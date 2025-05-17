@@ -22,7 +22,7 @@ A Python application built with PySide6 that helps enrich MP3 file metadata tags
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/FmBlueSystem/mp3-tag-enricher.git
+   git clone https://github.com/FmBlueSystem/mp3-tag-enriche.git
    cd mp3-tag-enricher
    ```
 
