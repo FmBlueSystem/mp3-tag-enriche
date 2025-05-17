@@ -1,437 +1,523 @@
-"""Main window implementation for the MP3 Tag Enricher application."""
-
+"""Main window implementation for the Genre Detector application."""
 from pathlib import Path
+import os
+import re
+import time
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QFileDialog, QProgressBar, QStatusBar, QScrollArea,
-    QFrame, QLineEdit, QCheckBox, QTextEdit, QListWidget
+    QLabel, QFileDialog, QProgressBar, QStatusBar, QListWidget,
+    QCheckBox, QSlider, QSpinBox
 )
-from PySide6.QtCore import Qt, QMimeData, Signal, Slot, QThread
-from PySide6.QtGui import QDragEnterEvent, QDropEvent
+from PySide6.QtCore import Qt, Signal, Slot, QThread
+from PySide6.QtGui import QDropEvent, QDragEnterEvent, QFont
 
-from . import apply_material_style, COLORS
-from ..core import MP3TagProcessor, ProcessingResult
+from ..core.genre_detector import GenreDetector
+from ..core.file_handler import Mp3FileHandler
+from ..core.music_apis import MusicBrainzAPI
+from src.gui.style import apply_dark_theme
 
-class DragDropArea(QFrame):
-    """A widget that accepts drag and drop of MP3 files."""
-    
-    fileDropped = Signal(str)  # Signal emitted when a file is dropped
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setAcceptDrops(True)
-        self.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
-        self.setMinimumHeight(100)
+# MODELO: Encapsula la lógica de negocio y datos
+class GenreModel:
+    def __init__(self):
+        self.detector = GenreDetector([MusicBrainzAPI()], verbose=True)
+        # Configurar un backup_dir para garantizar que se creen copias de seguridad
+        # Usar la nueva ruta en disco externo
+        backup_dir = "/Volumes/My Passport/Dj compilation 2025/Respados mp3"
+        self.detector.file_handler = Mp3FileHandler(backup_dir=backup_dir)
+        # Establecer un umbral de confianza más bajo para mejorar la detección
+        self.min_confidence = 0.2
+        # Establecer un límite de etiquetas para filtrar resultados ruidosos
+        self.max_api_tags = 100
+        # Opción para renombrar archivos después de actualizar géneros
+        self.rename_after_update = True
+        # Lista de términos a filtrar
+        self.spam_terms = [
+            "http", "fix", "tag", "mess", "error", "todo", "check", 
+            "wrong", "unknown", "unclassifiable", "other", "others", 
+            "delete", "seen live", "favorites", "favourite", "test", 
+            "misc", "checked", "need", "spotify", "lastfm", "indy", 
+            "artist", "artists", "video", "title"
+        ]
         
-        # Layout
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignCenter)
+    def filter_noise_genres(self, genres_dict):
+        """Filtra géneros ruidosos o irrelevantes.
         
-        # Label
-        self.label = QLabel("Drag and drop MP3 files or directories here\nor use the buttons below to browse")
-        self.label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.label)
+        Args:
+            genres_dict: Diccionario de géneros con sus valores de confianza
+            
+        Returns:
+            Diccionario filtrado de géneros
+        """
+        if not genres_dict:
+            return {}
+            
+        filtered = {}
         
-        # Styling
-        self.setStyleSheet(f"""
-            DragDropArea {{
-                background-color: {COLORS['surface']};
-                border: 2px dashed {COLORS['primary']};
-                border-radius: 8px;
-                padding: 16px;
-            }}
-            QLabel {{
-                color: {COLORS['on_surface']};
-                font-size: 16px;
-            }}
-        """)
-    
-    def dragEnterEvent(self, event: QDragEnterEvent):
-        """Handle drag enter events for MP3 files and directories."""
-        if event.mimeData().hasUrls():
-            for url in event.mimeData().urls():
-                file_path = url.toLocalFile()
-                if file_path.lower().endswith('.mp3') or Path(file_path).is_dir():
-                    event.acceptProposedAction()
-                    return
-    
-    def dropEvent(self, event: QDropEvent):
-        """Handle drop events for MP3 files and directories."""
-        for url in event.mimeData().urls():
-            file_path = url.toLocalFile()
-            path = Path(file_path)
-            if path.is_dir():
-                self.fileDropped.emit(str(path))
-            elif file_path.lower().endswith('.mp3'):
-                self.fileDropped.emit(str(path))
+        for genre, conf in genres_dict.items():
+            # Verificar longitud y contenido
+            if (len(genre) < 30 and  # No demasiado largo
+                not any(term in genre.lower() for term in self.spam_terms) and  # Sin términos de spam
+                len(genre.strip()) > 1 and  # No demasiado corto
+                not genre.isdigit() and  # No solo dígitos
+                not all(c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+" for c in genre)):  # No solo símbolos
+                filtered[genre] = conf
+        
+        return filtered
 
+    def analyze(self, filepath):
+        try:
+            # Verificación exhaustiva para archivos, especialmente en volúmenes externos
+            exists = False
+            error_msg = ""
+            
+            # Intentar múltiples métodos para verificar la existencia del archivo
+            try:
+                # Método 1: Usando Path
+                path_obj = Path(filepath)
+                if path_obj.exists():
+                    exists = True
+            except Exception as e:
+                error_msg = f"Error con Path.exists(): {str(e)}"
+            
+            # Método 2: Usando os.path si el método 1 falló
+            if not exists:
+                try:
+                    if os.path.exists(filepath):
+                        exists = True
+                    else:
+                        error_msg = f"os.path.exists() reporta que el archivo no existe"
+                except Exception as e:
+                    error_msg += f", Error con os.path.exists(): {str(e)}"
+            
+            # Método 3: Intentar abrir el archivo directamente
+            if not exists:
+                try:
+                    with open(filepath, 'rb') as f:
+                        # Si llegamos aquí, el archivo existe y se puede leer
+                        exists = True
+                except Exception as e:
+                    error_msg += f", Error al intentar abrir archivo: {str(e)}"
+            
+            if not exists:
+                return {"error": f"Archivo inaccesible: {filepath}. {error_msg}"}
+            
+            # Verificar si es un MP3 válido
+            if not self.detector.file_handler.is_valid_mp3(filepath):
+                return {"error": f"Archivo MP3 inválido: {filepath}"}
+                
+            # Proceder con el análisis
+            result = self.detector.analyze_file(filepath)
+            
+            # Filtrar etiquetas de género para resultados más limpios
+            if "detected_genres" in result:
+                # Usar la función dedicada para filtrar géneros
+                filtered_genres = self.filter_noise_genres(result["detected_genres"])
+                
+                # Tomar solo los más relevantes ordenados por confianza
+                sorted_genres = dict(sorted(
+                    filtered_genres.items(),
+                    key=lambda x: x[1],
+                    reverse=True
+                )[:self.max_api_tags])
+                
+                result["detected_genres"] = sorted_genres
+            
+            return result
+        except Exception as e:
+            return {"error": f"Error al analizar: {str(e)}"}
+
+    def process(self, filepath, confidence, max_genres):
+        try:
+            # Verificación exhaustiva para archivos, especialmente en volúmenes externos
+            exists = False
+            error_msg = ""
+            
+            # Intentar múltiples métodos para verificar la existencia del archivo
+            try:
+                # Método 1: Usando Path
+                path_obj = Path(filepath)
+                if path_obj.exists():
+                    exists = True
+            except Exception as e:
+                error_msg = f"Error con Path.exists(): {str(e)}"
+            
+            # Método 2: Usando os.path si el método 1 falló
+            if not exists:
+                try:
+                    if os.path.exists(filepath):
+                        exists = True
+                    else:
+                        error_msg = f"os.path.exists() reporta que el archivo no existe"
+                except Exception as e:
+                    error_msg += f", Error con os.path.exists(): {str(e)}"
+            
+            # Método 3: Intentar abrir el archivo directamente
+            if not exists:
+                try:
+                    with open(filepath, 'rb') as f:
+                        # Si llegamos aquí, el archivo existe y se puede leer
+                        exists = True
+                except Exception as e:
+                    error_msg += f", Error al intentar abrir archivo: {str(e)}"
+            
+            if not exists:
+                return {"error": f"Archivo inaccesible: {filepath}. {error_msg}", "written": False}
+                
+            if not self.detector.file_handler.is_valid_mp3(filepath):
+                return {"error": f"Archivo MP3 inválido: {filepath}", "written": False}
+            
+            # Detectar primero para obtener información de géneros
+            analysis = self.detector.analyze_file(filepath)
+            
+            # Extraer géneros con confianza suficiente
+            genres = analysis.get("detected_genres", {})
+            
+            # Filtrar géneros ruidosos o irrelevantes
+            filtered_genres = self.filter_noise_genres(genres)
+            
+            # Verificar si quedan géneros después del filtrado estricto
+            if not filtered_genres:
+                # Si no hay géneros filtrados, hacer filtrado menos estricto
+                for genre, conf in genres.items():
+                    if len(genre) < 50 and len(genre.strip()) > 1:
+                        filtered_genres[genre] = conf
+            
+            # Si aún no hay géneros, reportar el problema
+            if not filtered_genres:
+                return {
+                    "error": f"No se detectaron géneros válidos para este archivo",
+                    "written": False,
+                    "detected_genres": genres
+                }
+            
+            # Usar un umbral de confianza adaptativo
+            adaptive_confidence = confidence
+            if not any(conf >= confidence for conf in filtered_genres.values()):
+                # Usar un umbral adaptativo (mínimo configurado o 20% menos que el umbral original)
+                adaptive_confidence = min(self.min_confidence, max(0.1, confidence - 0.2))
+            
+            selected_genres = []
+            for genre, conf in sorted(filtered_genres.items(), key=lambda x: x[1], reverse=True):
+                if conf >= adaptive_confidence:
+                    # Preservar géneros actuales que puedan ser válidos
+                    # Normalizar género para evitar duplicados con diferente formato (ej: "Rock" vs "rock")
+                    normalized = genre[0].upper() + genre[1:] if genre else ""
+                    
+                    # Verificar duplicados de manera más inteligente comparando en minúsculas
+                    if normalized.lower() not in [g.lower() for g in selected_genres]:
+                        selected_genres.append(normalized)
+                        if len(selected_genres) >= max_genres:
+                            break
+            
+            if not selected_genres:
+                # Si aún no hay géneros seleccionados, tomar el género con mayor confianza
+                if filtered_genres:
+                    top_genre = max(filtered_genres.items(), key=lambda x: x[1])
+                    normalized = top_genre[0][0].upper() + top_genre[0][1:] if top_genre[0] else ""
+                    selected_genres.append(normalized)
+                    adaptive_confidence = top_genre[1]  # Usar la confianza de este género como umbral
+                else:
+                    return {
+                        "error": f"No se detectaron géneros con confianza suficiente",
+                        "written": False,
+                        "detected_genres": filtered_genres,
+                        "threshold_used": adaptive_confidence
+                    }
+            
+            # Escribir géneros con manejo de errores mejorado
+            try:
+                # Intentar hacer una copia de seguridad primero
+                backup_success = self.detector.file_handler._create_backup(filepath)
+                if not backup_success:
+                    # Si la copia de seguridad falla, seguir pero notificar
+                    print(f"Advertencia: No se pudo crear copia de seguridad para {filepath}")
+                
+                # Intentar escribir los géneros
+                success = self.detector.file_handler.write_genre(filepath, selected_genres, backup=False)
+                
+                result = {"written": success}
+                if success:
+                    # Verificar que los cambios se hayan guardado realmente
+                    time.sleep(0.2)  # Esperar un momento para que el sistema de archivos se actualice
+                    info = self.detector.file_handler.get_file_info(filepath)
+                    result["current_genre"] = info.get("current_genre", "")
+                    result["selected_genres"] = selected_genres
+                    result["threshold_used"] = adaptive_confidence
+                    
+                    # Renombrar el archivo si está habilitada la opción
+                    if self.rename_after_update:
+                        rename_result = self.detector.file_handler.rename_file_by_genre(filepath)
+                        result["renamed"] = rename_result["success"]
+                        if rename_result["success"]:
+                            result["new_filepath"] = rename_result["new_path"]
+                            result["rename_message"] = rename_result["message"]
+                        else:
+                            result["rename_error"] = rename_result.get("error", "Error desconocido al renombrar")
+                else:
+                    result["error"] = "Error al escribir géneros en el archivo"
+                    
+                return result
+            except Exception as write_error:
+                return {
+                    "error": f"Error al escribir en el archivo: {str(write_error)}",
+                    "written": False,
+                    "selected_genres": selected_genres
+                }
+                
+        except Exception as e:
+            return {"error": f"Error al procesar: {str(e)}", "written": False}
+# PROCESO: Hilo para tareas asíncronas
 class ProcessingThread(QThread):
-    """Background thread for MP3 processing."""
-    
-    finished = Signal(ProcessingResult)
-    file_processed = Signal(str, ProcessingResult)  # Emitted for each processed file
-    progress = Signal(int, int)  # current, total
-    
-    def __init__(self, processor: MP3TagProcessor, files: list[Path], analysis_mode: bool):
-        super().__init__()
-        self.processor = processor
-        self.files = files
-        self.analysis_mode = analysis_mode
-    
+    progress = Signal(str)
+    finished = Signal(dict)
+    def __init__(self, file_paths, analyze_only=True, confidence=0.3, max_genres=3, parent=None):
+        super().__init__(parent)
+        self.file_paths = file_paths
+        self.analyze_only = analyze_only
+        self.confidence = confidence
+        self.max_genres = max_genres
+        self.model = GenreModel()
     def run(self):
-        """Execute the processing operation for multiple files."""
-        total_files = len(self.files)
-        for i, filepath in enumerate(self.files, 1):
-            result = self.processor.process_file(filepath, self.analysis_mode)
-            self.file_processed.emit(str(filepath), result)
-            self.progress.emit(i, total_files)
-        self.finished.emit(result)  # Emit last result
+        results = {}
+        for filepath in self.file_paths:
+            self.progress.emit(f"Processing {Path(filepath).name}")
+            try:
+                if self.analyze_only:
+                    result = self.model.analyze(filepath)
+                else:
+                    result = self.model.process(filepath, self.confidence, self.max_genres)
+                results[filepath] = result
+            except Exception as e:
+                results[filepath] = {"error": str(e)}
+        self.finished.emit(results)
 
-class ResultsWidget(QFrame):
-    """Widget for displaying processing results."""
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setup_ui()
-    
-    def setup_ui(self):
-        """Initialize the user interface."""
-        layout = QVBoxLayout(self)
-        
-        # Results text area
-        self.results = QTextEdit()
-        self.results.setReadOnly(True)
-        self.results.setMinimumHeight(200)
-        layout.addWidget(self.results)
-        
-        # Styling
-        self.setStyleSheet(f"""
-            ResultsWidget {{
-                background-color: {COLORS['surface']};
-                border-radius: 4px;
-                padding: 16px;
-            }}
-            QTextEdit {{
-                font: 14px;
-                border: 1px solid {COLORS['primary']};
-                border-radius: 4px;
-            }}
-        """)
-    
-    def set_results(self, result: ProcessingResult):
-        """Display processing results."""
-        text = []
-        
-        # Status and message
-        text.append(f"Status: {'Success' if result.success else 'Error'}")
-        text.append(f"Message: {result.message}\n")
-        
-        # Original tags
-        if result.original_tags:
-            text.append("Original Tags:")
-            for key, value in result.original_tags.items():
-                text.append(f"  {key.title()}: {value}")
-            text.append("")
-        
-        # Language info
-        if result.detected_language:
-            text.append(f"Detected Language: {result.detected_language}\n")
-        
-        # MusicBrainz data
-        if result.musicbrainz_info:
-            text.append("MusicBrainz Data:")
-            for key, value in result.musicbrainz_info.items():
-                text.append(f"  {key.title()}: {value}")
-            text.append("")
-        
-        # Proposed changes
-        if result.proposed_tags:
-            text.append("Proposed Tags:")
-            for key, value in result.proposed_tags.items():
-                text.append(f"  {key.title()}: {value}")
-        
-        self.results.setPlainText("\n".join(text))
-
-class TagEditorWidget(QFrame):
-    """Widget for displaying and editing MP3 tags."""
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setup_ui()
-    
-    def setup_ui(self):
-        """Initialize the user interface."""
-        layout = QVBoxLayout(self)
-        
-        # Create fields
-        self.fields = {}
-        field_names = ['Artist', 'Title', 'Album', 'Year', 'Genre', 'Track']
-        
-        for name in field_names:
-            field_layout = QHBoxLayout()
-            label = QLabel(name + ':')
-            label.setMinimumWidth(80)
-            edit = QLineEdit()
-            apply_material_style(edit)  # Apply Material Design style
-            field_layout.addWidget(label)
-            field_layout.addWidget(edit)
-            layout.addLayout(field_layout)
-            self.fields[name.lower()] = edit
-        
-        # Styling
-        self.setStyleSheet(f"""
-            TagEditorWidget {{
-                background-color: {COLORS['surface']};
-                border-radius: 4px;
-                padding: 16px;
-            }}
-            QLabel {{
-                color: {COLORS['on_surface']};
-                font: 14px;
-            }}
-            QLineEdit {{
-                border: 1px solid {COLORS['primary']};
-                border-radius: 4px;
-                padding: 8px;
-                font: 14px;
-            }}
-            QLineEdit:focus {{
-                border: 2px solid {COLORS['primary']};
-            }}
-        """)
-    
-    def set_tags(self, tags: dict):
-        """Update the displayed tags."""
-        for field, value in tags.items():
-            if field in self.fields:
-                self.fields[field].setText(str(value))
-    
-    def get_tags(self) -> dict:
-        """Get the current tag values."""
-        return {
-            field: edit.text()
-            for field, edit in self.fields.items()
-        }
-
+# CONTROL: Interfaz y eventos
 class MainWindow(QMainWindow):
-    """Main window of the MP3 Tag Enricher application."""
-    
     def __init__(self):
         super().__init__()
-        self.processor = MP3TagProcessor()
         self.mp3_files = []
         self.processing_thread = None
         self.setup_ui()
-        apply_material_style(self)
-    
+        apply_dark_theme(self)
     def setup_ui(self):
-        """Initialize the user interface."""
-        self.setWindowTitle("MP3 Tag Enricher")
-        self.setMinimumSize(800, 600)
-        
-        # Central widget and main layout
+        self.setWindowTitle("Genre Detector - Dark AI")
+        self.setMinimumSize(900, 650)
+        font = QFont("Segoe UI", 11)
+        self.setFont(font)
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(16)
-        
-        # Drag & Drop area
-        self.drag_drop = DragDropArea()
-        self.drag_drop.fileDropped.connect(self.handle_file_dropped)
-        layout.addWidget(self.drag_drop)
-        
-        # Browse buttons
-        browse_layout = QHBoxLayout()
-        browse_button = QPushButton("Browse for MP3 Files")
-        browse_button.clicked.connect(self.browse_file)
-        apply_material_style(browse_button)
-        
-        browse_dir_button = QPushButton("Browse for Directory")
-        browse_dir_button.clicked.connect(self.browse_directory)
-        apply_material_style(browse_dir_button)
-        
-        browse_layout.addWidget(browse_button)
-        browse_layout.addWidget(browse_dir_button)
-        layout.addLayout(browse_layout)
-        
-        # File list
+        # File list section
+        file_list_layout = QVBoxLayout()
+        button_layout = QHBoxLayout()
+        add_file_btn = QPushButton("Add Files")
+        add_file_btn.clicked.connect(self.browse_files)
+        add_folder_btn = QPushButton("Add Folder")
+        add_folder_btn.clicked.connect(self.browse_folder)
+        button_layout.addWidget(add_file_btn)
+        button_layout.addWidget(add_folder_btn)
+        file_list_layout.addLayout(button_layout)
         self.file_list = QListWidget()
-        self.file_list.setMinimumHeight(100)
-        self.file_list.itemSelectionChanged.connect(self.handle_file_selection)
-        layout.addWidget(self.file_list)
+        self.file_list.setAcceptDrops(True)
+        self.file_list.setMinimumHeight(200)
+        file_list_layout.addWidget(self.file_list)
+        layout.addLayout(file_list_layout)
+        # Options
+        options_layout = QVBoxLayout()
         
-        # Tag editor
-        self.tag_editor = TagEditorWidget()
-        layout.addWidget(self.tag_editor)
+        # Modo de análisis
+        analyze_row = QHBoxLayout()
+        self.analyze_only = QCheckBox("Analysis Only")
+        self.analyze_only.setChecked(True)
+        analyze_row.addWidget(self.analyze_only)
         
-        # Results display
-        self.results_widget = ResultsWidget()
-        layout.addWidget(self.results_widget)
+        # Opción para renombrar archivos
+        self.rename_files = QCheckBox("Rename Files After Update")
+        self.rename_files.setChecked(True)
+        self.rename_files.setToolTip("Renombra los archivos según el formato 'Artista - Título [Género]'")
+        analyze_row.addWidget(self.rename_files)
         
-        # Process controls
-        controls_layout = QHBoxLayout()
+        options_layout.addLayout(analyze_row)
         
-        self.analysis_mode = QCheckBox("Analysis Mode")
-        self.analysis_mode.setStyleSheet(f"""
-            QCheckBox {{
-                font: 14px;
-                color: {COLORS['on_surface']};
-            }}
-        """)
-        controls_layout.addWidget(self.analysis_mode)
+        # Control de confianza
+        confidence_row = QHBoxLayout()
+        self.confidence_label = QLabel("Confidence Threshold:")
+        confidence_row.addWidget(self.confidence_label)
         
-        controls_layout.addStretch()
+        self.confidence_slider = QSlider(Qt.Horizontal)
+        self.confidence_slider.setMinimum(10)
+        self.confidence_slider.setMaximum(90)
+        self.confidence_slider.setValue(30)
+        self.confidence_slider.setTickInterval(10)
+        self.confidence_slider.setTickPosition(QSlider.TicksBelow)
+        self.confidence_slider.valueChanged.connect(self.update_confidence_label)
+        confidence_row.addWidget(self.confidence_slider)
         
-        self.process_button = QPushButton("Process All Files")
-        self.process_button.clicked.connect(self.process_file)
-        self.process_button.setEnabled(False)
-        apply_material_style(self.process_button)
-        controls_layout.addWidget(self.process_button)
+        self.confidence_input = QLabel("0.3")
+        confidence_row.addWidget(self.confidence_input)
+        options_layout.addLayout(confidence_row)
         
-        layout.addLayout(controls_layout)
+        # Control de máx géneros
+        max_genres_row = QHBoxLayout()
+        self.max_genres_label = QLabel("Max Genres:")
+        max_genres_row.addWidget(self.max_genres_label)
         
-        # Progress bar
-        self.progress = QProgressBar()
-        self.progress.setVisible(False)
-        layout.addWidget(self.progress)
+        self.max_genres_spinner = QSpinBox()
+        self.max_genres_spinner.setMinimum(1)
+        self.max_genres_spinner.setMaximum(10)
+        self.max_genres_spinner.setValue(3)
+        self.max_genres_spinner.valueChanged.connect(self.update_max_genres_label)
+        max_genres_row.addWidget(self.max_genres_spinner)
         
+        self.max_genres_input = QLabel("3")
+        max_genres_row.addWidget(self.max_genres_input)
+        options_layout.addLayout(max_genres_row)
+        
+        layout.addLayout(options_layout)
+        # Process button
+        self.process_btn = QPushButton("Process Files")
+        self.process_btn.clicked.connect(self.process_files)
+        self.process_btn.setEnabled(False)
+        layout.addWidget(self.process_btn)
+        # Progress
+        self.progress_label = QLabel()
+        layout.addWidget(self.progress_label)
+        # Results list
+        self.results_list = QListWidget()
+        layout.addWidget(self.results_list)
         # Status bar
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Ready")
-    
-    def scan_directory(self, directory: Path) -> list[Path]:
-        """Recursively scan a directory for MP3 files."""
-        mp3_files = []
-        try:
-            for item in directory.rglob("*.mp3"):
-                if item.is_file():
-                    mp3_files.append(item)
-        except Exception as e:
-            self.status_bar.showMessage(f"Error scanning directory: {e}")
-        return mp3_files
-    
-    @Slot(str)
-    def handle_file_dropped(self, file_path: str):
-        """Handle a dropped MP3 file or directory."""
-        path = Path(file_path)
+        self.statusBar().showMessage("Ready - Dark AI Mode")
         
-        if path.is_dir():
-            # Scan directory for MP3 files
-            new_files = self.scan_directory(path)
-            self.mp3_files.extend(new_files)
-            self.update_file_list()
-            self.status_bar.showMessage(f"Found {len(new_files)} MP3 files in directory")
-        else:
-            # Single MP3 file
-            self.mp3_files.append(path)
-            self.update_file_list()
-            self.load_file_tags(path)
-            self.status_bar.showMessage(f"Loaded: {file_path}")
-    
-    def update_file_list(self):
-        """Update the list widget with found MP3 files."""
-        self.file_list.clear()
-        for file_path in self.mp3_files:
-            self.file_list.addItem(file_path.name)
-        self.process_button.setEnabled(len(self.mp3_files) > 0)
-    
-    def handle_file_selection(self):
-        """Handle selection change in the file list."""
-        if self.file_list.currentItem():
-            selected_name = self.file_list.currentItem().text()
-            selected_file = next(f for f in self.mp3_files if f.name == selected_name)
-            self.load_file_tags(selected_file)
-    
-    def load_file_tags(self, file_path: Path):
-        """Load and display tags for the selected file."""
-        try:
-            current_tags = self.processor.load_current_tags(file_path)
-            self.tag_editor.set_tags(current_tags)
-        except Exception as e:
-            self.status_bar.showMessage(f"Error loading tags: {e}")
-    
-    def browse_file(self):
-        """Open file browser dialog for MP3 selection."""
-        file_paths, _ = QFileDialog.getOpenFileNames(
-            self,
-            "Select MP3 Files",
-            "",
-            "MP3 Files (*.mp3);;All Files (*.*)"
+    def update_confidence_label(self, value):
+        """Actualiza la etiqueta de confianza cuando se mueve el slider."""
+        confidence = value / 100
+        self.confidence_input.setText(f"{confidence:.1f}")
+        
+    def update_max_genres_label(self, value):
+        """Actualiza la etiqueta de máximo de géneros cuando cambia el spinner."""
+        self.max_genres_input.setText(str(value))
+
+    def browse_files(self):
+        """Open file browser for MP3 selection."""
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "Select MP3 Files", "", "MP3 Files (*.mp3)"
         )
-        for file_path in file_paths:
-            self.handle_file_dropped(file_path)
-    
-    def browse_directory(self):
-        """Open directory browser dialog."""
-        directory = QFileDialog.getExistingDirectory(
-            self,
-            "Select Directory",
-            ""
-        )
-        if directory:
-            self.handle_file_dropped(directory)
-    
-    @Slot()
-    def process_file(self):
+        if files:
+            self.add_files(files)
+            
+    def browse_folder(self):
+        """Open folder browser."""
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if folder:
+            self.add_folder(folder)
+            
+    def add_files(self, files):
+        """Add MP3 files to the list."""
+        for file in files:
+            if file.lower().endswith('.mp3'):
+                self.mp3_files.append(file)
+                self.file_list.addItem(Path(file).name)
+        self.process_btn.setEnabled(bool(self.mp3_files))
+                
+    def add_folder(self, folder):
+        """Add all MP3 files from a folder."""
+        for file in Path(folder).rglob("*.mp3"):
+            self.mp3_files.append(str(file))
+            self.file_list.addItem(file.name)
+        self.process_btn.setEnabled(bool(self.mp3_files))
+            
+    def process_files(self):
         """Process the selected MP3 files."""
-        if not self.mp3_files:
-            return
+        self.results_list.clear()
+        self.process_btn.setEnabled(False)
+        analyze_only = self.analyze_only.isChecked()
+        confidence = float(self.confidence_input.text())
+        max_genres = int(self.max_genres_input.text())
         
-        # Disable UI during processing
-        self.process_button.setEnabled(False)
-        self.progress.setVisible(True)
-        self.progress.setRange(0, len(self.mp3_files))
-        self.progress.setValue(0)
+        # Configurar la opción de renombramiento
+        rename_files = self.rename_files.isChecked()
         
-        # Start processing in background thread
+        # Inicializar el hilo de procesamiento
         self.processing_thread = ProcessingThread(
-            self.processor,
-            self.mp3_files.copy(),
-            self.analysis_mode.isChecked()
+            self.mp3_files,
+            analyze_only=analyze_only,
+            confidence=confidence,
+            max_genres=max_genres
         )
-        self.processing_thread.finished.connect(self.handle_processing_complete)
-        self.processing_thread.file_processed.connect(self.handle_file_processed)
+        
+        # Actualizar la configuración del modelo
+        self.processing_thread.model.rename_after_update = rename_files
         self.processing_thread.progress.connect(self.update_progress)
+        self.processing_thread.finished.connect(self.processing_complete)
         self.processing_thread.start()
-    
-    @Slot(str, ProcessingResult)
-    def handle_file_processed(self, file_path: str, result: ProcessingResult):
-        """Handle completion of single file processing."""
-        # Update results for the current file
-        self.results_widget.set_results(result)
+
+    def update_progress(self, message):
+        """Update progress display."""
+        self.progress_label.setText(message)
+        self.statusBar().showMessage(message)
         
-        if result.success:
-            self.status_bar.showMessage(f"Processed: {file_path}")
-            # Update displayed tags if changes were made and this is the selected file
-            if not self.analysis_mode.isChecked():
-                current_item = self.file_list.currentItem()
-                if current_item and current_item.text() == Path(file_path).name:
-                    self.tag_editor.set_tags(result.proposed_tags)
-        else:
-            self.status_bar.showMessage(f"Error processing {file_path}: {result.message}")
-    
-    @Slot(int, int)
-    def update_progress(self, current: int, total: int):
-        """Update the progress bar."""
-        self.progress.setValue(current)
-    
-    @Slot(ProcessingResult)
-    def handle_processing_complete(self, result: ProcessingResult):
-        """Handle completion of file processing."""
-        # Update UI
-        self.progress.setVisible(False)
-        self.process_button.setEnabled(True)
+    def processing_complete(self, results):
+        """Handle completion of processing."""
+        self.progress_label.clear()
+        self.process_btn.setEnabled(True)
         
-        # Display results
-        self.results_widget.set_results(result)
+        # Estadísticas para mostrar en la barra de estado
+        success_count = 0
+        error_count = 0
+        analyze_only = self.analyze_only.isChecked()
         
-        # Update status
-        if result.success:
-            self.status_bar.showMessage(result.message)
-            # Update displayed tags if changes were made
-            if not self.analysis_mode.isChecked():
-                self.tag_editor.set_tags(result.proposed_tags)
-        else:
-            self.status_bar.showMessage(f"Error: {result.message}")
+        for filepath, result in results.items():
+            filename = Path(filepath).name
+            
+            if "error" in result:
+                error_count += 1
+                error_msg = result["error"]
+                
+                # Si hay géneros detectados pero ninguno con confianza suficiente, mostrarlos
+                if "detected_genres" in result:
+                    genres = result["detected_genres"]
+                    if genres:
+                        genre_str = ", ".join(f"{g} ({c:.2f})" for g, c in genres.items())
+                        self.results_list.addItem(f"Error en {filename}: {error_msg}")
+                        self.results_list.addItem(f"  Géneros detectados: {genre_str}")
+                    else:
+                        self.results_list.addItem(f"Error en {filename}: {error_msg}")
+                else:
+                    self.results_list.addItem(f"Error en {filename}: {error_msg}")
+            
+            elif "written" in result:
+                if result["written"]:
+                    success_count += 1
+                    genre = result.get("current_genre", "?")
+                    selected = ", ".join(result.get("selected_genres", []))
+                    self.results_list.addItem(f"{filename}: Género escrito: {genre}")
+                    if "selected_genres" in result:
+                        self.results_list.addItem(f"  Géneros seleccionados: {selected}")
+                    
+                    # Mostrar información sobre el renombramiento si está disponible
+                    if "renamed" in result:
+                        if result["renamed"]:
+                            new_name = Path(result["new_filepath"]).name
+                            self.results_list.addItem(f"  Archivo renombrado: {new_name}")
+                        else:
+                            error_msg = result.get("rename_error", "Error desconocido")
+                            self.results_list.addItem(f"  Error al renombrar: {error_msg}")
+                else:
+                    error_count += 1
+                    self.results_list.addItem(f"{filename}: Error al escribir el género")
+            
+            else:
+                # Análisis exitoso
+                success_count += 1
+                genres = result.get("detected_genres", {})
+                if genres:
+                    genre_str = ", ".join(f"{g} ({c:.2f})" for g, c in 
+                                       sorted(genres.items(), key=lambda x: x[1], reverse=True))
+                    self.results_list.addItem(f"{filename}: {genre_str}")
+                else:
+                    self.results_list.addItem(f"{filename}: No se detectaron géneros")
+        
+        # Actualizar la barra de estado con estadísticas
+        mode = "análisis" if analyze_only else "actualización"
+        status_msg = f"Procesamiento completado: {success_count} archivos procesados correctamente, {error_count} con errores - Modo: {mode}"
+        self.statusBar().showMessage(status_msg)
