@@ -59,7 +59,7 @@ class GenreModel:
                 not any(term in genre.lower() for term in self.spam_terms) and  # Sin términos de spam
                 len(genre.strip()) > 1 and  # No demasiado corto
                 not genre.isdigit() and  # No solo dígitos
-                not all(c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+" for c in genre)):  # No solo símbolos
+                not all(c in "!@#$%^&*()[]{};:,./<>?\\|`~-=_+" for c in genre)):  # No solo símbolos
                 filtered[genre] = conf
         
         return filtered
