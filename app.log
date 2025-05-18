@@ -1,0 +1,5 @@
+2025-05-17 23:11:22,609 - __main__ - INFO - Iniciando la aplicación Genre Detector GUI...
+2025-05-17 23:11:22,833 - src.core.file_handler - INFO - No backup directory specified. Backups will be disabled.
+2025-05-17 23:11:22,833 - src.core.file_handler - INFO - No backup directory specified. Backups will be disabled.
+2025-05-17 23:11:22,833 - src.gui.main_window - INFO - Default backup directory ensured: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-17 23:11:23,072 - __main__ - INFO - Ventana principal mostrada.

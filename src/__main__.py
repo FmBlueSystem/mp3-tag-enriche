@@ -6,6 +6,9 @@ import sys
 from typing import Dict, List
 from .core.music_apis import MusicBrainzAPI, LastFmAPI
 from .core.genre_detector import GenreDetector
+import logging
+
+logger = logging.getLogger(__name__)
 
 def verify_path(path: str) -> bool:
     """Verify that a path exists and is accessible.
@@ -38,15 +41,19 @@ def create_detector(lastfm_api_key: str = None,
     Returns:
         Configured GenreDetector instance
     """
-    print("Creating detector...")
+    logger.info("Creating detector...")
     apis = [MusicBrainzAPI()]
     
     if lastfm_api_key and lastfm_api_secret:
-        print("Adding Last.fm API")
+        logger.info("Adding Last.fm API")
         apis.append(LastFmAPI(lastfm_api_key, lastfm_api_secret))
     
-    detector = GenreDetector(apis=apis, backup_dir=backup_dir, verbose=verbose)
-    print(f"Created detector with {len(apis)} APIs")
+    detector = GenreDetector(apis=apis, verbose=verbose)
+    if backup_dir:
+        logger.info(f"Setting backup directory for file handler: {backup_dir}")
+        detector.file_handler.backup_dir = backup_dir
+        
+    logger.info(f"Created detector with {len(apis)} APIs")
     return detector
 
 def process_files(detector: GenreDetector,
@@ -70,31 +77,31 @@ def process_files(detector: GenreDetector,
     
     for path in paths:
         if not verify_path(path):
-            print(f"Skipping inaccessible path: {path}")
+            logger.warning(f"Skipping inaccessible path: {path}")
             continue
             
-        print(f"\nProcessing path: {path}")
+        logger.info(f"\nProcessing path: {path}")
         if os.path.isfile(path):
             if analyze_only:
-                print("Analyzing file...")
+                logger.info("Analyzing file...")
                 results[path] = detector.analyze_file(path)
             else:
-                print("Processing file...")
+                logger.info("Processing file...")
                 results[path] = detector.process_file(path, **kwargs)
         elif os.path.isdir(path):
             if analyze_only:
-                print("Analyzing directory...")
+                logger.info("Analyzing directory...")
                 # Analyze each file individually
                 for root, _, files in os.walk(path):
                     for file in files:
                         if file.lower().endswith('.mp3'):
                             file_path = os.path.join(root, file)
-                            print(f"\nAnalyzing: {file_path}")
+                            logger.info(f"\nAnalyzing: {file_path}")
                             results[file_path] = detector.analyze_file(file_path)
                     if not recursive:
                         break
             else:
-                print("Processing directory...")
+                logger.info("Processing directory...")
                 results.update(detector.process_directory(
                     path,
                     recursive=recursive,
@@ -129,7 +136,8 @@ def main():
     
     parser.add_argument(
         '--backup-dir',
-        help='Directory for file backups'
+        default="/Volumes/My Passport/Dj compilation 2025/Respados mp3",
+        help='Directory for file backups (default: /Volumes/My Passport/Dj compilation 2025/Respados mp3)'
     )
     
     parser.add_argument(
@@ -169,13 +177,15 @@ def main():
     
     args = parser.parse_args()
     
-    # Enable more verbose logging
     if not args.quiet:
-        print("Starting genre detection...")
-        print(f"Paths to process: {args.paths}")
-        print(f"Analyze only: {args.analyze_only}")
-        print(f"Recursive: {args.recursive}")
-    
+        logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+        logger.info("Starting genre detection...")
+        logger.info(f"Paths to process: {args.paths}")
+        logger.info(f"Analyze only: {args.analyze_only}")
+        logger.info(f"Recursive: {args.recursive}")
+    else:
+        logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
+
     try:
         # Create detector
         detector = create_detector(

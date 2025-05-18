@@ -21,7 +21,7 @@ class MusicAPI(ABC):
         self.cache = TTLCache(maxsize=100, ttl=cache_ttl)
         
     @abstractmethod
-    def get_genres(self, artist: str, track: str) -> List[str]:
+    def get_genres(self, artist: str, track: str) -> Dict[str, float]:
         """Get genres for a track.
         
         Args:
@@ -29,7 +29,7 @@ class MusicAPI(ABC):
             track: Track title
             
         Returns:
-            List of genre strings
+            Dict of genre strings and their scores
         """
         pass
 
@@ -55,7 +55,7 @@ class MusicBrainzAPI(MusicAPI):
             time.sleep(2 - elapsed)
         self.last_request_time = time.time()
         
-    def get_genres(self, artist: str, track: str) -> List[str]:
+    def get_genres(self, artist: str, track: str) -> Dict[str, float]:
         """Get genres from MusicBrainz."""
         cache_key = f"mb:{artist}:{track}"
         if cache_key in self.cache:
@@ -69,30 +69,46 @@ class MusicBrainzAPI(MusicAPI):
                 recording=track,
                 limit=1
             )
+            raw_genres_list = []
             if result["recording-list"]:
                 recording = result["recording-list"][0]
-                genres = []
                 if "tag-list" in recording:
-                    genres.extend(tag["name"] for tag in recording["tag-list"]
-                                if tag["name"].lower() != "seen live")
+                    # Guardar tuplas (nombre, cuenta) si está disponible, sino (nombre, 1)
+                    raw_genres_list.extend([(tag["name"], tag.get("count", 1)) 
+                                            for tag in recording["tag-list"] 
+                                            if tag["name"].lower() != "seen live"])
                 
-                # Also search for artist tags
                 time.sleep(1)  # Wait before artist query
                 artist_result = musicbrainzngs.search_artists(artist, limit=1)
                 if artist_result.get("artist-list"):
                     artist_data = artist_result["artist-list"][0]
                     if "tag-list" in artist_data:
-                        genres.extend(tag["name"] for tag in artist_data["tag-list"])
+                        raw_genres_list.extend([(tag["name"], tag.get("count", 1)) 
+                                                for tag in artist_data["tag-list"]])
                 
-                genres = list(set(genres))  # Remove duplicates
-                self.cache[cache_key] = genres
-                return genres
+            # Convertir lista de tuplas (genre, count) a Dict[str, float]
+            # Si hay duplicados, tomar el count más alto. Normalizar counts si es necesario.
+            # Por ahora, sumaremos counts para géneros duplicados (después de normalizar nombre de género)
+            # y luego normalizaremos todos los counts para que sumen 1.0, o simplemente los usaremos como están.
+            # Para simplificar, asignaremos 1.0 a cada género único por ahora.
+            # TODO: Implementar una mejor lógica de puntuación basada en "count"
+            
+            # Primero obtener todos los nombres de género únicos
+            unique_genre_names = list(set([g_tuple[0] for g_tuple in raw_genres_list]))
+            
+            # Crear el diccionario con una puntuación predeterminada (p.ej. 1.0)
+            # O, si queremos usar counts, necesitaríamos una normalización más sofisticada.
+            # Usaremos 1.0 por ahora para asegurar que sea un diccionario.
+            genres_with_scores = {genre: 1.0 for genre in unique_genre_names} 
+
+            self.cache[cache_key] = genres_with_scores
+            return genres_with_scores
                 
         except Exception as e:
             print(f"MusicBrainz API error: {e}")
-            return []
+            return {}
             
-        return []
+        return {}
 
 class LastFmAPI(MusicAPI):
     """Last.fm API integration."""
@@ -119,29 +135,33 @@ class LastFmAPI(MusicAPI):
             time.sleep(1 - elapsed)
         self.last_request_time = time.time()
         
-    def get_genres(self, artist: str, track: str) -> List[str]:
+    def get_genres(self, artist: str, track: str) -> Dict[str, float]:
         """Get genres from Last.fm tags."""
         cache_key = f"lastfm:{artist}:{track}"
         if cache_key in self.cache:
             return self.cache[cache_key]
             
         self._rate_limit()  # Apply rate limiting
-            
+        raw_genres_list = []
         try:
             track_obj = self.network.get_track(artist, track)
             tags = track_obj.get_top_tags(limit=10)
-            genres = [tag.item.get_name() for tag in tags]
+            # pylast tags tienen .item.name y .weight (que es un count)
+            raw_genres_list.extend([(tag.item.get_name(), float(tag.weight)) for tag in tags])
             
             time.sleep(1)  # Wait before artist query
-            # Also get artist genres
             artist_obj = self.network.get_artist(artist)
             artist_tags = artist_obj.get_top_tags(limit=10)
-            genres.extend(tag.item.get_name() for tag in artist_tags)
+            raw_genres_list.extend([(tag.item.get_name(), float(tag.weight)) for tag in artist_tags])
             
-            genres = list(set(genres))  # Remove duplicates
-            self.cache[cache_key] = genres
-            return genres
+            # Similar a MusicBrainz, por ahora convertimos a Dict[str, float] con 1.0
+            # TODO: Mejorar la lógica de puntuación usando los weights/counts.
+            unique_genre_names = list(set([g_tuple[0] for g_tuple in raw_genres_list]))
+            genres_with_scores = {genre: 1.0 for genre in unique_genre_names}
+
+            self.cache[cache_key] = genres_with_scores
+            return genres_with_scores
             
         except Exception as e:
             print(f"Last.fm API error: {e}")
-            return []
+            return {}

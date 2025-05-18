@@ -1,197 +1,153 @@
-"""Main genre detection and processing module."""
-from typing import Dict, List, Optional, Set
-from .music_apis import MusicAPI, MusicBrainzAPI, LastFmAPI
-from .genre_normalizer import GenreNormalizer
+"""Genre detection and analysis module."""
+from typing import Dict, List, Optional
+from pathlib import Path
+import json
+import os
+import logging # Importar logging
+from .music_apis import MusicAPI
 from .file_handler import Mp3FileHandler
+from .genre_normalizer import GenreNormalizer
+
+# Configurar un logger básico para el módulo
+logger = logging.getLogger(__name__)
 
 class GenreDetector:
-    """Main class for genre detection and processing."""
+    """Detect and normalize music genres from various sources."""
     
-    def __init__(self, 
-                 apis: Optional[List[MusicAPI]] = None,
-                 backup_dir: Optional[str] = None,
-                 verbose: bool = True):
-        """Initialize the genre detector.
-        
-        Args:
-            apis: List of MusicAPI instances (optional)
-            backup_dir: Directory for file backups (optional)
-            verbose: Enable verbose output (default: True)
-        """
+    def __init__(self, apis: Optional[List[MusicAPI]] = None, verbose: bool = False, file_handler: Optional[Mp3FileHandler] = None): # MODIFICADO
+        """Initialize genre detector."""
         self.apis = apis or []
-        self.normalizer = GenreNormalizer()
-        self.file_handler = Mp3FileHandler(backup_dir)
-        self.verbose = verbose
-        
-    def add_api(self, api: MusicAPI):
-        """Add an API source.
-        
-        Args:
-            api: MusicAPI instance
-        """
-        self.apis.append(api)
-        
-    def detect_genres(self, artist: str, track: str) -> Dict[str, float]:
-        """Detect and normalize genres for a track.
-        
-        Args:
-            artist: Artist name
-            track: Track title
-            
-        Returns:
-            Dictionary of normalized genres with confidence scores
-        """
+        if file_handler:
+            self.file_handler = file_handler
+        else:
+            logger.info("GenreDetector: No Mp3FileHandler provided, creating a default one.")
+            self.file_handler = Mp3FileHandler() # Crea uno por defecto si no se proporciona
+        self.confidence_threshold = 0.5
+        self.max_genres = 5
+        self._genre_cache = {}
+        self.verbose = verbose # Almacenar verbose
         if self.verbose:
-            print(f"\nProcessing: {artist} - {track}")
+            logger.setLevel(logging.INFO) # O logging.DEBUG para más detalle
+        else:
+            logger.setLevel(logging.WARNING) # O superior para menos detalle
+        
+    def _merge_genre_scores(self, genre_scores: List[Dict[str, float]]) -> Dict[str, float]:
+        """
+        Merge genre confidence scores from multiple API results.
+        Normalizes genre names, takes the highest score for each normalized genre,
+        applies a confidence threshold, and then limits by max_genres.
+        The returned scores are the direct scores that passed the threshold and limits,
+        and do not necessarily sum to 1.0.
+        """
+        # First pass: normalize names and find highest scores
+        max_scores = {}
+        for scores in genre_scores:
+            for genre, score in scores.items():
+                norm_genre = GenreNormalizer.normalize(genre)
+                if norm_genre not in max_scores or score > max_scores[norm_genre]:
+                    max_scores[norm_genre] = score
+                    
+        if not max_scores:
+            return {}
             
-        # Collect genres from all APIs
-        all_genres = []
+        # Apply confidence threshold
+        filtered = {g: s for g, s in max_scores.items() if s >= self.confidence_threshold}
+        
+        # If nothing passes threshold, take top scoring genres from original max_scores
+        # (before applying the initial confidence threshold)
+        if not filtered and max_scores: # Check max_scores to ensure it's not empty
+            logger.info("No genres met the initial confidence threshold. Considering top genres before threshold.")
+            sorted_items_before_threshold = sorted(max_scores.items(), key=lambda x: x[1], reverse=True)
+            top_genres = sorted_items_before_threshold[:self.max_genres]
+            if top_genres:
+                filtered = dict(top_genres)
+            
+        # Apply max genres limit
+        if len(filtered) > self.max_genres:
+            logger.info(f"Limiting {len(filtered)} genres to {self.max_genres} based on score.")
+            sorted_items = sorted(filtered.items(), key=lambda x: x[1], reverse=True)
+            filtered = dict(sorted_items[:self.max_genres])
+            
+        # Scores are returned as they are after filtering; they do not necessarily sum to 1.0.
+        return filtered
+        
+    def analyze_file(self, file_path: str) -> Dict:
+        """Analyze an MP3 file to detect genres."""
+        logger.info(f"Starting analysis for file: {file_path}")
+        result = {
+            "file_info": {},
+            "metadata": {},
+            "current_genres": [],
+            "detected_genres": {}
+        }
+        
+        # Get file info
+        file_info = self.file_handler.get_file_info(file_path)
+        if not file_info:
+            logger.error(f"Could not read file info for {file_path}")
+            result["error"] = "Could not read file info"
+            return result
+            
+        result["file_info"] = file_info
+        
+        # Extract and normalize current genres
+        current_genres_str = file_info.get('current_genre', '')
+        current_genres_list = [g.strip() for g in current_genres_str.split(';') if g.strip()]
+        result["current_genres"] = GenreNormalizer.normalize_list(current_genres_list)
+        logger.info(f"Current genres for {file_path}: {result['current_genres']}")
+        
+        # Get metadata
+        metadata = {
+            'title': file_info.get('title'),
+            'artist': file_info.get('artist'),
+            'album': file_info.get('album')
+        }
+        result["metadata"] = metadata
+        
+        logger.info(f"Processing: Artist - {metadata.get('artist', 'N/A')}, Title - {metadata.get('title', 'N/A')}")
+        
+        # Check cache first
+        cache_key = f"{metadata.get('artist', '')}_{metadata.get('title', '')}"
+        if cache_key in self._genre_cache:
+            logger.info(f"Found in cache for {cache_key}")
+            result["detected_genres"] = self._genre_cache[cache_key]
+            result["source"] = "cache"
+            return result
+            
+        # Query APIs
+        api_results = []
+        api_errors = []
+        
         for api in self.apis:
             try:
-                if self.verbose:
-                    print(f"Querying {api.__class__.__name__}...")
-                genres = api.get_genres(artist, track)
-                if self.verbose:
-                    print(f"Found genres: {genres}")
-                all_genres.extend(genres)
+                logger.info(f"Querying {api.__class__.__name__}...")
+                genres = api.get_genres(metadata['artist'], metadata['title'])
+                logger.info(f"Found genres from {api.__class__.__name__}: {genres}")
+                if genres:
+                    api_results.append(genres)
             except Exception as e:
-                print(f"Error getting genres from {api.__class__.__name__}: {e}")
+                error_msg = f"Error with {api.__class__.__name__}: {e}"
+                logger.error(error_msg)
+                api_errors.append(error_msg)
                 
-        # Normalize and get confidence scores
-        scores = self.normalizer.get_confidence_score(all_genres)
-        if self.verbose:
-            print(f"Normalized genres with confidence scores: {scores}\n")
-        return scores
+        if not api_results:
+            err_msg = "API Error during processing." if api_errors else "No genres detected from APIs."
+            logger.warning(f"{err_msg} For Artist: {metadata.get('artist', 'N/A')}, Title: {metadata.get('title', 'N/A')}")
+            result["error"] = err_msg
+            return result
+            
+        # Merge and normalize results
+        merged_genres = self._merge_genre_scores(api_results)
+        if not merged_genres:
+            logger.warning(f"No genres met confidence/ranking criteria for Artist: {metadata.get('artist', 'N/A')}, Title: {metadata.get('title', 'N/A')}")
+            result["error"] = "No genres met confidence threshold or ranking criteria" # Mensaje actualizado
+            return result
+            
+        logger.info(f"Detected genres for {cache_key}: {merged_genres}")
+        result["detected_genres"] = merged_genres
+        self._genre_cache[cache_key] = merged_genres
+        return result
         
-    def process_file(self, 
-                    file_path: str,
-                    confidence_threshold: float = 0.3,
-                    max_genres: int = 3,
-                    create_backup: bool = True) -> bool:
-        """Process an MP3 file to detect and write genres.
-        
-        Args:
-            file_path: Path to the MP3 file
-            confidence_threshold: Minimum confidence score to include genre
-            max_genres: Maximum number of genres to write
-            create_backup: Whether to create a backup before modifying
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        if self.verbose:
-            print(f"\nProcessing file: {file_path}")
-            
-        # Validate file
-        if not self.file_handler.is_valid_mp3(file_path):
-            print(f"Invalid MP3 file: {file_path}")
-            return False
-            
-        # Get current file info
-        info = self.file_handler.get_file_info(file_path)
-        if not info.get('artist') or not info.get('title'):
-            print(f"Missing artist/title tags in {file_path}")
-            return False
-            
-        if self.verbose:
-            print(f"Current file info: {info}")
-            
-        # Detect genres
-        genres = self.detect_genres(info['artist'], info['title'])
-        
-        # Filter by confidence and limit
-        selected_genres = []
-        for genre, confidence in sorted(
-            genres.items(), 
-            key=lambda x: x[1], 
-            reverse=True
-        ):
-            if confidence >= confidence_threshold:
-                selected_genres.append(genre)
-                if len(selected_genres) >= max_genres:
-                    break
-                    
-        if not selected_genres:
-            print(f"No genres detected with confidence >= {confidence_threshold}")
-            return False
-            
-        # Write genres to file
-        if self.verbose:
-            print(f"Selected genres to write: {selected_genres}")
-            
-        return self.file_handler.write_genre(
-            file_path,
-            selected_genres,
-            backup=create_backup
-        )
-        
-    def process_directory(self,
-                         directory: str,
-                         recursive: bool = True,
-                         **kwargs) -> Dict[str, bool]:
-        """Process all MP3 files in a directory.
-        
-        Args:
-            directory: Directory path
-            recursive: Whether to process subdirectories
-            **kwargs: Additional arguments passed to process_file()
-            
-        Returns:
-            Dictionary of file paths to success status
-        """
-        from pathlib import Path
-        
-        if self.verbose:
-            print(f"\nProcessing directory: {directory}")
-            print(f"Recursive: {recursive}")
-        
-        results = {}
-        directory = Path(directory)
-        
-        pattern = '**/*.mp3' if recursive else '*.mp3'
-        for mp3_file in directory.glob(pattern):
-            try:
-                success = self.process_file(str(mp3_file), **kwargs)
-                results[str(mp3_file)] = success
-            except Exception as e:
-                print(f"Error processing {mp3_file}: {e}")
-                results[str(mp3_file)] = False
-                
-        return results
-        
-    def analyze_file(self, file_path: str) -> Dict[str, any]:
-        """Analyze an MP3 file without modifying it.
-        
-        Args:
-            file_path: Path to the MP3 file
-            
-        Returns:
-            Dictionary with analysis results
-        """
-        if self.verbose:
-            print(f"\nAnalyzing file: {file_path}")
-            
-        # Get file info
-        info = self.file_handler.get_file_info(file_path)
-        if not info:
-            return {'error': 'Could not read file info'}
-            
-        # Get current genres
-        current_genres = set(info.get('current_genre', '').split(', '))
-        current_genres.discard('')
-        
-        if self.verbose:
-            print(f"Current file info: {info}")
-            print(f"Current genres: {current_genres}")
-            
-        # Detect new genres
-        if info.get('artist') and info.get('title'):
-            detected_genres = self.detect_genres(info['artist'], info['title'])
-        else:
-            detected_genres = {}
-            
-        return {
-            'file_info': info,
-            'current_genres': list(current_genres),
-            'detected_genres': detected_genres
-        }
+    def analyze_files(self, file_paths: List[str]) -> Dict[str, Dict]:
+        """Analyze multiple files."""
+        return {path: self.analyze_file(path) for path in file_paths}
