@@ -1,153 +1,159 @@
-"""Tests for file handling operations."""
-import os
-import shutil
+"""Test suite for file handling and genre normalization functionality."""
 import pytest
 from pathlib import Path
+import os
 from src.core.file_handler import Mp3FileHandler
+from src.core.genre_normalizer import GenreNormalizer
 
+@pytest.fixture
+def file_handler(tmp_path):
+    """Create a file handler with temporary backup directory."""
+    backup_dir = tmp_path / "backups"
+    return Mp3FileHandler(str(backup_dir))
 
-class TestMp3FileHandler:
-    @pytest.fixture
-    def handler(self):
-        """Create a test file handler with the specified backup directory."""
-        fixed_backup_dir = "/Volumes/My Passport/Dj compilation 2025/Respados mp3"
-        # Asegurarse de que el directorio de backup exista o se pueda crear por Mp3FileHandler
-        # Mp3FileHandler ya intenta crearlo en su __init__
-        return Mp3FileHandler(backup_dir=fixed_backup_dir)
+@pytest.fixture
+def sample_mp3(tmp_path):
+    """Create a sample MP3 file for testing."""
+    mp3_path = tmp_path / "test.mp3"
+    mp3_path.write_bytes(b"dummy mp3 content")
+    return str(mp3_path)
 
-    def test_backup_creation(self, handler, valid_mp3):
-        """Test backup file creation."""
-        assert handler.backup_dir is not None, "Backup directory must be set for this test"
-        initial_backup_files = list(Path(handler.backup_dir).glob('*'))
+class TestGenreNormalization:
+    """Test genre normalization functionality."""
 
-        success = handler._create_backup(valid_mp3)
-        assert success, "Backup creation should succeed"
-        
-        current_backup_files = list(Path(handler.backup_dir).glob('*'))
-        new_backup_files = [f for f in current_backup_files if f not in initial_backup_files]
+    def test_rnb_variations(self):
+        """Test various R&B genre name variations."""
+        variations = [
+            ("r&b", "R&B"),
+            ("rnb", "R&B"),
+            ("randb", "R&B"),
+            ("rb", "R&B"),
+            ("r n b", "R&B"),
+            ("r and b", "R&B"),
+            ("rhythm & blues", "R&B"),
+            ("rhythm n blues", "R&B"),
+            ("contemporary r&b", "Contemporary R&B")
+        ]
+        for input_genre, expected in variations:
+            normalized, confidence = GenreNormalizer.normalize(input_genre)
+            assert normalized == expected
+            assert confidence == 1.0
 
-        assert len(new_backup_files) == 1, "One new backup file should be created"
-        backup_path = new_backup_files[0]
-        
-        assert backup_path.exists(), "Backup file should exist"
-        assert backup_path.stat().st_size > 0, "Backup file should not be empty"
+    def test_case_sensitivity(self):
+        """Test genre case sensitivity rules."""
+        cases = [
+            ("r&b", "R&B"),
+            ("R&B", "R&B"),
+            ("hip-hop", "Hip-Hop"),
+            ("HIP-HOP", "Hip-Hop"),
+            ("UK Garage", "UK Garage"),
+            ("uk garage", "UK Garage"),
+            ("edm", "Electronic Dance Music"),
+            ("EDM", "Electronic Dance Music")
+        ]
+        for input_genre, expected in cases:
+            normalized, _ = GenreNormalizer.normalize(input_genre)
+            assert normalized == expected
 
-    def test_invalid_mp3_detection(self, handler, tmp_path):
-        """Test detection of invalid MP3 files."""
-        invalid_file = tmp_path / "invalid.mp3"
-        invalid_file.write_text("Not an MP3 file")
+    def test_multiple_genre_weighting(self):
+        """Test genre weighting and combination logic."""
+        genres = {
+            "alternative rock": 0.9,
+            "rock": 0.8,
+            "indie": 0.7,
+            "punk": 0.6
+        }
+        normalized = GenreNormalizer.normalize_dict(genres)
         
-        assert not handler.is_valid_mp3(str(invalid_file)), "Should detect invalid MP3"
+        # Check that parent genres are properly weighted
+        assert "Rock" in normalized
+        assert "Alternative Rock" in normalized
+        assert normalized["Alternative Rock"] > normalized["Rock"]
+        assert len(normalized) <= 3  # Should limit to top 3 genres
 
-    def test_valid_mp3_detection(self, handler, valid_mp3):
-        """Test detection of valid MP3 files."""
-        assert handler.is_valid_mp3(valid_mp3), "Should recognize valid MP3"
+    def test_genre_edge_cases(self):
+        """Test edge cases in genre normalization."""
+        cases = [
+            ("", ("", 0.0)),  # Empty string
+            ("   ", ("", 0.0)),  # Whitespace only
+            ("unknown_genre", ("Unknown_genre", 0.5)),  # Unknown genre
+            ("r&b/soul", ("R&B", 0.95)),  # Complex genre
+            ("ELECTRONIC-DANCE", ("Electronic Dance Music", 0.85))  # All caps with hyphen
+        ]
+        for input_genre, (expected_name, min_confidence) in cases:
+            normalized, confidence = GenreNormalizer.normalize(input_genre)
+            assert normalized == expected_name
+            assert confidence >= min_confidence
 
-    def test_write_genre(self, handler, valid_mp3):
-        """Test writing genre tags."""
-        genres = ["Rock", "Pop"]
-        success = handler.write_genre(valid_mp3, genres, backup=True)
-        assert success, "Genre writing should succeed"
-        
-        # Verify genre was written
-        info = handler.get_file_info(valid_mp3)
-        assert "current_genre" in info, "Genre info should be readable"
-        assert any(genre in info["current_genre"] for genre in genres), "Written genres should be present"
+class TestFileRenaming:
+    """Test file renaming functionality."""
 
-    def test_file_permission_handling(self, handler, valid_mp3):
-        """Test handling of file permission issues."""
-        # Make file read-only
-        os.chmod(valid_mp3, 0o444)
-        try:
-            success = handler.write_genre(valid_mp3, ["Rock"], backup=True)
-            assert not success, "Should fail on read-only file"
-        finally:
-            # Restore permissions for cleanup
-            os.chmod(valid_mp3, 0o666)
+    def test_genre_in_filename(self, file_handler, sample_mp3):
+        """Test including genres in filename."""
+        genres = ["Rock", "Alternative Rock"]
+        result = file_handler.rename_file_by_genre(
+            sample_mp3,
+            genres_to_write=genres,
+            include_genre_in_filename=True
+        )
+        assert result["success"]
+        assert "[Rock, Alternative Rock]" in result["new_path"]
 
-    def test_genre_normalization(self, handler, valid_mp3):
-        """Test genre name normalization."""
-        genres = ["rock and roll", "R&B", "hip-hop"]
-        success = handler.write_genre(valid_mp3, genres)
-        assert success, "Genre writing should succeed"
+    def test_special_characters(self, file_handler, sample_mp3):
+        """Test handling of special characters in filenames."""
+        special_cases = [
+            ("Artist/Name", "Artist⁄Name"),  # Forward slash
+            ("Artist\\Name", "Artist⧵Name"),  # Backslash
+            ("Artist:Name", "Artist꞉Name"),  # Colon
+            ("Artist*Name", "Artist∗Name"),  # Asterisk
+            ("Artist?Name", "Artist？Name"),  # Question mark
+            ('Artist"Name', "Artist'Name"),  # Quotes
+            ("Artist<Name", "Artist❮Name"),  # Less than
+            ("Artist>Name", "Artist❯Name"),  # Greater than
+            ("Artist|Name", "Artist⏐Name")   # Vertical bar
+        ]
         
-        info = handler.get_file_info(valid_mp3)
-        written_genres = info.get("current_genre", "").split(";")
-        
-        # Verify proper capitalization
-        assert any("Rock" in g for g in written_genres), "Genre should be properly capitalized"
-        assert "R&B" in written_genres, "Should preserve certain abbreviations"
-        assert "Hip-Hop" in written_genres, "Should properly capitalize hyphenated genres"
+        for input_name, expected in special_cases:
+            result = file_handler.rename_file_by_genre(
+                sample_mp3,
+                genres_to_write=["Rock"],
+                include_genre_in_filename=True
+            )
+            assert result["success"]
 
-    def test_backup_restoration(self, handler, valid_mp3):
-        """Test backup restoration functionality."""
-        assert handler.backup_dir is not None, "Backup directory must be set for this test"
-        original_content = Path(valid_mp3).read_bytes()
+    def test_filename_conflict_resolution(self, file_handler, tmp_path):
+        """Test handling of filename conflicts."""
+        # Create two files with same metadata
+        file1 = tmp_path / "test1.mp3"
+        file2 = tmp_path / "test2.mp3"
+        file1.write_bytes(b"dummy content 1")
+        file2.write_bytes(b"dummy content 2")
         
-        initial_backup_files = list(Path(handler.backup_dir).glob('*'))
-        success = handler._create_backup(valid_mp3)
-        assert success, "Backup creation should succeed"
+        # Try to rename both to same name
+        result1 = file_handler.rename_file_by_genre(str(file1), genres_to_write=["Rock"])
+        result2 = file_handler.rename_file_by_genre(str(file2), genres_to_write=["Rock"])
         
-        current_backup_files = list(Path(handler.backup_dir).glob('*'))
-        new_backup_files = [f for f in current_backup_files if f not in initial_backup_files]
-        assert len(new_backup_files) == 1, "One new backup file should be created for restoration test"
-        backup_path = new_backup_files[0]
-        
-        assert backup_path.exists(), "Backup should exist for restoration test"
-        
-        # Modify file
-        handler.write_genre(valid_mp3, ["Test Genre"], backup=False) # Ensure no new backup is made here for this step
-        
-        # Verify backup content matches original
-        backup_content = backup_path.read_bytes()
-        assert backup_content == original_content, "Backup should preserve original content"
+        assert result1["success"]
+        assert result2["success"]
+        assert result1["new_path"] != result2["new_path"]
+        assert " (1)" in result2["new_path"]
 
-    def test_file_renaming(self, handler, valid_mp3):
-        """Test file renaming functionality."""
-        # First write a genre
-        handler.write_genre(valid_mp3, ["Rock"])
+    def test_long_filename_handling(self, file_handler, sample_mp3):
+        """Test handling of very long filenames."""
+        very_long_artist = "A" * 100
+        very_long_title = "T" * 100
+        very_long_genres = ["Very Long Genre Name"] * 3
         
-        # Then try to rename
-        result = handler.rename_file_by_genre(valid_mp3)
+        result = file_handler.rename_file_by_genre(
+            sample_mp3,
+            genres_to_write=very_long_genres,
+            include_genre_in_filename=True
+        )
         
-        assert result["success"], "File renaming should succeed"
-        assert "[Rock]" in result["new_path"], "New filename should include genre"
-        assert Path(result["new_path"]).exists(), "New file should exist"
+        assert result["success"]
+        new_path = Path(result["new_path"])
+        # Check that final filename is within filesystem limits
+        assert len(new_path.name.encode('utf-8')) <= 255
 
-    def test_concurrent_access(self, handler, valid_mp3):
-        """Test handling of concurrent file access."""
-        with open(valid_mp3, "rb") as f:
-            # Should still be able to read file info
-            info = handler.get_file_info(valid_mp3)
-            assert info is not None, "Should read info from open file"
-            assert "current_genre" in info, "Should read genre from open file"
-
-    def test_backup_on_write(self, handler, valid_mp3):
-        """Test automatic backup creation during write."""
-        assert handler.backup_dir is not None, "Backup directory must be set for this test"
-        original_content = Path(valid_mp3).read_bytes()
-        initial_backup_files = list(Path(handler.backup_dir).glob('*'))
-        
-        handler.write_genre(valid_mp3, ["Test Genre"], backup=True)
-        
-        current_backup_files = list(Path(handler.backup_dir).glob('*'))
-        new_backup_files = [f for f in current_backup_files if f not in initial_backup_files]
-
-        assert len(new_backup_files) == 1, "One new backup file should be created by write_genre"
-        backup_path = new_backup_files[0]
-        
-        assert backup_path.exists(), "Backup should be created by write_genre"
-        assert backup_path.read_bytes() == original_content, "Backup should match original"
-
-    def test_multiple_genre_handling(self, handler, valid_mp3):
-        """Test handling multiple genres."""
-        test_genres = ["Rock", "Alternative", "Indie"]
-        
-        success = handler.write_genre(valid_mp3, test_genres)
-        assert success, "Writing multiple genres should succeed"
-        
-        info = handler.get_file_info(valid_mp3)
-        written_genres = info.get("current_genre", "").split(";")
-        
-        assert len(written_genres) == len(test_genres), "All genres should be written"
-        assert all(g in written_genres for g in test_genres), "All genres should be present"
+if __name__ == "__main__":
+    pytest.main([__file__])

@@ -1,780 +1,442 @@
 """Main window implementation for the Genre Detector application."""
-from pathlib import Path
 import os
-import re
-import time
+import logging
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QFileDialog, QProgressBar, QStatusBar, QListWidget,
-    QCheckBox, QSlider, QSpinBox
+    QFileDialog, QStatusBar, QComboBox, QSplitter, QProgressBar,
+    QMessageBox
 )
-from PySide6.QtCore import Qt, Signal, Slot, QThread
-from PySide6.QtGui import QDropEvent, QDragEnterEvent, QFont
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFont, QIcon, QColor
 from typing import Optional
-import logging
+from pathlib import Path
+
+from .i18n import tr, set_language
 
 from ..core.genre_detector import GenreDetector
-from ..core.file_handler import Mp3FileHandler
-from ..core.music_apis import MusicBrainzAPI
-from src.gui.style import apply_dark_theme
+from .models.genre_model import GenreModel
+from .widgets.control_panel import ControlPanel
+from .widgets.backup_panel import BackupPanel
+from .widgets.file_results_table_widget import FileResultsTableWidget
+from .threads.processing_thread import ProcessingThread
+from .style import apply_dark_theme, apply_light_theme
 
 logger = logging.getLogger(__name__)
 
-# MODELO: Encapsula la lógica de negocio y datos
-class GenreModel:
-    def __init__(self, backup_dir: Optional[str] = None):
-        # Crear primero el file_handler con el backup_dir
-        file_handler_instance = Mp3FileHandler(backup_dir=backup_dir)
-        # Pasar el file_handler al GenreDetector
-        self.detector = GenreDetector(apis=[MusicBrainzAPI()], verbose=True, file_handler=file_handler_instance)
-        self.min_confidence = 0.2
-        self.max_api_tags = 100
-        self.rename_after_update = True
-        self.spam_terms = [
-            "http", "fix", "tag", "mess", "error", "todo", "check", 
-            "wrong", "unknown", "unclassifiable", "other", "others", 
-            "delete", "seen live", "favorites", "favourite", "test", 
-            "misc", "checked", "need", "spotify", "lastfm", "indy", 
-            "artist", "artists", "video", "title"
-        ]
-        
-    def filter_noise_genres(self, genres_dict):
-        """Filtra géneros ruidosos o irrelevantes.
-        
-        Args:
-            genres_dict: Diccionario de géneros con sus valores de confianza
-            
-        Returns:
-            Diccionario filtrado de géneros
-        """
-        if not genres_dict:
-            return {}
-            
-        filtered = {}
-        
-        for genre, conf in genres_dict.items():
-            # Verificar longitud y contenido
-            if (len(genre) < 30 and  # No demasiado largo
-                not any(term in genre.lower() for term in self.spam_terms) and  # Sin términos de spam
-                len(genre.strip()) > 1 and  # No demasiado corto
-                not genre.isdigit() and  # No solo dígitos
-                not all(c in "!@#$%^&*()[]{};:,./<>?\\|`~-=_+" for c in genre)):  # No solo símbolos
-                filtered[genre] = conf
-        
-        return filtered
-
-    def analyze(self, filepath):
-        try:
-            # Verificación exhaustiva para archivos, especialmente en volúmenes externos
-            exists = False
-            error_msg = ""
-            
-            # Intentar múltiples métodos para verificar la existencia del archivo
-            try:
-                # Método 1: Usando Path
-                path_obj = Path(filepath)
-                if path_obj.exists():
-                    exists = True
-            except Exception as e:
-                error_msg = f"Error con Path.exists(): {str(e)}"
-            
-            # Método 2: Usando os.path si el método 1 falló
-            if not exists:
-                try:
-                    if os.path.exists(filepath):
-                        exists = True
-                    else:
-                        error_msg = f"os.path.exists() reporta que el archivo no existe"
-                except Exception as e:
-                    error_msg += f", Error con os.path.exists(): {str(e)}"
-            
-            # Método 3: Intentar abrir el archivo directamente
-            if not exists:
-                try:
-                    with open(filepath, 'rb') as f:
-                        # Si llegamos aquí, el archivo existe y se puede leer
-                        exists = True
-                except Exception as e:
-                    error_msg += f", Error al intentar abrir archivo: {str(e)}"
-            
-            if not exists:
-                return {"error": f"Archivo inaccesible: {filepath}. {error_msg}"}
-            
-            # Verificar si es un MP3 válido
-            if not self.detector.file_handler.is_valid_mp3(filepath):
-                return {"error": f"Archivo MP3 inválido: {filepath}"}
-                
-            # Proceder con el análisis
-            result = self.detector.analyze_file(filepath)
-            
-            # Filtrar etiquetas de género para resultados más limpios
-            if "detected_genres" in result:
-                # Usar la función dedicada para filtrar géneros
-                filtered_genres = self.filter_noise_genres(result["detected_genres"])
-                
-                # Tomar solo los más relevantes ordenados por confianza
-                sorted_genres = dict(sorted(
-                    filtered_genres.items(),
-                    key=lambda x: x[1],
-                    reverse=True
-                )[:self.max_api_tags])
-                
-                result["detected_genres"] = sorted_genres
-            
-            return result
-        except Exception as e:
-            return {"error": f"Error al analizar: {str(e)}"}
-
-    def process(self, filepath, confidence, max_genres):
-        try:
-            # Verificación exhaustiva para archivos, especialmente en volúmenes externos
-            exists = False
-            error_msg = ""
-            
-            # Intentar múltiples métodos para verificar la existencia del archivo
-            try:
-                # Método 1: Usando Path
-                path_obj = Path(filepath)
-                if path_obj.exists():
-                    exists = True
-            except Exception as e:
-                error_msg = f"Error con Path.exists(): {str(e)}"
-            
-            # Método 2: Usando os.path si el método 1 falló
-            if not exists:
-                try:
-                    if os.path.exists(filepath):
-                        exists = True
-                    else:
-                        error_msg = f"os.path.exists() reporta que el archivo no existe"
-                except Exception as e:
-                    error_msg += f", Error con os.path.exists(): {str(e)}"
-            
-            # Método 3: Intentar abrir el archivo directamente
-            if not exists:
-                try:
-                    with open(filepath, 'rb') as f:
-                        # Si llegamos aquí, el archivo existe y se puede leer
-                        exists = True
-                except Exception as e:
-                    error_msg += f", Error al intentar abrir archivo: {str(e)}"
-            
-            if not exists:
-                return {"error": f"Archivo inaccesible: {filepath}. {error_msg}", "written": False}
-                
-            if not self.detector.file_handler.is_valid_mp3(filepath):
-                return {"error": f"Archivo MP3 inválido: {filepath}", "written": False}
-            
-            # Detectar primero para obtener información de géneros
-            analysis = self.detector.analyze_file(filepath)
-            
-            # Extraer géneros con confianza suficiente
-            genres = analysis.get("detected_genres", {})
-            
-            # Filtrar géneros ruidosos o irrelevantes
-            filtered_genres = self.filter_noise_genres(genres)
-            
-            # Verificar si quedan géneros después del filtrado estricto
-            if not filtered_genres:
-                # Si no hay géneros filtrados, hacer filtrado menos estricto
-                for genre, conf in genres.items():
-                    if len(genre) < 50 and len(genre.strip()) > 1:
-                        filtered_genres[genre] = conf
-            
-            # Si aún no hay géneros, reportar el problema
-            if not filtered_genres:
-                return {
-                    "error": f"No se detectaron géneros válidos para este archivo",
-                    "written": False,
-                    "detected_genres": genres
-                }
-            
-            # Usar un umbral de confianza adaptativo
-            adaptive_confidence = confidence
-            if not any(conf >= confidence for conf in filtered_genres.values()):
-                # Usar un umbral adaptativo (mínimo configurado o 20% menos que el umbral original)
-                adaptive_confidence = min(self.min_confidence, max(0.1, confidence - 0.2))
-            
-            selected_genres = []
-            for genre, conf in sorted(filtered_genres.items(), key=lambda x: x[1], reverse=True):
-                if conf >= adaptive_confidence:
-                    # Preservar géneros actuales que puedan ser válidos
-                    # Normalizar género para evitar duplicados con diferente formato (ej: "Rock" vs "rock")
-                    normalized = genre[0].upper() + genre[1:] if genre else ""
-                    
-                    # Verificar duplicados de manera más inteligente comparando en minúsculas
-                    if normalized.lower() not in [g.lower() for g in selected_genres]:
-                        selected_genres.append(normalized)
-                        if len(selected_genres) >= max_genres:
-                            break
-            
-            if not selected_genres:
-                # Si aún no hay géneros seleccionados, tomar el género con mayor confianza
-                if filtered_genres:
-                    top_genre = max(filtered_genres.items(), key=lambda x: x[1])
-                    normalized = top_genre[0][0].upper() + top_genre[0][1:] if top_genre[0] else ""
-                    selected_genres.append(normalized)
-                    adaptive_confidence = top_genre[1]  # Usar la confianza de este género como umbral
-                else:
-                    return {
-                        "error": f"No se detectaron géneros con confianza suficiente",
-                        "written": False,
-                        "detected_genres": filtered_genres,
-                        "threshold_used": adaptive_confidence
-                    }
-            
-            # Escribir géneros con manejo de errores mejorado
-            try:
-                # Intentar hacer una copia de seguridad primero, ANTES de cualquier escritura
-                backup_success = self.detector.file_handler._create_backup(filepath)
-                if not backup_success:
-                    # Si la copia de seguridad falla, seguir pero notificar
-                    # Idealmente, esto se registraría o se mostraría al usuario de alguna manera.
-                    logger.warning(f"Advertencia: No se pudo crear copia de seguridad para {filepath}")
-                
-                # Si se va a renombrar, rename_file_by_genre se encarga de todos los tags y el nombre.
-                if self.rename_after_update:
-                    current_filepath_for_rename = filepath 
-                    rename_result = self.detector.file_handler.rename_file_by_genre(
-                        current_filepath_for_rename, 
-                        genres_to_write=selected_genres
-                    )
-                    # Actualizar el resultado con la información de rename_result
-                    current_error = rename_result.get("error") # Obtener el error potencial
-                    result = {
-                        "written": rename_result.get("success", False),
-                        "renamed": rename_result.get("success", False) and rename_result.get("new_path") != filepath,
-                        "new_filepath": rename_result.get("new_path"),
-                        "message": rename_result.get("message", ""),
-                        # Solo incluir la clave "error" si current_error no es None
-                        # "error": current_error, <--- Se manejará más abajo
-                        "current_genre": ";".join(selected_genres) # Reflejar los géneros que intentamos escribir
-                    }
-                    if current_error:
-                        result["error"] = current_error
-                    
-                    if "tag_update_error" in rename_result:
-                         result["tag_update_error"] = rename_result["tag_update_error"]
-
-                else: # Si no se renombra, solo escribir géneros (Artista/Título no se tocan aquí)
-                    success = self.detector.file_handler.write_genre(filepath, selected_genres, backup=False) # Backup ya hecho
-                    result = {"written": success}
-                    if success:
-                        time.sleep(0.2)  # Esperar un momento para que el sistema de archivos se actualice
-                        info_after_write = self.detector.file_handler.get_file_info(filepath)
-                        result["current_genre"] = info_after_write.get("current_genre", "")
-                        result["selected_genres"] = selected_genres
-                        result["threshold_used"] = adaptive_confidence
-                    else:
-                        result["error"] = f"Error al escribir géneros en {filepath}"
-            
-                return result
-            except Exception as write_error:
-                return {
-                    "error": f"Error al escribir en el archivo: {str(write_error)}",
-                    "written": False,
-                    "selected_genres": selected_genres
-                }
-                
-        except Exception as e:
-            return {"error": f"Error al procesar: {str(e)}", "written": False}
-
-# PROCESO: Hilo para tareas asíncronas
-class ProcessingThread(QThread):
-    progress = Signal(str)
-    finished = Signal(dict)
-    file_processed = Signal(str, str) # file path, status (e.g., "Success", "Error: ...")
-
-    def __init__(self, file_paths, model, analyze_only=True, confidence=0.3, max_genres=3, rename_files=False, backup_dir: Optional[str] = None, parent=None):
-        super().__init__(parent)
-        self.file_paths = file_paths
-        self.analyze_only = analyze_only
-        self.confidence = confidence
-        self.max_genres = max_genres
-        self.rename_files = rename_files
-        self.backup_dir = backup_dir # Este es el backup_dir de MainWindow
-        self.model = model # Este es el GenreModel
-
-        # Actualizar el backup_dir del file_handler existente en el modelo
-        if self.model and self.model.detector and self.model.detector.file_handler:
-            if hasattr(self.model.detector.file_handler, 'set_backup_dir'):
-                self.model.detector.file_handler.set_backup_dir(self.backup_dir)
-                logger.info(f"ProcessingThread: backup_dir en Mp3FileHandler (modelo) configurado/actualizado a: {self.backup_dir}")
-            else:
-                # Fallback si set_backup_dir no existe por alguna razón (no debería pasar)
-                logger.warning("ProcessingThread: Mp3FileHandler no tiene set_backup_dir. Recreando con nueva ruta.")
-                self.model.detector.file_handler = Mp3FileHandler(backup_dir=self.backup_dir)
-        else:
-            logger.error("ProcessingThread: No se pudo acceder a model.detector.file_handler para configurar backup_dir.")
-
-    def run(self):
-        total_files = len(self.file_paths)
-        if total_files == 0:
-            self.progress.emit("No hay archivos seleccionados para procesar.")
-            self.finished.emit({"total": 0, "success": 0, "errors": 0, "renamed": 0, "details": []})
-            return
-
-        processed_count = 0
-        success_count = 0
-        error_count = 0
-        renamed_count = 0
-        results_details = []
-
-        for filepath in self.file_paths:
-            self.progress.emit(f"Processing {Path(filepath).name}")
-            try:
-                if self.analyze_only:
-                    result = self.model.analyze(filepath)
-                else:
-                    result = self.model.process(filepath, self.confidence, self.max_genres)
-                
-                # Comprobar si hay un error real en el resultado
-                actual_error = result.get("error")
-                if actual_error: # Esto es True si actual_error no es None y no es una cadena vacía
-                    error_count += 1
-                    logger.error(f"Error al procesar {filepath}: {actual_error}")
-                    self.file_processed.emit(filepath, f"Error: {actual_error}")
-                elif "written" in result: # Si no hay error, ver si se escribió (caso de no análisis)
-                    if result["written"]:
-                        success_count += 1
-                        # No emitir aquí si el renombrado va a emitir su propio mensaje
-                        if not ("renamed" in result and result["renamed"]):
-                             self.file_processed.emit(filepath, result.get("message", "Éxito en escritura de metadatos."))
-                    else:
-                        error_count += 1
-                        # Este caso puede ocurrir si written=False pero no hay un result["error"] explícito (ej. write_genre falla silenciosamente)
-                        err_msg_write = result.get('error', 'Error desconocido durante escritura de metadatos')
-                        logger.error(f"Error al escribir metadatos para {filepath}: {err_msg_write}")
-                        self.file_processed.emit(filepath, f"Error al escribir metadatos: {err_msg_write}")
-                elif not self.analyze_only: # Caso donde 'written' no está pero no es análisis (inesperado)
-                    error_count += 1
-                    logger.error(f"Resultado inesperado para {filepath} (ni error ni written): {result}")
-                    self.file_processed.emit(filepath, "Error: Resultado inesperado del procesamiento")
-                else: # Éxito en el modo 'analyze_only'
-                    success_count += 1
-                    genres = result.get("detected_genres", {})
-                    if genres:
-                        genre_str = ", ".join(f"{g} ({c:.2f})" for g, c in 
-                                           sorted(genres.items(), key=lambda x: x[1], reverse=True))
-                        self.file_processed.emit(filepath, f"Éxito en análisis. Géneros detectados: {genre_str}")
-                    else:
-                        self.file_processed.emit(filepath, "No se detectaron géneros")
-                
-                processed_count += 1
-                self.progress.emit(f"Procesado: {processed_count}/{total_files} - {os.path.basename(filepath)}")
-
-                if "renamed" in result:                    
-                    if result["renamed"]: # Si el renombrado fue exitoso (y hubo cambio)
-                        renamed_count += 1
-                        new_filepath_val = result.get('new_filepath')
-                        # El mensaje de éxito del renombrado ya lo da rename_file_by_genre, no es necesario emitir otro.
-                        # self.file_processed.emit(filepath, f"Éxito en renombrado. Renombrado a: {os.path.basename(new_filepath_val)}")
-                        if result.get("message"):
-                             self.file_processed.emit(filepath, result.get("message"))
-                        elif new_filepath_val: # Backup
-                             self.file_processed.emit(filepath, f"Renombrado a: {os.path.basename(new_filepath_val)}")
-
-                    elif result.get("success") and result.get("new_path") == filepath: # Tags actualizados, sin renombrado
-                        # success_count ya se incrementó si written fue True
-                        if result.get("message"):
-                            self.file_processed.emit(filepath, result.get("message"))
-                        else:
-                            self.file_processed.emit(filepath, "Tags actualizados (nombre sin cambios).")
-                    else: 
-                        # Si 'renamed' es False, o no está, pero SÍ hubo un error específico del renombrado 
-                        # (distinto del error general de procesamiento)
-                        rename_specific_error = result.get("error") # O la clave que use rename_file_by_genre para sus errores internos
-                        if rename_specific_error and not actual_error: # Si no contamos ya este error
-                            # No incrementar error_count aquí si el error ya se contó arriba (actual_error)
-                            # Esto es para errores que SOLO ocurren en la fase de renombrado Y NO SON el 'actual_error'
-                            # del procesamiento general.
-                            # El problema es que 'error' es la misma clave.
-                            # Lo importante es que el mensaje se emita.
-                            self.file_processed.emit(filepath, f"Fallo al renombrar/actualizar tags: {rename_specific_error}")
-                        elif not actual_error and not result.get("success"):
-                             self.file_processed.emit(filepath, f"Fallo al renombrar/actualizar tags: {result.get('message', 'Razón desconocida')}")
-
-                results_details.append({
-                    "filepath": filepath,
-                    "written_metadata_success": result.get("written", False),
-                    "current_genre": result.get("current_genre", ""),
-                    "selected_genres": result.get("selected_genres", []),
-                    "threshold_used": result.get("threshold_used", 0.3),
-                    "renamed_to": result.get("new_filepath", ""),
-                    "error": result.get("error", ""),
-                    "rename_error": result.get("error", ""),
-                    "rename_message": result.get("message", ""),
-                    "detected_genres": result.get("detected_genres", {})
-                })
-            except Exception as e:
-                error_count += 1
-                logger.error(f"Error al procesar {filepath}: {str(e)}")
-                self.file_processed.emit(filepath, f"Error: {str(e)}")
-
-        # Simular finalización
-        # self.progress.emit(f"Completado: {processed_count} archivos procesados.")
-        self.finished.emit({
-            "total": total_files, 
-            "success": success_count, 
-            "errors": error_count, 
-            "renamed": renamed_count,
-            "details": results_details
-        })
-
-# CONTROL: Interfaz y eventos
 class MainWindow(QMainWindow):
-    browse_files_triggered = Signal()
-    browse_folder_triggered = Signal()
-    process_files_triggered = Signal()
+    """Ventana principal de la aplicación."""
 
     def __init__(self):
         super().__init__()
-        self.mp3_files = []
-        self.processing_thread = None
-        # Establecer la ruta de backup predeterminada ANTES de inicializar GenreModel
-        self.backup_dir_path = "/Volumes/My Passport/Dj compilation 2025/Respados mp3"
-        self.model = GenreModel(backup_dir=self.backup_dir_path)
+        self.setWindowTitle(tr("ui.window.title"))
+        self.setGeometry(100, 100, 1200, 800)  # Increased width to accommodate side panel
+        self.backup_dir: Optional[str] = None
+        default_backup_path = '/Volumes/My Passport/Dj compilation 2025/Respados mp3'
         
+        try:
+            if os.path.exists(default_backup_path):
+                if os.path.isdir(default_backup_path):
+                    self.backup_dir = default_backup_path
+                    logger.info(f"Usando dir de respaldo existente: {self.backup_dir}")
+                else:
+                    logger.warning(f"Ruta de respaldo '{default_backup_path}' no es un dir. Seleccione manualmente.")
+                    self.backup_dir = None
+            else:
+                os.makedirs(default_backup_path, exist_ok=True)
+                self.backup_dir = default_backup_path
+                logger.info(f"Dir de respaldo creado: {self.backup_dir}")
+        except OSError as e:
+            logger.error(f"Error con dir de respaldo '{default_backup_path}': {e}. Seleccione manualmente.")
+            self.backup_dir = None
+
+        self.model = GenreModel(backup_dir=self.backup_dir)
+        self.is_dark_theme = True
         self.setup_ui()
-        apply_dark_theme(self)
+        self.apply_current_theme()
+
+    def _ensure_model_backup_dir_updated(self):
+        """Asegura que el modelo esté inicializado y su directorio de respaldo actualizado."""
+        # Comprobación básica para evitar errores si el modelo no está completamente inicializado
+        if not hasattr(self, 'model') or self.model is None:
+            logger.warning("El modelo no está inicializado. Creando una nueva instancia.")
+            # Crear el modelo si no existe
+            self.model = GenreModel(backup_dir=self.backup_dir)
         
-        # Actualizar la etiqueta del directorio de backup después de setup_ui
-        if self.backup_dir_path:
-            self.backup_dir_label.setText(f"Backup Directory: {self.backup_dir_path}")
-        else:
-            self.backup_dir_label.setText("Backup Directory: Not Set (Error creating default)")
+        # Actualizar el directorio de respaldo del modelo solo si ha cambiado
+        if self.model.backup_dir != self.backup_dir:
+            self.model.update_backup_dir(self.backup_dir)
+            logger.info(f"Directorio de respaldo del modelo actualizado a: {self.backup_dir}")
+
 
     def setup_ui(self):
-        """Set up the user interface following Material Design guidelines."""
-        self.setWindowTitle("Genre Detector - Dark AI")
-        self.setMinimumSize(900, 650)
-        # Use Segoe UI or Roboto font for Material Design consistency
-        font = QFont("Segoe UI", 11)
-        self.setFont(font)
-        
-        # Enable keyboard focus and tab navigation for accessibility
-        self.setFocusPolicy(Qt.StrongFocus)
-        
-        central_widget = QWidget()
-        central_widget.setAccessibleName("Main Window")
-        self.setCentralWidget(central_widget)
-        
-        # Use consistent spacing from Material Design (8dp grid)
-        layout = QVBoxLayout(central_widget)
-        layout.setSpacing(16)  # 16dp spacing between sections
-        layout.setContentsMargins(16, 16, 16, 16)  # 16dp margins
-        # File selection section
-        file_section = QWidget()
-        file_section.setAccessibleName("File Selection Section")
-        file_list_layout = QVBoxLayout(file_section)
-        
-        # Action buttons
-        button_layout = QHBoxLayout()
-        button_layout.setSpacing(8)  # 8dp between buttons
-        
-        add_file_btn = QPushButton("Add Files")
-        add_file_btn.setAccessibleName("Add Files Button")
-        add_file_btn.setToolTip("Select MP3 files to process")
-        add_file_btn.clicked.connect(self.browse_files)
-        add_file_btn.setShortcut("Ctrl+O")  # Keyboard shortcut
-        
-        add_folder_btn = QPushButton("Add Folder")
-        add_folder_btn.setAccessibleName("Add Folder Button")
-        add_folder_btn.setToolTip("Select a folder containing MP3 files")
-        add_folder_btn.clicked.connect(self.browse_folder)
-        add_folder_btn.setShortcut("Ctrl+Shift+O")  # Keyboard shortcut
-        
-        button_layout.addWidget(add_file_btn)
-        button_layout.addWidget(add_folder_btn)
-        button_layout.addStretch()  # Right-align buttons
-        file_list_layout.addLayout(button_layout)
-        
-        # File list with enhanced accessibility
-        self.file_list = QListWidget()
-        self.file_list.setAccessibleName("File List")
-        self.file_list.setAccessibleDescription("List of MP3 files to process")
-        self.file_list.setAcceptDrops(True)
-        self.file_list.setMinimumHeight(200)
-        self.file_list.setSelectionMode(QListWidget.ExtendedSelection)  # Allow multiple selection
-        self.file_list.setToolTip("Drag and drop MP3 files here or use the buttons above")
-        file_list_layout.addWidget(self.file_list)
-        
-        layout.addWidget(file_section)
-        # Options section with improved accessibility
-        options_section = QWidget()
-        options_section.setAccessibleName("Options Section")
-        options_layout = QVBoxLayout(options_section)
-        options_layout.setSpacing(16)
-        
-        # Analysis mode options
-        analyze_row = QHBoxLayout()
-        analyze_row.setSpacing(16)
-        
-        self.analyze_only = QCheckBox("Analysis Only")
-        self.analyze_only.setAccessibleName("Analysis Only Checkbox")
-        self.analyze_only.setToolTip("Only analyze files without making changes")
-        self.analyze_only.setChecked(True)
-        analyze_row.addWidget(self.analyze_only)
-        
-        self.rename_files = QCheckBox("Rename Files After Update")
-        self.rename_files.setAccessibleName("Rename Files Checkbox")
-        self.rename_files.setToolTip("Rename files using format: 'Artist - Title [Genre]'")
-        self.rename_files.setChecked(True)
-        analyze_row.addWidget(self.rename_files)
-        
-        analyze_row.addStretch()
-        options_layout.addLayout(analyze_row)
-        
-        # Confidence threshold control with enhanced accessibility
-        confidence_row = QHBoxLayout()
-        confidence_row.setSpacing(16)
-        
-        self.confidence_label = QLabel("Confidence Threshold:")
-        self.confidence_label.setAccessibleName("Confidence Threshold Label")
-        confidence_row.addWidget(self.confidence_label)
-        
-        self.confidence_slider = QSlider(Qt.Horizontal)
-        self.confidence_slider.setAccessibleName("Confidence Threshold Slider")
-        self.confidence_slider.setAccessibleDescription("Set minimum confidence level for genre detection")
-        self.confidence_slider.setMinimum(10)
-        self.confidence_slider.setMaximum(90)
-        self.confidence_slider.setValue(30)
-        self.confidence_slider.setTickInterval(10)
-        self.confidence_slider.setTickPosition(QSlider.TicksBelow)
-        self.confidence_slider.valueChanged.connect(self.update_confidence_label)
-        self.confidence_slider.setToolTip("Adjust minimum confidence level for genre detection")
-        confidence_row.addWidget(self.confidence_slider)
-        
-        self.confidence_input = QLabel("0.3")
-        self.confidence_input.setAccessibleName("Confidence Value Label")
-        confidence_row.addWidget(self.confidence_input)
-        
-        options_layout.addLayout(confidence_row)
-        
-        # Maximum genres control with enhanced accessibility
-        max_genres_row = QHBoxLayout()
-        max_genres_row.setSpacing(16)
-        
-        self.max_genres_label = QLabel("Max Genres:")
-        self.max_genres_label.setAccessibleName("Maximum Genres Label")
-        max_genres_row.addWidget(self.max_genres_label)
-        
-        self.max_genres_spinner = QSpinBox()
-        self.max_genres_spinner.setAccessibleName("Maximum Genres Spinner")
-        self.max_genres_spinner.setAccessibleDescription("Set maximum number of genres to detect")
-        self.max_genres_spinner.setMinimum(1)
-        self.max_genres_spinner.setMaximum(10)
-        self.max_genres_spinner.setValue(3)
-        self.max_genres_spinner.valueChanged.connect(self.update_max_genres_label)
-        self.max_genres_spinner.setToolTip("Maximum number of genres to detect per file")
-        max_genres_row.addWidget(self.max_genres_spinner)
-        
-        self.max_genres_input = QLabel("3")
-        self.max_genres_input.setAccessibleName("Maximum Genres Value Label")
-        max_genres_row.addWidget(self.max_genres_input)
-        
-        options_layout.addLayout(max_genres_row)
-        
-        # Backup directory selection
-        backup_dir_row = QHBoxLayout()
-        backup_dir_row.setSpacing(8) 
-        
-        self.backup_dir_label = QLabel("Backup Directory: Not Set") # El texto se actualizará en __init__
-        self.backup_dir_label.setAccessibleName("Backup Directory Label")
-        backup_dir_row.addWidget(self.backup_dir_label, 1) 
-        
-        self.select_backup_dir_btn = QPushButton("Select Backup Dir")
-        self.select_backup_dir_btn.setAccessibleName("Select Backup Directory Button")
-        self.select_backup_dir_btn.setToolTip("Select a folder to store backups of modified MP3 files")
-        self.select_backup_dir_btn.clicked.connect(self.select_backup_directory)
-        backup_dir_row.addWidget(self.select_backup_dir_btn)
-        
-        options_layout.addLayout(backup_dir_row) # Añadir la fila de backup al layout de opciones
+        """Set up the user interface."""
+        self.setWindowTitle(tr("ui.window.title"))
+        self.setMinimumSize(1100, 650)
 
-        layout.addWidget(options_section)
-        # Process button with enhanced accessibility
-        self.process_btn = QPushButton("Process Files")
-        self.process_btn.setAccessibleName("Process Files Button")
-        self.process_btn.setAccessibleDescription("Start processing the selected files")
+        central_widget = QWidget()
+        central_widget.setAccessibleName(tr("accessibility_main_window"))
+        self.setCentralWidget(central_widget)
+
+        layout = QVBoxLayout(central_widget)
+        layout.setSpacing(10)
+        layout.setContentsMargins(12, 12, 12, 12)
+
+        top_controls = QHBoxLayout()
+
+        self.lang_selector = QComboBox()
+        self.lang_selector.addItem("English", "en")
+        self.lang_selector.addItem("Español", "es")
+        self.lang_selector.setMinimumWidth(120)
+        self.lang_selector.currentIndexChanged.connect(self.change_language)
+        top_controls.addWidget(self.lang_selector)
+
+        self.theme_btn = QPushButton()
+        self.theme_btn.setAccessibleName(tr("accessibility.buttons.theme.name"))
+        self.theme_btn.setAccessibleDescription(tr("accessibility.buttons.theme.desc"))
+        self.theme_btn.clicked.connect(self.toggle_theme)
+        self.theme_btn.setToolTip(tr("tooltips.theme"))
+        self.theme_btn.setShortcut("Ctrl+T")
+        self.theme_btn.setMinimumWidth(64)
+        self.update_theme_button()
+        top_controls.addStretch()
+        top_controls.addWidget(self.theme_btn)
+        layout.addLayout(top_controls)
+
+        buttons_layout = QHBoxLayout()
+
+        self.add_files_btn = QPushButton(tr("ui.buttons.add_files"))
+        self.add_files_btn.setAccessibleName(tr("accessibility.buttons.add_files.name"))
+        self.add_files_btn.setAccessibleDescription(tr("accessibility.buttons.add_files.desc"))
+        self.add_files_btn.clicked.connect(self.browse_files)
+        self.add_files_btn.setToolTip(tr("tooltips.add_files"))
+        self.add_files_btn.setShortcut("Ctrl+O")
+        self.add_files_btn.setMinimumWidth(64)
+        buttons_layout.addWidget(self.add_files_btn)
+
+        self.add_folder_btn = QPushButton(tr("ui.buttons.add_folder"))
+        self.add_folder_btn.setAccessibleName(tr("accessibility.buttons.add_folder.name"))
+        self.add_folder_btn.setAccessibleDescription(tr("accessibility.buttons.add_folder.desc"))
+        self.add_folder_btn.clicked.connect(self.browse_folder)
+        self.add_folder_btn.setToolTip(tr("tooltips.add_folder"))
+        self.add_folder_btn.setShortcut("Ctrl+D")
+        self.add_folder_btn.setMinimumWidth(64)
+        buttons_layout.addWidget(self.add_folder_btn)
+
+        buttons_layout.addStretch()
+        layout.addLayout(buttons_layout)
+
+        # Usar el nuevo FileResultsTableWidget
+        self.file_results_table = FileResultsTableWidget()
+        self.file_results_table.files_added.connect(self.on_files_added)
+        layout.addWidget(self.file_results_table, 1)
+
+        side_panel = QWidget()
+        side_layout = QVBoxLayout(side_panel)
+        side_layout.setSpacing(10)
+
+        self.control_panel = ControlPanel()
+        self.control_panel.settings_changed.connect(self.on_settings_changed)
+        side_layout.addWidget(self.control_panel)
+
+        self.backup_panel = BackupPanel()
+        self.backup_panel.backup_dir_changed.connect(self.on_backup_dir_changed)
+        self.backup_panel.select_backup_dir_btn.clicked.connect(self.select_backup_directory)
+        if self.backup_dir:
+            self.backup_panel.set_backup_dir(self.backup_dir)
+        side_layout.addWidget(self.backup_panel)
+
+        # Barra de progreso
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setFormat("%v/%m archivos - %p%")
+        self.progress_bar.hide()
+        side_layout.addWidget(self.progress_bar)
+
+        # Botones de proceso
+        process_buttons = QHBoxLayout()
+        
+        self.process_btn = QPushButton(tr("ui.buttons.process"))
+        self.process_btn.setAccessibleName(tr("accessibility.buttons.process.name"))
+        self.process_btn.setAccessibleDescription(tr("accessibility.buttons.process.desc"))
         self.process_btn.clicked.connect(self.process_files)
         self.process_btn.setEnabled(False)
-        self.process_btn.setToolTip("Process the selected files (Ctrl+P)")
-        self.process_btn.setShortcut("Ctrl+P")  # Keyboard shortcut
-        layout.addWidget(self.process_btn, 0, Qt.AlignCenter)
-        # Progress section with enhanced accessibility
-        self.progress_label = QLabel()
-        self.progress_label.setAccessibleName("Progress Label")
-        self.progress_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.progress_label)
-        
-        # Results section with enhanced accessibility
-        results_section = QWidget()
-        results_section.setAccessibleName("Results Section")
-        results_layout = QVBoxLayout(results_section)
-        
-        # Results list with enhanced accessibility
-        self.results_list = QListWidget()
-        self.results_list.setAccessibleName("Results List")
-        self.results_list.setAccessibleDescription("List of processing results for each file")
-        self.results_list.setToolTip("Results of file processing")
-        results_layout.addWidget(self.results_list)
-        
-        layout.addWidget(results_section)
-        
-        # Status bar with enhanced accessibility
-        status_bar = self.statusBar()
-        status_bar.setAccessibleName("Status Bar")
-        status_bar.showMessage("Ready - Dark AI Mode")
-        
-    def update_confidence_label(self, value):
-        """Actualiza la etiqueta de confianza cuando se mueve el slider."""
-        confidence = value / 100
-        self.confidence_input.setText(f"{confidence:.1f}")
-        
-    def update_max_genres_label(self, value):
-        """Actualiza la etiqueta de máximo de géneros cuando cambia el spinner."""
-        self.max_genres_input.setText(str(value))
+        self.process_btn.setToolTip(tr("tooltips.process"))
+        self.process_btn.setShortcut("Ctrl+P")
+        self.process_btn.setMinimumWidth(100)
+        process_buttons.addWidget(self.process_btn)
 
-    def browse_files(self):
-        self.browse_files_triggered.emit()
-        """Open file browser for MP3 selection."""
-        files, _ = QFileDialog.getOpenFileNames(
-            self, "Select MP3 Files", "", "MP3 Files (*.mp3)"
-        )
-        if files:
-            self.add_files(files)
-            
-    def browse_folder(self):
-        self.browse_folder_triggered.emit()
-        """Open folder browser."""
-        folder = QFileDialog.getExistingDirectory(self, "Select Folder")
-        if folder:
-            self.add_folder(folder)
-            
-    def add_files(self, files):
-        """Add MP3 files to the list."""
-        for file in files:
-            if file.lower().endswith('.mp3'):
-                self.mp3_files.append(file)
-                self.file_list.addItem(Path(file).name)
-        self.process_btn.setEnabled(bool(self.mp3_files))
-                
-    def add_folder(self, folder):
-        """Add all MP3 files from a folder."""
-        for file in Path(folder).rglob("*.mp3"):
-            self.mp3_files.append(str(file))
-            self.file_list.addItem(file.name)
-        self.process_btn.setEnabled(bool(self.mp3_files))
-            
+        self.cancel_btn = QPushButton(tr("ui.buttons.cancel"))
+        self.cancel_btn.setAccessibleName(tr("accessibility.buttons.cancel"))
+        self.cancel_btn.clicked.connect(self.cancel_processing)
+        self.cancel_btn.setEnabled(False)
+        self.cancel_btn.setToolTip(tr("tooltips.cancel"))
+        self.cancel_btn.setMinimumWidth(100)
+        process_buttons.addWidget(self.cancel_btn)
+        
+        side_layout.addLayout(process_buttons)
+
+        layout.addWidget(side_panel)
+
+        status_bar = self.statusBar()
+        status_bar.setAccessibleName(tr("accessibility.controls.status"))
+        status_bar.showMessage(tr("general.status.ready"))
+
     def select_backup_directory(self):
-        new_backup_dir = QFileDialog.getExistingDirectory(self, "Seleccionar Carpeta de Backup")
-        if new_backup_dir:
-            self.backup_dir_path = new_backup_dir
-            self.backup_dir_label.setText(f"Directorio de Backup: {self.backup_dir_path}")
-            logger.info(f"Directorio de backup actualizado por el usuario a: {self.backup_dir_path}")
-            # Actualizar también el file_handler en el modelo existente usando set_backup_dir
-            if self.model and self.model.detector and self.model.detector.file_handler:
-                if hasattr(self.model.detector.file_handler, 'set_backup_dir'):
-                    self.model.detector.file_handler.set_backup_dir(self.backup_dir_path)
-                    # El log ya lo hará set_backup_dir
-                else:
-                    logger.error("MainWindow: Mp3FileHandler en el modelo no tiene set_backup_dir.")
-            else:
-                logger.warning("MainWindow: No se pudo actualizar el backup_dir en el file_handler del modelo porque no existe.")
+        """Permite al usuario seleccionar el directorio de respaldo."""
+        dir_path = QFileDialog.getExistingDirectory(
+            self,
+            tr("dialogs.select_backup"),
+            self.backup_dir or os.path.expanduser("~")
+        )
+        if dir_path:
+            self.backup_dir = dir_path
+            self.backup_panel.set_backup_dir(dir_path)
+            self._ensure_model_backup_dir_updated()
+
+    def on_files_added(self, count: int):
+        """Maneja la adición de archivos a la tabla."""
+        if self.file_results_table.rowCount() > 0:
+            self.process_btn.setEnabled(True)
+        else:
+            self.process_btn.setEnabled(False)
+        self.statusBar().showMessage(tr("general.status.files_added", {"count": count}), 3000)
+
+    def on_settings_changed(self, settings: dict):
+        """Maneja cambios en la configuración."""
+        # Aquí podemos implementar lógica adicional cuando cambian las configuraciones
+        pass
+
+    def on_backup_dir_changed(self, dir_path: str):
+        """Maneja cambios en el directorio de respaldo."""
+        self.backup_dir = dir_path
+        self._ensure_model_backup_dir_updated()
 
     def process_files(self):
-        self.process_files_triggered.emit()
-        self.results_list.clear()
-        self.process_btn.setEnabled(False)
-        analyze_only = self.analyze_only.isChecked()
-        confidence = float(self.confidence_input.text())
-        max_genres = int(self.max_genres_input.text())
-        rename_files = self.rename_files.isChecked()
+        """Inicia el procesamiento de archivos."""
+        files_to_process = self.file_results_table.get_all_files()
+        
+        if not files_to_process:
+            self.statusBar().showMessage(tr("general.status.no_files"), 3000)
+            return
 
-        # Pasar el backup_dir_path al ProcessingThread
+        self._ensure_model_backup_dir_updated()
+        settings = self.control_panel.get_settings()
+
+        # Configurar UI para procesamiento
+        self.progress_bar.setMaximum(len(files_to_process))
+        self.progress_bar.setValue(0)
+        self.progress_bar.show()
+        self.statusBar().showMessage(tr("general.status.processing"))
+        
+        for file_path in files_to_process:
+            self.file_results_table.update_status(file_path, "Pendiente...")
+
+        # Iniciar thread de procesamiento
         self.processing_thread = ProcessingThread(
-            self.mp3_files,
-            self.model,
-            analyze_only=analyze_only,
-            confidence=confidence,
-            max_genres=max_genres,
-            rename_files=rename_files,
-            backup_dir=self.backup_dir_path # Pasar la ruta seleccionada
+            file_paths=files_to_process,
+            model=self.model,
+            analyze_only=settings['analyze_only'],
+            confidence=settings['confidence'],
+            max_genres=settings['max_genres'],
+            rename_files=settings['rename_files'],
+            backup_dir=self.backup_dir
         )
         
-        self.processing_thread.progress.connect(self.update_progress)
+        # Conectar señales
         self.processing_thread.finished.connect(self.processing_complete)
-        self.processing_thread.file_processed.connect(self.on_file_processed)
+        self.processing_thread.file_processed.connect(
+            lambda filepath, message, is_error: self.update_table_on_file_processed(filepath, message, is_error)
+        )
+        self.processing_thread.progress.connect(self.update_progress)
+        self.processing_thread.circuit_breaker_opened.connect(self.on_circuit_breaker_opened)
+        self.processing_thread.circuit_breaker_closed.connect(self.on_circuit_breaker_closed)
+        self.processing_thread.task_state_changed.connect(self.on_task_state_changed)
+
+        # Deshabilitar controles
+        self.process_btn.setEnabled(False)
+        self.control_panel.setEnabled(False)
+        self.backup_panel.select_backup_dir_btn.setEnabled(False)
+        self.cancel_btn.setEnabled(True)
+        
         self.processing_thread.start()
 
-    def update_progress(self, message):
-        """Update progress display."""
-        self.progress_label.setText(message)
-        self.statusBar().showMessage(message)
+    def update_table_on_file_processed(self, file_path: str, result_message: str, is_error: bool = False):
+        """Actualiza la tabla cuando un archivo ha sido procesado."""
+        try:
+            if not isinstance(file_path, str):
+                logger.error(f"TypeError: file_path debe ser str, no {type(file_path)}")
+                return
+            if not isinstance(result_message, str):
+                logger.error(f"TypeError: result_message debe ser str, no {type(result_message)}")
+                result_message = str(result_message)
+            
+            status = "Error" if is_error else "Completado"
+            logger.debug(f"Actualizando tabla para {file_path}: estado={status}, mensaje={result_message}")
+            
+            self.file_results_table.update_status(file_path, status)
+            self.file_results_table.update_result(file_path, result_message, is_error)
+        except Exception as e:
+            logger.error(f"Error al actualizar tabla GUI: {str(e)}", exc_info=True)
+
+
+    def update_progress(self, message: str):
+        """Actualiza la barra de progreso y mensajes de estado."""
+        if "Procesado:" in message:
+            try:
+                current, total = map(int, message.split(":")[1].split("/"))
+                self.progress_bar.setValue(current)
+            except (ValueError, IndexError):
+                logger.error(f"Error parseando mensaje de progreso: {message}")
         
-    def processing_complete(self, results):
+    def on_circuit_breaker_opened(self):
+        """Maneja la apertura del circuit breaker."""
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle(tr("dialogs.circuit_breaker.title"))
+        msg.setText(tr("dialogs.circuit_breaker.opened"))
+        msg.setInformativeText(tr("dialogs.circuit_breaker.info"))
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec()
+        
+    def on_circuit_breaker_closed(self):
+        """Maneja el cierre del circuit breaker."""
+        self.statusBar().showMessage(tr("dialogs.circuit_breaker.closed"), 5000)
+        
+    def on_task_state_changed(self, task_id: str, state: str):
+        """Actualiza la UI según el estado de las tareas."""
+        logger.debug(f"Tarea {task_id} cambió a estado: {state}")
+
+    def cancel_processing(self):
+        """Cancela el procesamiento actual."""
+        if hasattr(self, "processing_thread") and self.processing_thread.isRunning():
+            reply = QMessageBox.question(
+                self,
+                tr("dialogs.confirm_cancel.title"),
+                tr("dialogs.confirm_cancel.message"),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply == QMessageBox.Yes:
+                self.processing_thread.stop()
+                self.statusBar().showMessage(tr("general.status.cancelled"), 5000)
+        
+    def processing_complete(self, results: dict):
+        """Maneja la finalización del procesamiento."""
         total = results.get("total", 0)
         successful = results.get("success", 0)
         errors = results.get("errors", 0)
         renamed = results.get("renamed", 0)
-        
-        self.progress_label.clear()
+
+        # Reactivar controles
         self.process_btn.setEnabled(True)
-        self.analyze_only.setEnabled(True)
-        self.rename_files.setEnabled(True)
-        self.select_backup_dir_btn.setEnabled(True)
+        self.control_panel.setEnabled(True)
+        self.backup_panel.select_backup_dir_btn.setEnabled(True)
+        self.cancel_btn.setEnabled(False)
+        self.progress_bar.hide()
 
         if total == 0:
-            self.statusBar().showMessage("No se seleccionaron archivos para procesar.", 7000)
+            self.statusBar().showMessage(tr("general.status.no_selection"), 7000)
         elif errors == 0:
-            self.statusBar().showMessage(f"Procesamiento completado: {successful} archivo(s) exitoso(s). {renamed} renombrado(s).", 7000)
+            self.statusBar().showMessage(
+                tr("general.status.complete.success", {
+                    "success": successful,
+                    "renamed": renamed
+                }),
+                7000
+            )
         else:
-            self.statusBar().showMessage(f"Procesamiento finalizado: {successful} exitoso(s), {errors} error(es). {renamed} renombrado(s).", 10000)
-
-        # Actualizar la lista de archivos con los resultados
-        results_details = results.get("details", [])
-        for i in range(self.results_list.count()):
-            item = self.results_list.item(i)
-            filepath = item.data(Qt.UserRole) # Asumiendo que guardaste el filepath original
+            QMessageBox.warning(
+                self,
+                tr("dialogs.processing_errors.title"),
+                tr("general.status.complete.with_errors", {
+                    "success": successful,
+                    "errors": errors,
+                    "renamed": renamed
+                })
+            )
             
-            found_detail = False
-            for detail in results_details:
-                if detail["filepath"] == filepath:
-                    status_message = "Éxito"
-                    if detail.get("error"):
-                        status_message = f"Error: {detail['error']}"
-                    elif not detail.get("written_metadata_success", False) and not self.analyze_only.isChecked():
-                         status_message = "Error: Escritura de metadatos falló"
-                    
-                    if detail.get("renamed_to"):
-                        status_message += f" -> Renombrado a: {os.path.basename(detail['renamed_to'])}"
-                        # Actualizar el texto del ítem y su data si fue renombrado
-                        item.setText(f"{os.path.basename(detail['renamed_to'])} - {status_message}")
-                        item.setData(Qt.UserRole, detail['renamed_to']) # Actualizar al nuevo path
-                    else:
-                        item.setText(f"{os.path.basename(filepath)} - {status_message}")
-                    found_detail = True
-                    break
-            
-            if not found_detail: # Si no está en los detalles, es porque no se procesó (ej. no era mp3)
-                 # Podríamos querer obtener un estado más específico si es necesario
-                 # item.setText(f"{os.path.basename(filepath)} - No procesado (ver logs)")
-                 pass # Mantener el texto actual si no hay detalles, o decidir un mensaje
-        
-        # Limpiar la lista de mensajes de progreso individuales
-        self.results_list.clear()
-        # Mostrar resumen en la lista de progreso
-        self.results_list.addItem(f"Total de archivos intentados: {total}")
-        self.results_list.addItem(f"Operaciones de metadatos exitosas: {successful}")
-        self.results_list.addItem(f"Errores durante el proceso: {errors}")
-        self.results_list.addItem(f"Archivos renombrados: {renamed}")
-
         logger.info(f"Procesamiento GUI completado. Total: {total}, Exitosos: {successful}, Errores: {errors}, Renombrados: {renamed}")
 
-    def on_file_processed(self, filepath, status):
-        self.results_list.addItem(f"{os.path.basename(filepath)}: {status}")
-        self.results_list.scrollToBottom()
+    def browse_files(self):
+        """Abre el diálogo para seleccionar archivos MP3."""
+        files, _ = QFileDialog.getOpenFileNames(
+            self,
+            tr("dialogs.select_files"),
+            os.path.expanduser("~"),
+            tr("ui.filters.mp3")
+        )
+        if files:
+            self.file_results_table.add_files(files) # Usar el nuevo widget
 
-    def setup_logging(self):
-        # Implementa la lógica para configurar el registro de la aplicación
-        pass
+    def browse_folder(self):
+        """Abre el diálogo para seleccionar una carpeta con archivos MP3."""
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            tr("dialogs.select_folder"),
+            os.path.expanduser("~")
+        )
+        if folder:
+            self.file_results_table.add_folder(folder) # Usar el nuevo widget
+
+    def toggle_theme(self):
+        """Alterna entre tema claro y oscuro."""
+        self.is_dark_theme = not self.is_dark_theme
+        self.apply_current_theme()
+        self.update_theme_button()
+        theme_key = "ui.theme.dark.name" if self.is_dark_theme else "ui.theme.light.name"
+        theme_name = tr(theme_key)
+        logger.info(f"Theme changed to {theme_name} mode")
+        self.statusBar().showMessage(tr("ui.theme.changed", {"mode": theme_name}), 2000)
+
+    def change_language(self, index: int):
+        """Change the application language."""
+        lang_code = self.lang_selector.itemData(index)
+        set_language(lang_code)
+        # Update all UI text
+        self.setWindowTitle(tr("ui.window.title"))
+        self.add_files_btn.setText(tr("ui.buttons.add_files"))
+        self.add_folder_btn.setText(tr("ui.buttons.add_folder"))
+        self.process_btn.setText(tr("ui.buttons.process"))
+        self.update_theme_button()
+        # Update accessibility text
+        central_widget = self.centralWidget()
+        central_widget.setAccessibleName(tr("accessibility.main_window"))
+        self.theme_btn.setAccessibleName(tr("accessibility.buttons.theme.name"))
+        self.theme_btn.setAccessibleDescription(tr("accessibility.buttons.theme.desc"))
+        self.add_files_btn.setAccessibleName(tr("accessibility.buttons.add_files.name"))
+        self.add_files_btn.setAccessibleDescription(tr("accessibility.buttons.add_files.desc"))
+        self.add_folder_btn.setAccessibleName(tr("accessibility.buttons.add_folder.name"))
+        self.add_folder_btn.setAccessibleDescription(tr("accessibility.buttons.add_folder.desc"))
+        self.process_btn.setAccessibleName(tr("accessibility.buttons.process.name"))
+        self.process_btn.setAccessibleDescription(tr("accessibility.buttons.process.desc"))
+        # Update tooltips
+        self.theme_btn.setToolTip(tr("tooltips.theme"))
+        self.add_files_btn.setToolTip(tr("tooltips.add_files"))
+        self.add_folder_btn.setToolTip(tr("tooltips.add_folder"))
+        self.process_btn.setToolTip(tr("tooltips.process"))
+        # Update status bar
+        self.statusBar().showMessage(tr("general.status.ready"))
+
+    def apply_current_theme(self):
+        """Aplica el tema actual (claro u oscuro)."""
+        if self.is_dark_theme:
+            apply_dark_theme(self)
+        else:
+            apply_light_theme(self)
+
+    def update_theme_button(self):
+        """Actualiza el texto e ícono del botón de tema."""
+        if self.is_dark_theme:
+            self.theme_btn.setText(tr("ui.theme.light.label"))
+        else:
+            self.theme_btn.setText(tr("ui.theme.dark.label"))
+
+    def closeEvent(self, event):
+        """Asegura que cualquier hilo en ejecución se detenga limpiamente al cerrar la ventana principal."""
+        if hasattr(self, "processing_thread") and self.processing_thread is not None:
+            if self.processing_thread.isRunning():
+                self.processing_thread.stop()
+                self.processing_thread.quit()
+                self.processing_thread.wait()
+        super().closeEvent(event)

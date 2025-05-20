@@ -1,0 +1,143 @@
+{
+    "general": {
+        "app_name": "Genre Detector - Dark AI",
+        "status": {
+            "ready": "Listo - Modo Dark AI",
+            "processing": "Procesando archivos...",
+            "no_files": "No hay archivos para procesar.",
+            "files_added": "{count} archivo(s) MP3 añadido(s).",
+            "no_selection": "No se seleccionaron archivos para procesar.",
+            "complete": {
+                "success": "Procesamiento completado: {success} archivo(s) exitoso(s). {renamed} renombrado(s).",
+                "with_errors": "Procesamiento finalizado: {success} exitoso(s), {errors} error(es). {renamed} renombrado(s)."
+            },
+            "cancelled": "Procesamiento cancelado por el usuario"
+        }
+    },
+    "ui": {
+        "window": {
+            "title": "Genre Detector - Dark AI"
+        },
+        "buttons": {
+            "add_files": "Añadir Archivos",
+            "add_folder": "Añadir Carpeta",
+            "process": "Procesar Archivos",
+            "cancel": "Cancelar",
+            "select_backup": "Seleccionar Carpeta de Respaldo"
+        },
+        "theme": {
+            "light": {
+                "label": "☀️ Modo Claro",
+                "name": "claro"
+            },
+            "dark": {
+                "label": "🌙 Modo Oscuro",
+                "name": "oscuro"
+            },
+            "changed": "Tema cambiado a modo {mode}"
+        },
+        "filters": {
+            "mp3": "Archivos MP3 (*.mp3);;Todos los archivos (*.*)"
+        }
+    },
+    "accessibility": {
+        "main_window": "Ventana Principal",
+        "buttons": {
+            "theme": {
+                "name": "Botón Cambiar Tema",
+                "desc": "Alternar entre tema claro y oscuro"
+            },
+            "add_files": {
+                "name": "Botón Añadir Archivos",
+                "desc": "Abrir diálogo para seleccionar archivos MP3"
+            },
+            "add_folder": {
+                "name": "Botón Añadir Carpeta",
+                "desc": "Abrir diálogo para seleccionar una carpeta"
+            },
+            "process": {
+                "name": "Botón Procesar Archivos",
+                "desc": "Comenzar el procesamiento de los archivos seleccionados"
+            },
+            "cancel": "Botón Cancelar Procesamiento"
+        },
+        "panels": {
+            "file_list": {
+                "name": "Lista de Archivos",
+                "desc": "Lista de archivos MP3 para procesar"
+            },
+            "results": {
+                "name": "Lista de Resultados",
+                "desc": "Lista de resultados del procesamiento"
+            },
+            "file_management": "Panel de Gestión de Archivos"
+        },
+        "controls": {
+            "progress": "Etiqueta de Progreso",
+            "status": "Barra de Estado",
+            "analyze_only": "Casilla Solo Análisis",
+            "rename_files": "Casilla Renombrar Archivos",
+            "confidence": {
+                "label": "Etiqueta Umbral de Confianza",
+                "slider": "Control Deslizante de Confianza",
+                "desc": "Establecer nivel mínimo de confianza para la detección",
+                "value": "Valor de Confianza"
+            },
+            "max_genres": {
+                "label": "Etiqueta Géneros Máximos",
+                "control": "Control de Géneros Máximos",
+                "desc": "Establecer número máximo de géneros a detectar",
+                "value": "Valor de Géneros Máximos"
+            }
+        }
+    },
+    "tooltips": {
+        "theme": "Alternar tema claro/oscuro (Ctrl+T)",
+        "add_files": "Seleccionar archivos MP3 (Ctrl+O)",
+        "add_folder": "Seleccionar una carpeta con archivos MP3 (Ctrl+D)",
+        "process": "Procesar los archivos seleccionados (Ctrl+P)",
+        "cancel": "Cancelar el procesamiento actual",
+        "file_list": "Arrastre y suelte archivos MP3 aquí o use los botones de arriba",
+        "results": "Resultados del procesamiento de archivos",
+        "analyze_only": "Solo analizar archivos sin hacer cambios",
+        "rename_files": "Renombrar archivos usando el formato: 'Artista - Título [Género]'",
+        "confidence": "Ajustar nivel mínimo de confianza para la detección",
+        "max_genres": "Número máximo de géneros a detectar por archivo"
+    },
+    "dialogs": {
+        "select_files": "Seleccionar Archivos MP3",
+        "select_folder": "Seleccionar Carpeta con MP3s",
+        "select_backup": "Seleccionar Carpeta de Respaldo",
+        "circuit_breaker": {
+            "title": "Circuit Breaker Activado",
+            "opened": "Se han detectado demasiados errores",
+            "closed": "Circuit breaker reiniciado - continuando procesamiento",
+            "info": "El sistema ha detectado muchos errores consecutivos y se ha detenido temporalmente para prevenir más fallos. Se reintentará automáticamente en unos momentos."
+        },
+        "confirm_cancel": {
+            "title": "Confirmar Cancelación",
+            "message": "¿Está seguro que desea cancelar el procesamiento actual?"
+        },
+        "processing_errors": {
+            "title": "Errores en el Procesamiento"
+        }
+    },
+    "analysis": {
+        "options": {
+            "title": "Opciones de Análisis",
+            "analyze_only": "Solo Análisis",
+            "rename_files": "Renombrar Archivos Después de Actualizar"
+        },
+        "parameters": {
+            "title": "Parámetros de Detección",
+            "confidence": "Umbral de Confianza:",
+            "max_genres": "Géneros Máximos:"
+        },
+        "summary": {
+            "total": "Total de archivos intentados: {count}",
+            "success": "Operaciones de metadatos exitosas: {count}",
+            "errors": "Errores durante el proceso: {count}",
+            "renamed": "Archivos renombrados: {count}"
+        }
+    }
+}

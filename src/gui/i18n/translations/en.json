@@ -1,0 +1,143 @@
+{
+    "general": {
+        "app_name": "Genre Detector - Dark AI",
+        "status": {
+            "ready": "Ready - Dark AI Mode",
+            "processing": "Processing files...",
+            "no_files": "No files to process.",
+            "files_added": "{count} file(s) added.",
+            "no_selection": "No files selected for processing.",
+            "complete": {
+                "success": "Processing complete: {success} file(s) successful. {renamed} renamed.",
+                "with_errors": "Processing finished: {success} successful, {errors} error(s). {renamed} renamed."
+            },
+            "cancelled": "Processing cancelled by user"
+        }
+    },
+    "ui": {
+        "window": {
+            "title": "Genre Detector - Dark AI"
+        },
+        "buttons": {
+            "add_files": "Add Files",
+            "add_folder": "Add Folder",
+            "process": "Process Files",
+            "cancel": "Cancel",
+            "select_backup": "Select Backup Folder"
+        },
+        "theme": {
+            "light": {
+                "label": "☀️ Light Mode",
+                "name": "light"
+            },
+            "dark": {
+                "label": "🌙 Dark Mode",
+                "name": "dark"
+            },
+            "changed": "Theme changed to {mode} mode"
+        },
+        "filters": {
+            "mp3": "MP3 Files (*.mp3);;All Files (*.*)"
+        }
+    },
+    "accessibility": {
+        "main_window": "Main Window",
+        "buttons": {
+            "theme": {
+                "name": "Theme Toggle Button",
+                "desc": "Toggle between light and dark theme"
+            },
+            "add_files": {
+                "name": "Add Files Button",
+                "desc": "Open dialog to select MP3 files"
+            },
+            "add_folder": {
+                "name": "Add Folder Button",
+                "desc": "Open dialog to select a folder"
+            },
+            "process": {
+                "name": "Process Files Button",
+                "desc": "Start processing selected files"
+            },
+            "cancel": "Cancel Processing Button"
+        },
+        "panels": {
+            "file_list": {
+                "name": "File List",
+                "desc": "List of MP3 files to process"
+            },
+            "results": {
+                "name": "Results List",
+                "desc": "List of processing results"
+            },
+            "file_management": "File Management Panel"
+        },
+        "controls": {
+            "progress": "Progress Label",
+            "status": "Status Bar",
+            "analyze_only": "Analyze Only Checkbox",
+            "rename_files": "Rename Files Checkbox",
+            "confidence": {
+                "label": "Confidence Threshold Label",
+                "slider": "Confidence Slider Control",
+                "desc": "Set minimum confidence level for detection",
+                "value": "Confidence Value"
+            },
+            "max_genres": {
+                "label": "Maximum Genres Label",
+                "control": "Maximum Genres Control",
+                "desc": "Set maximum number of genres to detect",
+                "value": "Maximum Genres Value"
+            }
+        }
+    },
+    "tooltips": {
+        "theme": "Toggle light/dark theme (Ctrl+T)",
+        "add_files": "Select MP3 files (Ctrl+O)",
+        "add_folder": "Select a folder with MP3 files (Ctrl+D)",
+        "process": "Process selected files (Ctrl+P)",
+        "cancel": "Cancel current processing",
+        "file_list": "Drag and drop MP3 files here or use the buttons above",
+        "results": "File processing results",
+        "analyze_only": "Analyze files without making changes",
+        "rename_files": "Rename files using format: 'Artist - Title [Genre]'",
+        "confidence": "Adjust minimum confidence level for detection",
+        "max_genres": "Maximum number of genres to detect per file"
+    },
+    "dialogs": {
+        "select_files": "Select MP3 Files",
+        "select_folder": "Select Folder with MP3s",
+        "select_backup": "Select Backup Folder",
+        "circuit_breaker": {
+            "title": "Circuit Breaker Activated",
+            "opened": "Too many errors detected",
+            "closed": "Circuit breaker reset - continuing processing",
+            "info": "The system has detected many consecutive errors and has temporarily stopped to prevent further failures. It will automatically retry in a moment."
+        },
+        "confirm_cancel": {
+            "title": "Confirm Cancellation",
+            "message": "Are you sure you want to cancel the current processing?"
+        },
+        "processing_errors": {
+            "title": "Processing Errors"
+        }
+    },
+    "analysis": {
+        "options": {
+            "title": "Analysis Options",
+            "analyze_only": "Analyze Only",
+            "rename_files": "Rename Files After Update"
+        },
+        "parameters": {
+            "title": "Detection Parameters",
+            "confidence": "Confidence Threshold:",
+            "max_genres": "Maximum Genres:"
+        },
+        "summary": {
+            "total": "Total files attempted: {count}",
+            "success": "Successful metadata operations: {count}",
+            "errors": "Errors during processing: {count}",
+            "renamed": "Files renamed: {count}"
+        }
+    }
+}

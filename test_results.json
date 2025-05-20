@@ -1,0 +1,176 @@
+{
+  "files": [
+    {
+      "name": "Cheryl Lynn - Got To Be Real Part 1 [Funk, Soul].mp3",
+      "size": 7.6147918701171875,
+      "processing_time": 0.07696676254272461,
+      "memory_delta": 0.015625
+    },
+    {
+      "name": "DJ Sabs - Cont' Pt3 Uptown 80'S Dance Mix Part 1 [Pop, Electronic Dance Music].mp3",
+      "size": 14.315544128417969,
+      "processing_time": 0.1331479549407959,
+      "memory_delta": -1.765625
+    },
+    {
+      "name": "DJ Sabs - Cont' Pt3 Uptown 80'S Dance Mix Part 2 [Pop, Electronic Dance Music].mp3",
+      "size": 7.7503204345703125,
+      "processing_time": 0.07618403434753418,
+      "memory_delta": -2.015625
+    },
+    {
+      "name": "DJ Sabs - Cont' Pt3 Uptown 80'S Dance Mix Part 3 [Pop, Electronic Dance Music].mp3",
+      "size": 9.619007110595703,
+      "processing_time": 0.02511882781982422,
+      "memory_delta": 0.015625
+    },
+    {
+      "name": "Eu - Da Butt Part 2 [Funk].mp3",
+      "size": 5.3288116455078125,
+      "processing_time": 0.02817678451538086,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Indeep - Last Night A DJ Saved My Life Part 1 [Rap, Funk].mp3",
+      "size": 8.942970275878906,
+      "processing_time": 0.04055976867675781,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Indeep - Last Night A DJ Saved My Life Part 2 [Rap, Funk].mp3",
+      "size": 7.639804840087891,
+      "processing_time": 0.025571107864379883,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Lipps Inc - Funkytown [Pop, Jazz].mp3",
+      "size": 13.382511138916016,
+      "processing_time": 0.039999961853027344,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Patric Hernandez - Born To Be Alive [Pop, Electronic].mp3",
+      "size": 12.806159973144531,
+      "processing_time": 0.02811598777770996,
+      "memory_delta": -0.765625
+    },
+    {
+      "name": "Rob Base DJ Ez Rock - It Takes Two Part 1 [Rock, Hip-Hop].mp3",
+      "size": 8.407318115234375,
+      "processing_time": 0.0271148681640625,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Rob Base DJ Ez Rock - It Takes Two Part 2 [Rock, Hip-Hop].mp3",
+      "size": 5.875415802001953,
+      "processing_time": 0.022758960723876953,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Shannon - Give Me Tonight Part 1 [Pop, Rock].mp3",
+      "size": 10.68832015991211,
+      "processing_time": 0.03691697120666504,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Shannon - Give Me Tonight Part 2 [Pop, Rock].mp3",
+      "size": 21.118724822998047,
+      "processing_time": 0.01797795295715332,
+      "memory_delta": 0.015625
+    },
+    {
+      "name": "Shannon - Let The Music Play Part 2 [Pop, Rock].mp3",
+      "size": 4.0703277587890625,
+      "processing_time": 0.0018990039825439453,
+      "memory_delta": 0.03125
+    },
+    {
+      "name": "Snap - The Power Part 1 [House, Electronic].mp3",
+      "size": 10.107986450195312,
+      "processing_time": 0.029674053192138672,
+      "memory_delta": -0.0625
+    },
+    {
+      "name": "Snap - The Power Part 2 [House, Electronic].mp3",
+      "size": 5.387676239013672,
+      "processing_time": 0.031323909759521484,
+      "memory_delta": 0.0625
+    },
+    {
+      "name": "Sugar Hill Gang - Rapper'S Delight.mp3",
+      "size": 13.728118896484375,
+      "processing_time": 0.007002115249633789,
+      "memory_delta": 0.03125
+    },
+    {
+      "name": "The Bee Gees - Stayin' Alive Part 1 Pop Rock [Pop, Rock].mp3",
+      "size": 7.7184600830078125,
+      "processing_time": 0.002084016799926758,
+      "memory_delta": 0.015625
+    },
+    {
+      "name": "The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock Pop Rock.mp3",
+      "size": 7.530284881591797,
+      "processing_time": 0.029809951782226562,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Village People - YMCA Part 1.mp3",
+      "size": 7.913604736328125,
+      "processing_time": 0.024761199951171875,
+      "memory_delta": 0.0
+    },
+    {
+      "name": "Village People - YMCA Part 2.mp3",
+      "size": 6.715732574462891,
+      "processing_time": 0.02876591682434082,
+      "memory_delta": 0.0
+    }
+  ],
+  "memory": {
+    "initial": 40.390625,
+    "peak": 40.40625,
+    "final": 35.96875
+  },
+  "timing": {
+    "total": 0.7765960693359375,
+    "per_file": {}
+  },
+  "genres": {
+    "normalized": {
+      "Funk": 4,
+      "Soul": 1,
+      "Dance Pop": 12,
+      "Pop": 14,
+      "Electronic": 8,
+      "Rap": 1,
+      "Jazz": 1,
+      "House": 3,
+      "Hip-Hop": 2,
+      "Rock": 5,
+      "Pop/Rock": 3,
+      "Folk": 2,
+      "Rock & Roll": 2,
+      "Old School Hip-Hop": 1
+    },
+    "raw": {
+      "('Funk', 1.0)": 5,
+      "('Soul', 1.0)": 1,
+      "('Pop', 1.0)": 10,
+      "('Electronic Dance Music', 1.0)": 7,
+      "('Electronic', 1.0)": 5,
+      "('Hip-Hop', 1.0)": 5,
+      "('Jazz', 1.0)": 1,
+      "('Rock', 1.0)": 7,
+      "('House', 1.0)": 2,
+      "('Electronic', 0.95)": 1,
+      "('', 0.0)": 7
+    },
+    "by_api": {
+      "lastfm": {},
+      "musicbrainz": {},
+      "discogs": {}
+    }
+  },
+  "errors": []
+}

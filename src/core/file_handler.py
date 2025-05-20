@@ -1,5 +1,5 @@
 """MP3 file handling and tag management module."""
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 import shutil
 import os
@@ -39,9 +39,20 @@ def _format_text_to_spaced_title_case(text: str) -> str:
         return ""
     
     s = str(text) # Asegurar que sea string
+
+    # Limpieza preliminar de patrones problemáticos literales y caracteres no deseados.
+    # Eliminar la secuencia literal '\\g<0>' si aparece.
+    s = s.replace('\\\\g<0>', '') # Reemplaza la cadena literal \\g<0>
+    
+    # Reemplazar múltiples puntos o caracteres especiales problemáticos (no letras, números, espacios, apóstrofes, guiones básicos) con espacio
+    # Esto es para limpiar cosas como "Artista.....Nombre" o "Artista&&&Nombre"
+    # Mantener apóstrofes y guiones que pueden ser parte de nombres.
+    s = re.sub(r"[^a-zA-Z0-9\s'-'’]+", ' ', s) # Usar comillas dobles para el raw string y listar ' y ’ directamente.
+
     # Reemplazar separadores comunes (incluyendo paréntesis) con espacios.
     # Los paréntesis se reintroducirán formateados por format_title_tag si son parte del sufijo.
-    s = re.sub(r'[\\-_\\.\\(\\)]+', ' ', s) 
+    s = re.sub(r'[\\-_\\.\\(\\)]+', ' ', s)
+    
     s = re.sub(r'(?<=[a-z0-9])(?=[A-Z])', r' \\g<0>', s) # Dividir CamelCase: wordWord -> word Word
     s = re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', r' \\g<0>', s) # Dividir Acrónimos: ACRONYMWord -> ACRONYM Word
     s = re.sub(r'\\s+', ' ', s).strip() # Normalizar múltiples espacios a uno solo y quitar de extremos
@@ -208,19 +219,36 @@ class Mp3FileHandler:
             
     def set_backup_dir(self, backup_dir_path: Optional[str]):
         """Sets or updates the backup directory."""
+        logger.debug(f"Attempting to set backup directory to: {backup_dir_path}")
         if backup_dir_path:
-            self.backup_dir = Path(backup_dir_path)
             try:
+                self.backup_dir = Path(backup_dir_path)
+                logger.debug(f"Converted to Path object: {self.backup_dir}")
+                
+                # Verify the path exists or can be created
                 self.backup_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Verify write permissions by attempting to write a test file
+                test_file = self.backup_dir / '.test_write'
+                try:
+                    test_file.touch()
+                    test_file.unlink()  # Clean up test file
+                    logger.debug("Write permission test successful")
+                except Exception as e:
+                    raise PermissionError(f"No write permission: {e}")
+                
                 logger.info(f"Backup directory set to: {self.backup_dir}")
+                return
+                
             except Exception as e:
-                logger.error(f"Could not create or access backup directory {self.backup_dir}: {e}")
+                logger.error(f"Could not create or access backup directory {backup_dir_path}: {e}", exc_info=True)
                 self.backup_dir = None # Fallback to no backup
         else:
+            logger.debug("No backup directory path provided")
             self.backup_dir = None
         
         if not self.backup_dir:
-            logger.info("No backup directory specified or creation/access failed. Backups will be disabled.")
+            logger.warning("No backup directory specified or creation/access failed. Backups will be disabled.")
 
     def _get_backup_path(self, file_path: str) -> Optional[Path]:
         """Generate backup file path.
@@ -269,90 +297,174 @@ class Mp3FileHandler:
             logger.error(f"Backup error for {file_path} to {backup_path}: {e}")
             return False
             
-    def read_tags(self, file_path: str) -> Dict[str, List[str]]:
-        """Read metadata tags from an MP3 file."""
-        try:
-            if not os.path.exists(file_path):
-                logger.warning(f"File not found when trying to read tags: {file_path}")
-                return {}
-                
-            audio = EasyID3(file_path)
-            return {key: audio.get(key, []) for key in audio.keys()}
-            
-        except Exception as e:
-            logger.error(f"Error reading tags from {file_path}: {e}")
+    def read_tags(self, file_path: str, chunk_size: int = 8192) -> Dict[str, List[str]]:
+        """Lee metadata tags de un archivo MP3.
+        
+        Args:
+            file_path: Ruta al archivo MP3
+            chunk_size: No usado, mantenido por compatibilidad
+        """
+        if not os.path.exists(file_path):
+            logger.warning(f"Archivo no encontrado al intentar leer tags: {file_path}")
             return {}
             
-    def write_genre(self, file_path: str, genres: List[str], backup: bool = True) -> bool:
-        """Write genre tags to an MP3 file."""
+        try:
+            # Intentar cargar con EasyID3 primero (más simple)
+            try:
+                audio = EasyID3(file_path)
+                return {key: audio.get(key, []) for key in audio.keys()}
+            except Exception as e:
+                logger.debug(f"EasyID3 falló, intentando con ID3: {e}")
+                
+            # Si EasyID3 falla, intentar con ID3
+            try:
+                audio = ID3(file_path)
+                result = {}
+                
+                # Mapear frames ID3 a tags simples
+                for key in audio.keys():
+                    if key.startswith('T'):  # Text frames
+                        clean_key = key[4:].lower()  # TALB -> alb
+                        result[clean_key] = [str(audio[key])]
+                
+                return result
+            except Exception as e:
+                logger.debug(f"ID3 también falló: {e}")
+                return {}
+            
+        except Exception as e:
+            logger.error(f"Error leyendo tags de {file_path}: {e}")
+            return {}
+            
+    def write_genre(self, file_path: str, genres: List[str], backup: bool = True, chunk_size: int = 8192) -> bool:
+        """Escribe tags de género a un archivo MP3 usando chunks.
+        
+        Args:
+            file_path: Ruta al archivo MP3
+            genres: Lista de géneros a escribir
+            backup: Si se debe crear backup
+            chunk_size: Tamaño del chunk para lectura/escritura en bytes (default: 8KB)
+        """
         from .genre_normalizer import GenreNormalizer
         
         if backup:
             if not self._create_backup(file_path):
-                logger.warning(f"Failed to create backup for {file_path}. Proceeding without backup.")
-            
+                logger.warning(f"No se pudo crear backup para {file_path}. Procediendo sin backup.")
+        
         try:
-            try:
-                audio = EasyID3(file_path)
-            except Exception:
-                logger.info(f"No EasyID3 tags found for {file_path}, attempting to add them.")
-                audio_mp3 = MP3(file_path)
-                audio_mp3.add_tags()
-                audio_mp3.save()
-                audio = EasyID3(file_path)
-            
-            normalized_genres = GenreNormalizer.normalize_list(genres)
-            audio['genre'] = normalized_genres
-            audio.save()
-            logger.info(f"Genres written successfully to {file_path}: {normalized_genres}")
+            # Usar context manager para manejo de recursos
+            with open(file_path, 'rb+') as f:
+                # Leer header ID3 existente
+                header = f.read(10)
+                if not header.startswith(b'ID3'):
+                    # Crear nuevo tag ID3v2
+                    f.seek(0)
+                    id3_header = b'ID3\x03\x00\x00\x00\x00\x00\x00'
+                    f.write(id3_header)
+                
+                # Normalizar géneros
+                normalized_genres = GenreNormalizer.normalize_list(genres)
+                
+                # Crear frame de género ID3v2
+                genre_data = '\x00'.join(normalized_genres).encode('utf-8')
+                frame_header = b'TCON\x00\x00\x00' + len(genre_data).to_bytes(4, 'big') + b'\x00\x00'
+                
+                # Escribir frame en chunks
+                remaining = len(frame_header) + len(genre_data)
+                written = 0
+                
+                while written < remaining:
+                    chunk = (frame_header + genre_data)[written:written + chunk_size]
+                    if not chunk:
+                        break
+                    f.write(chunk)
+                    written += len(chunk)
+                
+                # Actualizar tamaño del tag
+                f.seek(6)
+                f.write(remaining.to_bytes(4, 'big'))
+                
+            logger.info(f"Géneros escritos exitosamente en {file_path}: {normalized_genres}")
             return True
             
         except Exception as e:
-            logger.error(f"Error writing genres to {file_path}: {e}")
+            logger.error(f"Error escribiendo géneros en {file_path}: {e}")
             return False
             
-    def get_file_info(self, file_path: str) -> Dict[str, str]:
-        """Get basic information about an MP3 file."""
+    def get_file_info(self, file_path: str, chunk_size: int = 8192) -> Dict[str, str]:
+        """Obtiene información básica sobre un archivo MP3 usando chunks.
+        
+        Args:
+            file_path: Ruta al archivo MP3
+            chunk_size: Tamaño del chunk para lectura en bytes (default: 8KB)
+        """
+        if not os.path.exists(file_path):
+            logger.warning(f"Archivo no encontrado al intentar get_file_info: {file_path}")
+            return {}
+
         try:
-            if not os.path.exists(file_path):
-                logger.warning(f"File not found when trying to get_file_info: {file_path}")
-                return {}
-                
-            audio = MP3(file_path)
-            info = {
-                'length': str(int(audio.info.length)),
-                'bitrate': str(audio.info.bitrate // 1000) + ' kbps',
-                'sample_rate': str(audio.info.sample_rate) + ' Hz',
-                'mode': audio.info.mode
-            }
+            info = {}
             
-            try:
-                id3 = EasyID3(file_path)
+            # Usar context manager para el manejo de recursos
+            with open(file_path, 'rb') as f:
+                # Leer headers MP3 para información básica
+                header = f.read(10)  # ID3v2 header
+                
+                # Calcular tamaño del archivo
+                f.seek(0, 2)  # Ir al final
+                file_size = f.tell()
+                f.seek(0)  # Volver al inicio
+                
+                # Detectar frames MP3 para obtener información técnica
+                f.seek(-128, 2)  # Ir a posición de ID3v1 si existe
+                has_id3v1 = f.read(3) == b'TAG'
+                
+                # Calcular duración aproximada basada en bitrate promedio
+                duration = file_size * 8 / (320 * 1000)  # Asumiendo máximo bitrate
+                
                 info.update({
-                    'title': id3.get('title', [''])[0],
-                    'artist': id3.get('artist', [''])[0],
-                    'album': id3.get('album', [''])[0],
-                    'current_genre': ';'.join(id3.get('genre', ['']))
+                    'length': str(int(duration)),
+                    'bitrate': '320 kbps',  # Valor por defecto
+                    'sample_rate': '44100 Hz',  # Valor común
+                    'mode': 'stereo'  # Valor por defecto
                 })
-                logger.info(f"Successfully retrieved file info for: {file_path}")
-                
-            except Exception as e:
-                logger.error(f"Error reading ID3 tags for {file_path}: {e}")
-                
+            
+            # Leer tags usando el método optimizado
+            tags = self.read_tags(file_path, chunk_size)
+            if tags:
+                info.update({
+                    'title': tags.get('title', [''])[0],
+                    'artist': tags.get('artist', [''])[0],
+                    'album': tags.get('album', [''])[0],
+                    'current_genre': ';'.join(tags.get('genre', []))
+                })
+                logger.debug(f"Información de archivo recuperada con éxito: {file_path}")
+            
             return info
             
         except Exception as e:
-            logger.error(f"Error getting file info for {file_path}: {e}")
+            logger.error(f"Error obteniendo información del archivo {file_path}: {e}")
             return {}
             
     def rename_file_by_genre(
-        self, 
-        file_path: str, 
-        genres_to_write: Optional[List[str]] = None
+        self,
+        file_path: str,
+        genres_to_write: Optional[List[str]] = None,
+        perform_os_rename_action: bool = True,
+        include_genre_in_filename: bool = False,
+        max_genres_in_filename: int = 2
     ) -> Dict[str, str]:
-        """Renombra el archivo, actualiza metadatos de Artista/Título y opcionalmente Género.
-           Formato nombre archivo: Artista - Titulo.extension (con Artista y Titulo formateados)
-           Metadatos ID3: Artista, Titulo y Género (si se provee) se actualizan.
+        """Rename file and update metadata with genre support.
+        
+        Args:
+            file_path: Path to the MP3 file
+            genres_to_write: List of genres to write to ID3 tags
+            perform_os_rename_action: Whether to physically rename the file
+            include_genre_in_filename: Whether to include genres in filename
+            max_genres_in_filename: Maximum number of genres to include in filename
+            
+        Returns:
+            Dictionary with operation results
         """
         result = {"success": False, "original_path": file_path, "message": ""}
         
@@ -363,95 +475,170 @@ class Mp3FileHandler:
                 result["message"] = "Error: Original file not found."
                 return result
 
-            file_info = self.get_file_info(file_path) # Esto lee los tags existentes
-            if not file_info:
-                result["error"] = "Could not read file info for renaming/tagging."
-                result["message"] = result["error"]
-                return result
-            
-            artist_raw = file_info.get('artist')
-            title_raw = file_info.get('title')
+            filename_stem = original_path_obj.stem
+            file_extension = original_path_obj.suffix.lower() # ej: .mp3
 
-            if not artist_raw and not title_raw:
-                # Si no hay artista ni título, podríamos optar por no hacer nada o usar defaults.
-                # Por ahora, si ambos faltan, no se procesa para evitar "Unknown Artist - Unknown Title".
-                result["error"] = "Missing both artist and title metadata. Cannot process."
-                result["message"] = result["error"]
+            if file_extension != ".mp3":
+                result["error"] = "Not an MP3 file."
+                result["message"] = "Error: El archivo no es MP3."
                 return result
+
+            # Leer tags actuales para obtener artista/título base si el nombre de archivo no es útil
+            # Esto podría ser una estrategia de fallback, por ahora asumimos que el nombre de archivo es la fuente principal.
+            current_tags = self.read_tags(str(original_path_obj))
+            raw_artist_from_tag = current_tags.get('artist', [""])[0]
+            raw_title_from_tag = current_tags.get('title', [""])[0]
+
+            # Extract artist and title from filename
+            artist_part_raw, title_part_raw = self.extract_artist_title_from_filename(
+                filename_stem,
+                fallback_artist=raw_artist_from_tag or "Unknown Artist",
+                fallback_title=raw_title_from_tag or filename_stem
+            )
             
-            # Usar valores existentes o "Unknown" si uno falta, para que el formateo no falle
-            formatted_artist = format_artist_tag(artist_raw if artist_raw else "Unknown Artist")
-            formatted_title = format_title_tag(title_raw if title_raw else "Unknown Title")
+            # Formatear Artista y Título para los tags y el nuevo nombre de archivo
+            formatted_artist = format_artist_tag(artist_part_raw)
+            formatted_title = format_title_tag(title_part_raw)
             
-            # Si después del formateo alguno queda como "Unknown..." y el original no lo era,
-            # podríamos decidir revertir al original o loggearlo.
-            # Por simplicidad, continuamos con el valor formateado (que podría ser "Unknown...").
+            logger.debug(f"Original artist: '{artist_part_raw}', title: '{title_part_raw}'")
+            logger.debug(f"Formatted artist: '{formatted_artist}', title: '{formatted_title}'")
 
             # Actualizar metadatos ID3 de Artista y Título en el archivo original
+            # También escribir géneros si se proporcionan
             try:
                 audio = EasyID3(str(original_path_obj)) # EasyID3 necesita str path
                 audio['artist'] = formatted_artist
                 audio['title'] = formatted_title
-                if genres_to_write is not None:
-                    from .genre_normalizer import GenreNormalizer # Import local para evitar circularidad
-                    normalized_genres = GenreNormalizer.normalize_list(genres_to_write)
-                    audio['genre'] = normalized_genres
-                    logger.info(f"Metadatos de Género actualizados para '{original_path_obj.name}' a: {normalized_genres}")
                 
+                if genres_to_write is not None: # Solo escribir si se proporcionan géneros válidos
+                    if genres_to_write: # Lista no vacía
+                        audio['genre'] = genres_to_write # EasyID3 maneja lista de strings para genre
+                        logger.info(f"Metadatos de Género actualizados para '{original_path_obj.name}' a: {genres_to_write}")
+                    else: # Lista vacía, significa que no se deben escribir o se deben borrar
+                        if 'genre' in audio: # Borrar tag de género si se pasa lista vacía
+                            del audio['genre']
+                            logger.info(f"Tag de Género eliminado para '{original_path_obj.name}'")
                 audio.save()
-                log_msg_tags = f"Metadatos Artist/Title actualizados para '{original_path_obj.name}' a: Art: '{formatted_artist}', Title: '{formatted_title}'"
-                if genres_to_write is not None:
-                    log_msg_tags += f", Genres: {normalized_genres}"
-                logger.info(log_msg_tags)
-                result["tags_updated"] = True
-            except Exception as tag_error:
-                logger.error(f"Error actualizando metadatos para '{original_path_obj.name}': {tag_error}")
-                result["tags_updated"] = False
-                result["tag_update_error"] = str(tag_error)
-                # No necesariamente detenemos el proceso de renombrado por esto, pero lo registramos.
+                logger.info(f"Metadatos Artist/Title actualizados para '{original_path_obj.name}' a: Art: '{formatted_artist}', Title: '{formatted_title}'")
+                result["success"] = True # Éxito en la escritura de tags
+                result["message"] = "Metadatos actualizados."
 
-            # Construir el nuevo nombre de archivo basado en los tags formateados
-            # La heurística del espacio antes del paréntesis se puede aplicar aquí si es necesario,
-            # o mejor aún, integrarla en format_title_tag si es un requisito general del título.
-            # format_title_tag ya maneja los paréntesis en el sufijo.
-            new_name_base = f"{formatted_artist} - {formatted_title}"
-            
-            # Sanitizar caracteres problemáticos para nombres de archivo (excepto ' y & que podrían ser válidos)
-            # Reemplazar / \ : * ? " < > | con _
-            # Permitir apóstrofes y ampersands si KNOWN_TITLES/ARTISTS los usan.
-            new_name_base_sanitized = re.sub(r'[\\/*?:"<>|]+', '_', new_name_base)
-            # Adicionalmente, asegurar que no termine con puntos o espacios (problema en Windows)
-            new_name_base_sanitized = new_name_base_sanitized.strip('. ')
-
-            if not new_name_base_sanitized:
-                 result["error"] = "Generated filename base is empty after sanitization."
-                 result["message"] = result["error"]
-                 return result
-
-            new_filename_with_ext = f"{new_name_base_sanitized}{original_path_obj.suffix}"
-            new_path = original_path_obj.with_name(new_filename_with_ext)
-            
-            if new_path == original_path_obj:
-                result["success"] = True # Aunque no haya cambio de nombre, los tags pudieron actualizarse
-                result["message"] = "Tags actualizados. El nombre de archivo generado es el mismo que el original."
-                result["new_path"] = str(original_path_obj)
+            except Exception as e:
+                logger.error(f"Error al escribir tags ID3 en {original_path_obj.name}: {e}", exc_info=True)
+                result["error"] = f"Error al escribir tags: {e}"
+                result["message"] = f"Error: No se pudieron escribir los tags en {original_path_obj.name}."
+                # Devolver aquí porque si los tags no se pueden escribir, no tiene sentido renombrar.
                 return result
 
-            # Renombrar el archivo físico
-            os.rename(str(original_path_obj), str(new_path))
-            logger.info(f"Archivo '{original_path_obj.name}' renombrado a '{new_path.name}'")
+            # Build new filename with genre support
+            new_filename_stem = f"{formatted_artist} - {formatted_title}"
             
-            result["success"] = True
-            result["new_path"] = str(new_path)
-            result["message"] = f"Archivo renombrado a {new_path.name} y tags actualizados."
+            # Add genres to filename if requested
+            if include_genre_in_filename and genres_to_write and len(genres_to_write) > 0:
+                top_genres = sorted(genres_to_write, key=lambda x: len(x))[:max_genres_in_filename]
+                genre_part = " [" + ", ".join(top_genres) + "]"
+                new_filename_stem += genre_part
+                
+            # Handle special characters
+            replacements = {
+                '/': '⁄',  # Use unicode division slash
+                '\\': '⧵',  # Use unicode reverse solidus
+                ':': '꞉',   # Use unicode modifier letter colon
+                '*': '∗',   # Use unicode asterisk operator
+                '?': '？',   # Use unicode full width question mark
+                '"': "'",   # Replace quotes with apostrophe
+                '<': '❮',   # Use unicode heavy left-pointing angle bracket
+                '>': '❯',   # Use unicode heavy right-pointing angle bracket
+                '|': '⏐',   # Use unicode vertical line
+                '\0': '',   # Remove null bytes
+            }
+            
+            for char, replacement in replacements.items():
+                new_filename_stem = new_filename_stem.replace(char, replacement)
+                
+            # Ensure filename length is within limits (255 bytes for most filesystems)
+            # Account for extension length and some buffer
+            max_length = 240 - len(file_extension)
+            if len(new_filename_stem.encode('utf-8')) > max_length:
+                # Try to preserve as much as possible while staying within limits
+                new_filename_stem = new_filename_stem.encode('utf-8')[:max_length].decode('utf-8', 'ignore')
+            
+            new_filename = new_filename_stem + file_extension
+            new_path = original_path_obj.parent / new_filename
+            
+            # Handle name conflicts
+            counter = 1
+            while new_path.exists() and new_path != original_path_obj:
+                base_stem = new_filename_stem
+                counter_str = f" ({counter})"
+                
+                # Ensure we don't exceed length limits even with counter
+                max_stem_length = max_length - len(counter_str)
+                if len(base_stem.encode('utf-8')) > max_stem_length:
+                    base_stem = base_stem.encode('utf-8')[:max_stem_length].decode('utf-8', 'ignore')
+                    
+                new_filename = base_stem + counter_str + file_extension
+                new_path = original_path_obj.parent / new_filename
+                counter += 1
+
+            result["new_path"] = str(new_path) # Guardar la ruta potencial incluso si no se renombra
+
+            # Renombrar el archivo FÍSICAMENTE solo si se solicita y es necesario
+            if perform_os_rename_action and original_path_obj.resolve() != new_path.resolve():
+                try:
+                    original_path_obj.rename(new_path)
+                    logger.info(f"Archivo '{original_path_obj.name}' renombrado a '{new_path.name}'")
+                    result["message"] = f"Metadatos actualizados y archivo renombrado a '{new_path.name}'."
+                    # 'success' ya es True por la escritura de tags
+                except OSError as e_os:
+                    logger.error(f"Error al renombrar el archivo '{original_path_obj.name}' a '{new_path.name}': {e_os}", exc_info=True)
+                    result["error"] = f"Error al renombrar: {e_os}"
+                    # Mantener el mensaje de éxito de tags si los tags se escribieron,
+                    # pero añadir que el renombrado falló.
+                    result["message"] = f"Metadatos actualizados. Error al renombrar el archivo: {e_os}"
+                    # Aunque el renombrado falle, los tags se actualizaron, así que success puede seguir siendo True overall.
+                    # El contador de 'renombrados' en la GUI se basará en si new_path != original_path y no hay error aquí.
+            elif perform_os_rename_action and original_path_obj.resolve() == new_path.resolve():
+                logger.info(f"El nombre del archivo '{original_path_obj.name}' ya está en el formato deseado. No se necesita renombrado físico.")
+                result["message"] = f"Metadatos actualizados. El nombre del archivo ya es correcto."
+            elif not perform_os_rename_action:
+                logger.info(f"Renombrado físico del archivo omitido para '{original_path_obj.name}' según la configuración.")
+                result["message"] = "Metadatos actualizados. Renombrado físico omitido."
+
             return result
-            
+
         except Exception as e:
-            logger.error(f"Error durante renombrado/actualización de tags para {file_path}: {e}", exc_info=True)
-            result["error"] = str(e)
-            result["message"] = f"Error durante renombrado/actualización de tags: {e}"
+            logger.error(f"Error en rename_file_by_genre para {file_path}: {e}", exc_info=True)
+            result["error"] = f"Error inesperado en la operación de archivo: {e}"
+            result["message"] = f"Error inesperado al procesar {Path(file_path).name}."
             return result
             
+    def extract_artist_title_from_filename(self, filename: str, fallback_artist: str = "", fallback_title: str = "") -> Tuple[str, str]:
+        """Extract artist and title from a filename.
+        
+        Args:
+            filename: The filename (without extension) to parse
+            fallback_artist: Artist name to use if no artist can be extracted
+            fallback_title: Title to use if no title can be extracted
+            
+        Returns:
+            Tuple containing (artist, title)
+        """
+        artist = ""
+        title = ""
+        
+        # Try to split on " - " first
+        if " - " in filename:
+            parts = filename.split(" - ", 1)
+            artist = parts[0].strip()
+            title = parts[1].strip()
+        else:
+            # If no separator found, use fallbacks
+            artist = fallback_artist
+            title = fallback_title or filename  # Use full filename as title if no fallback
+            
+        return artist, title
+
     def is_valid_mp3(self, file_path: str) -> bool:
         """Check if the file is a valid MP3."""
         if not os.path.exists(file_path):

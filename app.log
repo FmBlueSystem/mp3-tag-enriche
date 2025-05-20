@@ -1,5 +1,307 @@
-2025-05-17 23:11:22,609 - __main__ - INFO - Iniciando la aplicación Genre Detector GUI...
-2025-05-17 23:11:22,833 - src.core.file_handler - INFO - No backup directory specified. Backups will be disabled.
-2025-05-17 23:11:22,833 - src.core.file_handler - INFO - No backup directory specified. Backups will be disabled.
-2025-05-17 23:11:22,833 - src.gui.main_window - INFO - Default backup directory ensured: /Volumes/My Passport/Dj compilation 2025/Respados mp3
-2025-05-17 23:11:23,072 - __main__ - INFO - Ventana principal mostrada.
+2025-05-18 17:46:00,424 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-18 17:46:01,389 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:46:01,389 - src.core.file_handler - INFO - Backup directory set to: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:46:02,915 - src.core.persistent_cache - INFO - Cleaned up 570 expired cache entries
+2025-05-18 17:46:02,915 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-18 17:46:02,919 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-18 17:46:03,434 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:46:13,886 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-18 17:53:01,032 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-18 17:53:01,903 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:53:01,903 - src.core.file_handler - INFO - Backup directory set to: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:53:01,903 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-18 17:53:01,908 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-18 17:53:02,378 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:53:33,072 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-18 17:54:16,542 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-18 17:54:17,044 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:54:17,045 - src.core.file_handler - INFO - Backup directory set to: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:54:17,081 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-18 17:54:17,084 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-18 17:54:17,329 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 17:54:35,697 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-18 18:07:14,036 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-18 18:07:14,223 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:07:14,223 - src.core.file_handler - INFO - Backup directory set to: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:07:14,223 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-18 18:07:14,225 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-18 18:07:14,338 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-18 18:07:32,714 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-18 18:07:32,874 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:07:32,874 - src.core.file_handler - INFO - Backup directory set to: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:07:32,875 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-18 18:07:32,876 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-18 18:07:32,985 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:07:49,171 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-18 18:08:16,637 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-18 18:08:16,805 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:08:16,805 - src.core.file_handler - INFO - Backup directory set to: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:08:16,805 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-18 18:08:16,807 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-18 18:08:16,922 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Users/freddymolina/Documents/GenreDetectorBackups
+2025-05-18 18:08:21,526 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 19:57:00,505 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 19:57:00,524 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 19:57:00,524 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 19:57:00,524 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 19:57:01,174 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 19:57:01,174 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 19:57:01,174 - src.core.file_handler - INFO - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-19 19:57:01,180 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 19:57:01,290 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 19:57:23,783 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:02:17,242 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:02:17,283 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico/src', '/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:02:17,284 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:02:17,284 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:02:18,074 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:02:18,131 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:02:18,133 - src.core.file_handler - WARNING - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-19 20:02:18,136 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:02:18,506 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:02:37,726 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:03:35,351 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:03:35,382 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico/src', '/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:03:35,382 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:03:35,382 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:03:35,977 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:03:35,977 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:03:35,977 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:03:36,178 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:03:36,178 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:03:36,179 - src.core.file_handler - DEBUG - Attempting to set backup directory to: None
+2025-05-19 20:03:36,179 - src.core.file_handler - DEBUG - No backup directory path provided
+2025-05-19 20:03:36,179 - src.core.file_handler - WARNING - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-19 20:03:36,181 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:03:36,502 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:04:19,555 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:04:19,601 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-Mix Club Classics [November 2021] [Side A] [DJC]/Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic].mp3
+2025-05-19 20:04:22,752 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 0
+2025-05-19 20:04:35,695 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:06:16,219 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:06:16,220 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico/src', '/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:06:16,220 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:06:16,220 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:06:16,726 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:06:16,726 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:06:16,726 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:06:16,784 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:06:16,784 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:06:16,809 - src.core.file_handler - DEBUG - Attempting to set backup directory to: None
+2025-05-19 20:06:16,809 - src.core.file_handler - DEBUG - No backup directory path provided
+2025-05-19 20:06:16,809 - src.core.file_handler - WARNING - No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-19 20:06:16,811 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:06:17,032 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:06:17,032 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:06:47,241 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:06:47,276 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-Mix Club Classics [November 2021] [Side A] [DJC]/Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic].mp3
+2025-05-19 20:06:49,176 - src.core.file_handler - INFO - Backup created for Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic]_backup_20250519200648962017.mp3
+2025-05-19 20:06:49,178 - src.core.file_handler - DEBUG - Original artist: 'Yazoo Yaz', title: 'Don'T Go Xmix Edit [Rock, Electronic]'
+2025-05-19 20:06:49,178 - src.core.file_handler - DEBUG - Formatted artist: 'Yazoo Yaz', title: 'Don'T Go Xmix Edit Rock Electronic'
+2025-05-19 20:06:49,178 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic].mp3' a: ['Rock', 'Electronic']
+2025-05-19 20:06:49,181 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic].mp3' a: Art: 'Yazoo Yaz', Title: 'Don'T Go Xmix Edit Rock Electronic'
+2025-05-19 20:06:49,181 - src.core.file_handler - INFO - Archivo 'Yazoo Yaz - Don'T Go Xmix Edit [Rock, Electronic].mp3' renombrado a 'Yazoo Yaz - Don'T Go Xmix Edit Rock Electronic [Rock, Electronic].mp3'
+2025-05-19 20:06:49,182 - src.gui.models.mpc_server - DEBUG - Encolando comando update para el directorio: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics
+2025-05-19 20:06:49,185 - src.gui.models.mpc_server - WARNING - Intento 1/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:06:50,191 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:06:50,192 - src.gui.models.mpc_server - WARNING - Intento 2/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:06:51,195 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:06:51,196 - src.gui.models.mpc_server - ERROR - Error procesando comando MPC en cola: 'update' con args ('/Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics',). Error: Operación falló después de 3 intentos: [2@0] {update} Malformed path
+2025-05-19 20:06:51,238 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 20:07:25,486 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:09:36,232 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:09:36,233 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico/src', '/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:09:36,233 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:09:36,233 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:09:36,752 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:09:36,753 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:09:36,753 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:09:36,797 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:09:36,797 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:09:36,851 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:09:37,060 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:09:37,060 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:10:09,277 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:10:09,312 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-Mix Club Classics [November 2021] [Side A] [DJC]/Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic].mp3
+2025-05-19 20:10:12,836 - src.core.file_handler - INFO - Backup created for Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic]_backup_20250519201012292360.mp3
+2025-05-19 20:10:12,891 - src.core.file_handler - DEBUG - Original artist: 'Yazoo Yaz', title: 'Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic]'
+2025-05-19 20:10:12,892 - src.core.file_handler - DEBUG - Formatted artist: 'Yazoo Yaz', title: 'Don'T Go Tee'S Freeze Mix Xmix Edit Rock Electronic'
+2025-05-19 20:10:12,892 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic].mp3' a: ['Electronic', 'Rock']
+2025-05-19 20:10:12,968 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic].mp3' a: Art: 'Yazoo Yaz', Title: 'Don'T Go Tee'S Freeze Mix Xmix Edit Rock Electronic'
+2025-05-19 20:10:12,968 - src.core.file_handler - INFO - Archivo 'Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit [Rock, Electronic].mp3' renombrado a 'Yazoo Yaz - Don'T Go Tee'S Freeze Mix Xmix Edit Rock Electronic [Rock, Electronic].mp3'
+2025-05-19 20:10:12,969 - src.gui.models.mpc_server - DEBUG - Encolando comando update para el directorio: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics
+2025-05-19 20:10:12,972 - src.gui.models.mpc_server - WARNING - Intento 1/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:10:13,977 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:10:13,978 - src.gui.models.mpc_server - WARNING - Intento 2/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:10:14,983 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:10:15,009 - src.gui.models.mpc_server - ERROR - Error procesando comando MPC en cola: 'update' con args ('/Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics',). Error: Operación falló después de 3 intentos: [2@0] {update} Malformed path
+2025-05-19 20:10:15,024 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 20:10:22,845 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:12:32,229 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:12:32,229 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:12:32,229 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:12:32,229 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:12:32,798 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:12:32,799 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:12:32,799 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:12:32,850 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:12:32,850 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:12:32,897 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:12:33,088 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:12:33,088 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:13:02,654 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:13:02,726 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 [Pop, Rock].mp3
+2025-05-19 20:13:06,009 - src.core.file_handler - INFO - Backup created for The Bee Gees - Stayin' Alive Part 2 [Pop, Rock].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/The Bee Gees - Stayin' Alive Part 2 [Pop, Rock]_backup_20250519201305516994.mp3
+2025-05-19 20:13:06,010 - src.core.file_handler - DEBUG - Original artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 [Pop, Rock]'
+2025-05-19 20:13:06,010 - src.core.file_handler - DEBUG - Formatted artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock'
+2025-05-19 20:13:06,010 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'The Bee Gees - Stayin' Alive Part 2 [Pop, Rock].mp3' a: ['Rock', 'Pop', 'Electronic Dance Music']
+2025-05-19 20:13:06,146 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'The Bee Gees - Stayin' Alive Part 2 [Pop, Rock].mp3' a: Art: 'The Bee Gees', Title: 'Stayin' Alive Part 2 Pop Rock'
+2025-05-19 20:13:06,146 - src.core.file_handler - INFO - Archivo 'The Bee Gees - Stayin' Alive Part 2 [Pop, Rock].mp3' renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3'
+2025-05-19 20:13:06,148 - src.gui.models.mpc_server - DEBUG - Encolando comando update para el directorio: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics
+2025-05-19 20:13:06,150 - src.gui.models.mpc_server - WARNING - Intento 1/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:13:07,155 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:13:07,156 - src.gui.models.mpc_server - WARNING - Intento 2/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:13:08,160 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:13:08,161 - src.gui.models.mpc_server - ERROR - Error procesando comando MPC en cola: 'update' con args ('/Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics',). Error: Operación falló después de 3 intentos: [2@0] {update} Malformed path
+2025-05-19 20:13:08,258 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 20:13:18,479 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:19:31,056 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:19:31,056 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:19:31,056 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:19:31,056 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:19:31,652 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:19:31,652 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:19:31,653 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:19:31,696 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:19:31,696 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:19:31,776 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:19:31,992 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:19:31,992 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:20:03,534 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:20:03,564 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3
+2025-05-19 20:20:07,411 - src.core.file_handler - INFO - Backup created for The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock]_backup_20250519202007010906.mp3
+2025-05-19 20:20:07,412 - src.core.file_handler - DEBUG - Original artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock [Pop, Rock]'
+2025-05-19 20:20:07,412 - src.core.file_handler - DEBUG - Formatted artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock Pop Rock'
+2025-05-19 20:20:07,412 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3' a: ['Rock', 'Pop', 'Electronic Dance Music']
+2025-05-19 20:20:07,413 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3' a: Art: 'The Bee Gees', Title: 'Stayin' Alive Part 2 Pop Rock Pop Rock'
+2025-05-19 20:20:07,414 - src.core.file_handler - INFO - Archivo 'The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3' renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3'
+2025-05-19 20:20:07,417 - src.gui.models.mpc_server - DEBUG - Encolando comando update para el directorio: /Volumes/My%20Passport/Dj%20compilation%202025/DMS/Mayo25/X-Mix%20Club%20Classics
+2025-05-19 20:20:07,420 - src.gui.models.mpc_server - WARNING - Intento 1/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:20:08,426 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:20:08,427 - src.gui.models.mpc_server - WARNING - Intento 2/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:20:09,432 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:20:09,433 - src.gui.models.mpc_server - ERROR - Error procesando comando MPC en cola: 'update' con args ('/Volumes/My%20Passport/Dj%20compilation%202025/DMS/Mayo25/X-Mix%20Club%20Classics',). Error: Operación falló después de 3 intentos: [2@0] {update} Malformed path
+2025-05-19 20:20:09,434 - src.gui.threads.processing_thread - DEBUG - Emitiendo mensaje de renombrado para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3: Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3'.
+2025-05-19 20:20:09,513 - src.gui.main_window - DEBUG - Actualizando tabla para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock [Pop, Rock].mp3: estado=Completado, mensaje=Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3'.
+2025-05-19 20:20:09,514 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 20:20:14,634 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:22:35,403 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:22:35,422 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:22:35,422 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:22:35,422 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:22:36,028 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:22:36,028 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:22:36,028 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:22:36,062 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:22:36,062 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:22:36,160 - src.gui.models.mpc_server - INFO - Conectado al servidor MPC en localhost:6600
+2025-05-19 20:22:36,456 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:22:36,456 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:23:17,007 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:23:17,063 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3
+2025-05-19 20:23:20,408 - src.core.file_handler - INFO - Backup created for The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/The Bee Gees - Stayin' Alive Part 1 [Pop, Rock]_backup_20250519202320033477.mp3
+2025-05-19 20:23:20,485 - src.core.file_handler - DEBUG - Original artist: 'The Bee Gees', title: 'Stayin' Alive Part 1 [Pop, Rock]'
+2025-05-19 20:23:20,485 - src.core.file_handler - DEBUG - Formatted artist: 'The Bee Gees', title: 'Stayin' Alive Part 1 Pop Rock'
+2025-05-19 20:23:20,485 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3' a: ['Rock', 'Pop', 'Electronic Dance Music']
+2025-05-19 20:23:20,485 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3' a: Art: 'The Bee Gees', Title: 'Stayin' Alive Part 1 Pop Rock'
+2025-05-19 20:23:20,486 - src.core.file_handler - INFO - Archivo 'The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3' renombrado a 'The Bee Gees - Stayin' Alive Part 1 Pop Rock [Pop, Rock].mp3'
+2025-05-19 20:23:20,488 - src.gui.models.mpc_server - DEBUG - Encolando comando update para el directorio: /Volumes/My%20Passport/Dj%20compilation%202025/DMS/Mayo25/X-Mix%20Club%20Classics
+2025-05-19 20:23:20,489 - src.gui.models.mpc_server - WARNING - Intento 1/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:23:21,494 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:23:21,495 - src.gui.models.mpc_server - WARNING - Intento 2/3 falló: [2@0] {update} Malformed path. Reintentando...
+2025-05-19 20:23:22,496 - src.gui.models.mpc_server - DEBUG - Ping a MPC exitoso, la conexión existente está activa.
+2025-05-19 20:23:22,497 - src.gui.models.mpc_server - ERROR - Error procesando comando MPC en cola: 'update' con args ('/Volumes/My%20Passport/Dj%20compilation%202025/DMS/Mayo25/X-Mix%20Club%20Classics',). Error: Operación falló después de 3 intentos: [2@0] {update} Malformed path
+2025-05-19 20:23:22,497 - src.gui.threads.processing_thread - DEBUG - Emitiendo mensaje de renombrado para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3: Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 1 Pop Rock [Pop, Rock].mp3'.
+2025-05-19 20:23:22,575 - src.gui.main_window - DEBUG - Actualizando tabla para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 1 [Pop, Rock].mp3: estado=Completado, mensaje=Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 1 Pop Rock [Pop, Rock].mp3'.
+2025-05-19 20:23:22,575 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 20:23:46,326 - src.gui.models.mpc_server - INFO - Desconectado del servidor MPC.
+2025-05-19 20:29:44,740 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:29:44,794 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:29:44,794 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:29:44,794 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:29:45,531 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:29:45,531 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:29:45,531 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:29:45,623 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:29:45,623 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:29:46,044 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:29:46,045 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:30:17,458 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:30:17,518 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/Snap - The Power Part 2 [House, Electronic].mp3
+2025-05-19 20:30:20,262 - src.gui.threads.processing_thread - DEBUG - Emitiendo mensaje para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/Snap - The Power Part 2 [House, Electronic].mp3: No se detectaron géneros
+2025-05-19 20:30:20,338 - src.gui.main_window - DEBUG - Actualizando tabla para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/Snap - The Power Part 2 [House, Electronic].mp3: estado=Completado, mensaje=No se detectaron géneros
+2025-05-19 20:30:20,338 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 0
+2025-05-19 20:33:34,295 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:33:34,317 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:33:34,317 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:33:34,317 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:33:34,942 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:33:34,942 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:33:34,942 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:33:35,108 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:33:35,108 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:33:35,530 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:33:35,530 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:34:33,082 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:34:33,122 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3
+2025-05-19 20:34:36,480 - src.core.file_handler - INFO - Backup created for The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock]_backup_20250519203435990158.mp3
+2025-05-19 20:34:36,481 - src.core.file_handler - DEBUG - Original artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock]'
+2025-05-19 20:34:36,481 - src.core.file_handler - DEBUG - Formatted artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock'
+2025-05-19 20:34:36,482 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3' a: ['Rock', 'Pop', 'Dance Pop']
+2025-05-19 20:34:36,482 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3' a: Art: 'The Bee Gees', Title: 'Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock'
+2025-05-19 20:34:36,482 - src.core.file_handler - INFO - Archivo 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3' renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3'
+2025-05-19 20:34:36,482 - src.gui.threads.processing_thread - DEBUG - Emitiendo mensaje de renombrado para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3: Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3'.
+2025-05-19 20:34:36,672 - src.gui.main_window - DEBUG - Actualizando tabla para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock [Pop, Rock].mp3: estado=Completado, mensaje=Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3'.
+2025-05-19 20:34:36,673 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 20:38:39,417 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 20:38:39,441 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 20:38:39,441 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 20:38:39,441 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 20:38:40,012 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:38:40,012 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:38:40,012 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:38:40,063 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 20:38:40,063 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:38:40,797 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:38:40,797 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 20:39:52,223 - src.gui.threads.processing_thread - DEBUG - ProcessingThread: backup_dir (/Volumes/My Passport/Dj compilation 2025/Respados mp3) ya está configurado en file_handler.
+2025-05-19 20:39:52,276 - src.core.file_handler - DEBUG - Successfully retrieved file info for: /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3
+2025-05-19 20:39:56,075 - src.core.file_handler - INFO - Backup created for The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3 at /Volumes/My Passport/Dj compilation 2025/Respados mp3/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock]_backup_20250519203955623196.mp3
+2025-05-19 20:39:56,075 - src.core.file_handler - DEBUG - Original artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock]'
+2025-05-19 20:39:56,075 - src.core.file_handler - DEBUG - Formatted artist: 'The Bee Gees', title: 'Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock Pop Rock'
+2025-05-19 20:39:56,076 - src.core.file_handler - INFO - Metadatos de Género actualizados para 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3' a: ['Rock', 'Pop', 'Electronic Dance Music']
+2025-05-19 20:39:56,076 - src.core.file_handler - INFO - Metadatos Artist/Title actualizados para 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3' a: Art: 'The Bee Gees', Title: 'Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock Pop Rock'
+2025-05-19 20:39:56,076 - src.core.file_handler - INFO - Archivo 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3' renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock Pop Rock.mp3'
+2025-05-19 20:39:56,076 - src.gui.threads.processing_thread - DEBUG - Emitiendo mensaje de renombrado para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3: Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock Pop Rock.mp3'.
+2025-05-19 20:39:56,246 - src.gui.main_window - DEBUG - Actualizando tabla para /Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)/The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock [Pop, Rock].mp3: estado=Completado, mensaje=Metadatos actualizados y archivo renombrado a 'The Bee Gees - Stayin' Alive Part 2 Pop Rock Pop Rock Pop Rock Pop Rock.mp3'.
+2025-05-19 20:39:56,247 - src.gui.main_window - INFO - Procesamiento GUI completado. Total: 1, Exitosos: 1, Errores: 0, Renombrados: 1
+2025-05-19 21:36:44,791 - __main__ - INFO - Iniciando Genre Detector GUI...
+2025-05-19 21:36:44,812 - __main__ - INFO - Python path: ['/Volumes/My Passport/Proyectos/basico', '/Volumes/My Passport/Proyectos/basico', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Volumes/My Passport/Proyectos/basico/venv/lib/python3.13/site-packages', '/opt/homebrew/opt/python-tk@3.13/libexec']
+2025-05-19 21:36:44,812 - __main__ - INFO - Current working directory: /Volumes/My Passport/Proyectos/basico
+2025-05-19 21:36:44,812 - __main__ - INFO - Successfully imported MainWindow
+2025-05-19 21:36:45,716 - src.gui.main_window - INFO - Usando dir de respaldo existente: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 21:36:45,716 - src.core.file_handler - DEBUG - Attempting to set backup directory to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 21:36:45,716 - src.core.file_handler - DEBUG - Converted to Path object: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 21:36:45,784 - src.core.file_handler - DEBUG - Write permission test successful
+2025-05-19 21:36:45,784 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 21:36:45,803 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/-1358843739999502554.json: 'size'
+2025-05-19 21:36:45,866 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/-2274965366944433348.json: 'size'
+2025-05-19 21:36:45,874 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/-4895547902413756083.json: 'size'
+2025-05-19 21:36:45,916 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/-6365161351836255694.json: 'size'
+2025-05-19 21:36:45,925 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/-794159930566368268.json: 'size'
+2025-05-19 21:36:45,983 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/-9164661514666488699.json: 'size'
+2025-05-19 21:36:45,996 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/2880525589603464106.json: 'size'
+2025-05-19 21:36:46,011 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/4345565370887110868.json: 'size'
+2025-05-19 21:36:46,019 - src.core.persistent_cache - WARNING - Error cargando archivo de caché cache/music_apis/musicbrainzapi/6459724628268564232.json: 'size'
+2025-05-19 21:36:46,374 - src.gui.widgets.backup_panel - DEBUG - Emitiendo backup_dir_changed para: /Volumes/My Passport/Dj compilation 2025/Respados mp3
+2025-05-19 21:36:46,374 - src.gui.widgets.backup_panel - INFO - Directorio de respaldo establecido: /Volumes/My Passport/Dj compilation 2025/Respados mp3

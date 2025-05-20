@@ -7,16 +7,17 @@ from pathlib import Path
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TPE1, TCON
 
-SAMPLE_MP3_PATH = "/Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)"
-
 @pytest.fixture(scope="session")
 def sample_mp3():
-    """Get a real MP3 file for testing."""
-    # Get first MP3 file from the directory
-    for file in Path(SAMPLE_MP3_PATH).glob("*.mp3"):
-        if file.is_file():
-            return str(file)
-    raise RuntimeError("No MP3 files found in sample directory")
+    """Use an existing MP3 file for testing."""
+    test_file = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "mp3_backups",
+        "BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3"
+    )
+    if not os.path.exists(test_file):
+        raise RuntimeError(f"Test MP3 file not found: {test_file}")
+    return test_file
 
 @pytest.fixture
 def valid_mp3(tmp_path, sample_mp3):
@@ -35,16 +36,16 @@ def backup_dir(tmp_path):
 @pytest.fixture
 def mock_musicbrainz_api(monkeypatch):
     """Mock MusicBrainz API responses."""
-    def mock_get_genres(self, artist, track):
+    def mock_get_track_info(self, artist, track):
         return {
-            "Rock": 0.9,
-            "Alternative": 0.7,
-            "Pop": 0.5
+            "genres": ["Rock", "Alternative Rock", "Progressive Rock"],
+            "year": "2025",
+            "album": "Test Album"
         }
     
     from src.core.music_apis import MusicBrainzAPI
-    monkeypatch.setattr(MusicBrainzAPI, "get_genres", mock_get_genres)
-    return mock_get_genres
+    monkeypatch.setattr(MusicBrainzAPI, "get_track_info", mock_get_track_info)
+    return mock_get_track_info
 
 @pytest.fixture(scope="session")
 def test_data_dir():
