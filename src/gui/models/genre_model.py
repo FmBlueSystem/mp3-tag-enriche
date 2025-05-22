@@ -94,7 +94,11 @@ def clean_and_split_genre_payload(raw_genre_name: str) -> List[str]:
     if not raw_genre_name:
         return []
 
-    raw_items = re.split(r'[;,/]', raw_genre_name)
+    # Primero limpiar caracteres especiales y espacios extras
+    cleaned = re.sub(r'[\r\n\t]+', ' ', raw_genre_name)
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    
+    raw_items = re.split(r'[;,/]', cleaned)
     genres_cleaned_parts = []
 
     for item in raw_items:
@@ -103,10 +107,11 @@ def clean_and_split_genre_payload(raw_genre_name: str) -> List[str]:
             continue
         if any(term in genre_part.lower() for term in BLACKLIST_GENRE_TERMS_MODEL):
             continue
-        if re.search(r'\\b(19|20)\\d{2}\\b', genre_part):
-            continue
+        if re.search(r'\b(19|20)\d{2}\b', genre_part):  # Corregido el regex
+            genre_part = re.sub(r'\s*\b(19|20)\d{2}\b', '', genre_part)
         
         genre_title_case = genre_part.title()
+        genre_title_case = genre_title_case.strip()  # Asegurar que no haya espacios extras
 
         if (len(genre_title_case) > 1 and
             not genre_title_case.isdigit() and
@@ -240,14 +245,22 @@ class GenreModel:
                 return {"error": f"Archivo MP3 inválido: {filepath}"}
                 
             result = self.detector.analyze_file(filepath, chunk_size=chunk_size)
-            raw_api_genres = result.get("detected_genres", {}).copy()
             
-            if "detected_genres" in result and isinstance(result["detected_genres"], dict):
+            # Preservar todos los géneros encontrados
+            raw_api_genres = {}
+            raw_api_genres.update(result.get("detected_genres", {}))
+            raw_api_genres.update(result.get("found_genres", {}))
+            
+            if raw_api_genres:
                 result["processed_genres"] = self.process_genres(
-                    result.pop("detected_genres"),
+                    raw_api_genres,
                     self.max_api_tags
                 )
             result["raw_api_genres"] = raw_api_genres
+            
+            # Asegurar que found_genres se preserven
+            if "found_genres" in result:
+                result["detected_genres"] = result["found_genres"]
             
             return result
         except Exception as e:
@@ -277,13 +290,16 @@ class GenreModel:
                 return {"error": f"Archivo MP3 inválido: {filepath}", "written": False}
             
             analysis = self.analyze(filepath, chunk_size=chunk_size)
-            genres = analysis.get("processed_genres", {})
-            filtered_genres = genres
             
-            if not filtered_genres:
-                for genre, conf in genres.items():
-                    if len(genre) < 50 and len(genre.strip()) > 1:
-                        filtered_genres[genre] = conf
+            # Usar tanto processed_genres como raw_api_genres
+            genres = analysis.get("processed_genres", {})
+            if not genres:
+                genres = analysis.get("raw_api_genres", {})
+            
+            filtered_genres = {}
+            for genre, conf in genres.items():
+                if len(genre) < 50 and len(genre.strip()) > 1:
+                    filtered_genres[genre] = conf
             
             if not filtered_genres:
                 return {

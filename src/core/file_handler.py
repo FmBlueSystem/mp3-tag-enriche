@@ -12,6 +12,22 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Diccionarios y constantes para formateo de tags
+
+# Géneros comunes que deben ser eliminados del título
+COMMON_GENRES = {
+    "Pop", "Rock", "Hip-Hop", "Hip Hop", "R&B", "RnB", "Dance", "Electronic",
+    "House", "Techno", "Trance", "Dubstep", "Drum And Bass", "Jazz", "Blues",
+    "Country", "Folk", "Metal", "Classical", "Latin", "Reggae", "Funk", "Soul"
+}
+
+# Sufijos que deben preservarse aunque contengan géneros
+PROTECTED_SUFFIXES = {
+    "Original Mix", "Club Mix", "Radio Mix", "Extended Mix", "Remix",
+    "Radio Edit", "Club Edit", "Instrumental", "Acapella", "Dub Mix",
+    "VIP Mix", "Re-Edit", "Remaster", "Live Version", "Acoustic Version"
+}
+
 # Diccionarios de corrección estilística para formateo de tags
 KNOWN_TITLES = {
     # Clave (sin espacios, PascalCase) -> Valor deseado
@@ -47,7 +63,7 @@ def _format_text_to_spaced_title_case(text: str) -> str:
     # Reemplazar múltiples puntos o caracteres especiales problemáticos (no letras, números, espacios, apóstrofes, guiones básicos) con espacio
     # Esto es para limpiar cosas como "Artista.....Nombre" o "Artista&&&Nombre"
     # Mantener apóstrofes y guiones que pueden ser parte de nombres.
-    s = re.sub(r"[^a-zA-Z0-9\s'-'’]+", ' ', s) # Usar comillas dobles para el raw string y listar ' y ’ directamente.
+    s = re.sub(r"[^a-zA-Z0-9\s'-'’]+", ' ', s) # Usar comillas dobles para el raw string y listar ' y ' directamente.
 
     # Reemplazar separadores comunes (incluyendo paréntesis) con espacios.
     # Los paréntesis se reintroducirán formateados por format_title_tag si son parte del sufijo.
@@ -87,9 +103,38 @@ def format_title_tag(raw_title: Optional[str]) -> str:
     
     cleaned_title = str(raw_title) # Asegurar que sea string
     cleaned_title = re.sub(r'\\s+', ' ', cleaned_title).strip()
-    # No reemplazar paréntesis aquí, _format_text_to_spaced_title_case los tratará como separadores.
-    #cleaned_title = cleaned_title.replace('( ', '(').replace(' )', ')')
-    #cleaned_title = cleaned_title.replace('[', '(').replace(']', ')')
+
+    # Extraer y preservar sufijos protegidos
+    protected_suffix = ""
+    for suffix in PROTECTED_SUFFIXES:
+        # Buscar sufijos protegidos en patrones comunes
+        patterns = [
+            fr" {re.escape(suffix)}$",  # Al final
+            fr"\({re.escape(suffix)}\)",  # Entre paréntesis
+            fr" - {re.escape(suffix)}$",  # Después de guion
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, cleaned_title, re.IGNORECASE)
+            if match:
+                protected_suffix = match.group()
+                cleaned_title = cleaned_title[:match.start()].strip()
+                break
+        if protected_suffix:  # Si encontramos un sufijo protegido, dejar de buscar
+            break
+
+    # Eliminar referencias a géneros
+    for genre in COMMON_GENRES:
+        # Patrones para eliminar géneros
+        patterns = [
+            fr"\s+{re.escape(genre)}\s*$",  # Al final
+            fr"\s*\({re.escape(genre)}\)\s*",  # Entre paréntesis
+            fr"\s+{re.escape(genre)}\s+(?=\()",  # Antes de paréntesis
+            fr"\s+-\s+{re.escape(genre)}\s*$",  # Después de guion al final
+        ]
+        
+        for pattern in patterns:
+            cleaned_title = re.sub(pattern, '', cleaned_title, flags=re.IGNORECASE)
 
     # Intentar extraer la parte principal y todo lo que parezca un sufijo entre paréntesis o después de un guion
     # Esta regex es más compleja para capturar varios patrones de sufijo.
@@ -124,35 +169,43 @@ def format_title_tag(raw_title: Optional[str]) -> str:
         else:
             suffix_part_raw = parenthetical_suffix
             
-    # Clave de búsqueda para KNOWN_TITLES 
-    # Usar _to_pascal_case para generar una clave más consistente para la búsqueda
-    # Reemplazamos los paréntesis en la clave de búsqueda para que coincida con el formato de KNOWN_TITLES
+    # Formatear la parte principal
     temp_main_key_pascal = _to_pascal_case(main_part_raw.replace('(', ' ').replace(')', ' '))
-    
     if temp_main_key_pascal in KNOWN_TITLES:
         main_formatted = KNOWN_TITLES[temp_main_key_pascal]
     else:
         main_formatted = _format_text_to_spaced_title_case(main_part_raw)
     
-    # Formatear el sufijo si existe
+    # Formatear el sufijo no protegido si existe
     formatted_suffix = ""
     if suffix_part_raw:
-        # Si el sufijo comienza con paréntesis y termina con paréntesis (caso simple de "(Contenido)")
-        if suffix_part_raw.startswith("(") and suffix_part_raw.endswith(")"):
-            content_inside_parens = suffix_part_raw[1:-1].strip()
-            formatted_suffix = f" ({_format_text_to_spaced_title_case(content_inside_parens)})"
-        else: # Para sufijos más complejos como "(Sufijo1) - Algo Más"
-            formatted_suffix = f" - {_format_text_to_spaced_title_case(suffix_part_raw)}" # Asumir que es un " - Algo"
+        # Eliminar géneros del sufijo también
+        clean_suffix = suffix_part_raw
+        for genre in COMMON_GENRES:
+            clean_suffix = re.sub(fr'\s*{re.escape(genre)}\s*', '', clean_suffix, flags=re.IGNORECASE)
+        
+        # Si el sufijo comienza y termina con paréntesis
+        if clean_suffix.startswith("(") and clean_suffix.endswith(")"):
+            content = clean_suffix[1:-1].strip()
+            if content:  # Solo si quedó contenido después de limpiar géneros
+                formatted_suffix = f" ({_format_text_to_spaced_title_case(content)})"
+        elif clean_suffix:  # Si hay contenido después de limpiar géneros
+            formatted_suffix = f" - {_format_text_to_spaced_title_case(clean_suffix)}"
 
-    # Combinar parte principal y sufijo formateado
-    # Asegurar un solo espacio si ambos existen y el sufijo no empieza ya con espacio (como lo hace " (Algo)")
+    # Construir el título final
     final_title = main_formatted
+
+    # Añadir sufijo formateado si existe
     if formatted_suffix:
-        if formatted_suffix.startswith(" (") or formatted_suffix.startswith(" - "):
-            final_title += formatted_suffix
-        else: # Caso poco probable si la lógica anterior es correcta
-            final_title += " " + formatted_suffix
-            
+        final_title += formatted_suffix
+
+    # Añadir sufijo protegido al final si existe
+    if protected_suffix:
+        if protected_suffix.startswith(" ") or protected_suffix.startswith("("):
+            final_title += protected_suffix
+        else:
+            final_title += " " + protected_suffix
+
     return final_title.strip()
 
 def format_artist_tag(raw_artist: Optional[str]) -> str:
@@ -216,7 +269,13 @@ class Mp3FileHandler:
             verbose: Enable verbose logging (not directly used by logger level here, assumes parent configures)
         """
         self.set_backup_dir(backup_dir)
-            
+        self.tag_fields = [
+            'title', 'artist', 'album', 'genre', 'date', 
+            'composer', 'conductor', 'albumartist', 'copyright',
+            'encodedby', 'mood', 'organization', 'language',
+            'performer', 'isrc', 'discnumber', 'tracknumber'
+        ]
+    
     def set_backup_dir(self, backup_dir_path: Optional[str]):
         """Sets or updates the backup directory."""
         logger.debug(f"Attempting to set backup directory to: {backup_dir_path}")
@@ -337,13 +396,13 @@ class Mp3FileHandler:
             return {}
             
     def write_genre(self, file_path: str, genres: List[str], backup: bool = True, chunk_size: int = 8192) -> bool:
-        """Escribe tags de género a un archivo MP3 usando chunks.
+        """Escribe tags de género a un archivo MP3.
         
         Args:
             file_path: Ruta al archivo MP3
             genres: Lista de géneros a escribir
             backup: Si se debe crear backup
-            chunk_size: Tamaño del chunk para lectura/escritura en bytes (default: 8KB)
+            chunk_size: Tamaño del chunk para lectura/escritura (no usado directamente)
         """
         from .genre_normalizer import GenreNormalizer
         
@@ -352,40 +411,30 @@ class Mp3FileHandler:
                 logger.warning(f"No se pudo crear backup para {file_path}. Procediendo sin backup.")
         
         try:
-            # Usar context manager para manejo de recursos
-            with open(file_path, 'rb+') as f:
-                # Leer header ID3 existente
-                header = f.read(10)
-                if not header.startswith(b'ID3'):
-                    # Crear nuevo tag ID3v2
-                    f.seek(0)
-                    id3_header = b'ID3\x03\x00\x00\x00\x00\x00\x00'
-                    f.write(id3_header)
-                
-                # Normalizar géneros
-                normalized_genres = GenreNormalizer.normalize_list(genres)
-                
-                # Crear frame de género ID3v2
-                genre_data = '\x00'.join(normalized_genres).encode('utf-8')
-                frame_header = b'TCON\x00\x00\x00' + len(genre_data).to_bytes(4, 'big') + b'\x00\x00'
-                
-                # Escribir frame en chunks
-                remaining = len(frame_header) + len(genre_data)
-                written = 0
-                
-                while written < remaining:
-                    chunk = (frame_header + genre_data)[written:written + chunk_size]
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    written += len(chunk)
-                
-                # Actualizar tamaño del tag
-                f.seek(6)
-                f.write(remaining.to_bytes(4, 'big'))
-                
-            logger.info(f"Géneros escritos exitosamente en {file_path}: {normalized_genres}")
-            return True
+            # Normalizar géneros
+            normalized_genres = [g[0] if isinstance(g, tuple) else g for g in GenreNormalizer.normalize_list(genres)]
+            
+            # Intentar primero con EasyID3
+            try:
+                audio = EasyID3(file_path)
+                audio['genre'] = normalized_genres
+                audio.save()
+                logger.info(f"Géneros escritos exitosamente usando EasyID3 en {file_path}: {normalized_genres}")
+                return True
+            except Exception as e:
+                logger.warning(f"EasyID3 falló, intentando con ID3: {e}")
+            
+            # Si EasyID3 falla, intentar con ID3
+            try:
+                audio = ID3(file_path)
+                audio.add(TCON(encoding=3, text=normalized_genres))
+                audio.save(v2_version=3)
+                logger.info(f"Géneros escritos exitosamente usando ID3 en {file_path}: {normalized_genres}")
+                return True
+            except Exception as e:
+                logger.warning(f"ID3 también falló: {e}")
+            
+            raise Exception("No se pudieron escribir los tags usando EasyID3 ni ID3")
             
         except Exception as e:
             logger.error(f"Error escribiendo géneros en {file_path}: {e}")
@@ -431,6 +480,8 @@ class Mp3FileHandler:
             
             # Leer tags usando el método optimizado
             tags = self.read_tags(file_path, chunk_size)
+            
+            # First try to get metadata from tags
             if tags:
                 info.update({
                     'title': tags.get('title', [''])[0],
@@ -438,7 +489,22 @@ class Mp3FileHandler:
                     'album': tags.get('album', [''])[0],
                     'current_genre': ';'.join(tags.get('genre', []))
                 })
-                logger.debug(f"Información de archivo recuperada con éxito: {file_path}")
+                logger.debug(f"Información de archivo recuperada con éxito desde tags: {file_path}")
+            
+            # If artist or title is missing, try to extract from filename
+            if not info.get('artist') or not info.get('title'):
+                filename = os.path.basename(file_path)
+                filename_without_ext = os.path.splitext(filename)[0]
+                artist, title = self.extract_artist_title_from_filename(filename_without_ext)
+                
+                # Only update missing fields
+                if not info.get('artist'):
+                    info['artist'] = artist
+                if not info.get('title'):
+                    info['title'] = title
+                
+                if artist or title:
+                    logger.info(f"Extraída información de nombre de archivo para: {file_path}")
             
             return info
             
@@ -451,8 +517,8 @@ class Mp3FileHandler:
         file_path: str,
         genres_to_write: Optional[List[str]] = None,
         perform_os_rename_action: bool = True,
-        include_genre_in_filename: bool = False,
-        max_genres_in_filename: int = 2
+        include_genre_in_filename: bool = False,  # Siempre False por defecto para excluir géneros del nombre
+        max_genres_in_filename: int = 2  # Mantenido por compatibilidad pero no se usa si include_genre_in_filename es False
     ) -> Dict[str, str]:
         """Rename file and update metadata with genre support.
         
@@ -506,22 +572,38 @@ class Mp3FileHandler:
             # Actualizar metadatos ID3 de Artista y Título en el archivo original
             # También escribir géneros si se proporcionan
             try:
-                audio = EasyID3(str(original_path_obj)) # EasyID3 necesita str path
+                # Preserve existing metadata
+                preserved_metadata = self._preserve_metadata(str(original_path_obj), str(original_path_obj))
+                
+                # Create new EasyID3 tags
+                audio = EasyID3(str(original_path_obj))
+                
+                # Restore preserved metadata
+                for field, values in preserved_metadata.items():
+                    if field not in ['artist', 'title', 'genre']:  # Don't overwrite fields we're explicitly setting
+                        audio[field] = values
+                
+                # Set the main fields, never truncate these
                 audio['artist'] = formatted_artist
                 audio['title'] = formatted_title
                 
-                if genres_to_write is not None: # Solo escribir si se proporcionan géneros válidos
-                    if genres_to_write: # Lista no vacía
-                        audio['genre'] = genres_to_write # EasyID3 maneja lista de strings para genre
-                        logger.info(f"Metadatos de Género actualizados para '{original_path_obj.name}' a: {genres_to_write}")
-                    else: # Lista vacía, significa que no se deben escribir o se deben borrar
-                        if 'genre' in audio: # Borrar tag de género si se pasa lista vacía
+                # Handle genres
+                if genres_to_write is not None:
+                    if genres_to_write:
+                        audio['genre'] = genres_to_write
+                        logger.info(f"Genre metadata updated for '{original_path_obj.name}' to: {genres_to_write}")
+                    else:
+                        if 'genre' in audio:
                             del audio['genre']
-                            logger.info(f"Tag de Género eliminado para '{original_path_obj.name}'")
+                            logger.info(f"Genre tag removed for '{original_path_obj.name}'")
+                
+                # Save all metadata
                 audio.save()
-                logger.info(f"Metadatos Artist/Title actualizados para '{original_path_obj.name}' a: Art: '{formatted_artist}', Title: '{formatted_title}'")
-                result["success"] = True # Éxito en la escritura de tags
-                result["message"] = "Metadatos actualizados."
+                
+                logger.info(f"Metadata updated for '{original_path_obj.name}': Artist='{formatted_artist}', Title='{formatted_title}', Fields={list(audio.keys())}")
+                result["success"] = True
+                result["message"] = "Metadata updated successfully."
+                result["updated_fields"] = list(audio.keys())
 
             except Exception as e:
                 logger.error(f"Error al escribir tags ID3 en {original_path_obj.name}: {e}", exc_info=True)
@@ -530,14 +612,11 @@ class Mp3FileHandler:
                 # Devolver aquí porque si los tags no se pueden escribir, no tiene sentido renombrar.
                 return result
 
-            # Build new filename with genre support
+            # Build new filename without genre
             new_filename_stem = f"{formatted_artist} - {formatted_title}"
             
-            # Add genres to filename if requested
-            if include_genre_in_filename and genres_to_write and len(genres_to_write) > 0:
-                top_genres = sorted(genres_to_write, key=lambda x: len(x))[:max_genres_in_filename]
-                genre_part = " [" + ", ".join(top_genres) + "]"
-                new_filename_stem += genre_part
+            # Género removido intencionalmente del nombre del archivo
+            # El género solo se mantendrá en los metadatos ID3
                 
             # Handle special characters
             replacements = {
@@ -649,3 +728,25 @@ class Mp3FileHandler:
             return True
         except:
             return False
+    
+    def _preserve_metadata(self, target_path: str, source_path: str) -> Dict[str, List[str]]:
+        """Preserve metadata from source file when updating target file.
+        
+        Args:
+            target_path: Path to file being updated
+            source_path: Path to original file to preserve metadata from
+            
+        Returns:
+            Dictionary of metadata fields and values
+        """
+        preserved = {}
+        try:
+            source_audio = EasyID3(str(source_path))
+            for field in self.tag_fields:
+                if field in source_audio:
+                    preserved[field] = source_audio[field]
+            logger.debug(f"Preserved metadata fields from {source_path}: {list(preserved.keys())}")
+            return preserved
+        except Exception as e:
+            logger.warning(f"Could not preserve metadata: {e}")
+            return {}

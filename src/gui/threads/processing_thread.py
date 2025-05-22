@@ -21,16 +21,13 @@ class ProcessingThread(QThread):
     circuit_breaker_opened = Signal()
     circuit_breaker_closed = Signal()
 
-    def __init__(self, task_queue, model: GenreModel, parent=None):
-        super().__init__(parent)
-        self.task_queue = task_queue
-        self.model = model
-
     def __init__(self, file_paths: List[str] = None, model: GenreModel = None, analyze_only: bool = True,
                  confidence: float = 0.3, max_genres: int = 3,
                  rename_files: bool = False, backup_dir: Optional[str] = None,
-                 task_queue: TaskQueue = None, parent=None):
+                 task_queue: Optional[TaskQueue] = None, parent=None):
         super().__init__(parent)
+        from threading import Lock
+        self._thread_lock = Lock()
         self.file_paths = file_paths if file_paths is not None else []
         self.analyze_only = analyze_only
         self.confidence = confidence
@@ -38,8 +35,8 @@ class ProcessingThread(QThread):
         self.rename_files = rename_files
         self.backup_dir = backup_dir
         self.model = model
-        # Solo asignar la TaskQueue si se proporciona, no crear una nueva aquí
-        self.task_queue = task_queue
+        # Inicializar TaskQueue si no se proporciona una
+        self.task_queue = task_queue if task_queue is not None else TaskQueue()
         self.is_running = True
         # Asegurar que el file_handler del modelo use el backup_dir proporcionado al thread.
         if self.model and hasattr(self.model, 'detector') and self.model.detector and \
@@ -83,6 +80,10 @@ class ProcessingThread(QThread):
 
     def run(self):
         """Ejecuta el procesamiento de archivos en segundo plano usando la cola de tareas."""
+        if not hasattr(self, '_thread_lock'):
+            from threading import Lock
+            self._thread_lock = Lock()
+            
         if not self.file_paths:
             self.progress.emit("No hay archivos seleccionados para procesar.")
             self.finished.emit({
@@ -105,39 +106,58 @@ class ProcessingThread(QThread):
         tasks = {}
         for filepath in self.file_paths:
             task_id = str(uuid.uuid4())
-            task = self.task_queue.add_task(
-                task_id,
-                self.process_file,
-                filepath
-            )
-            tasks[task_id] = (task, filepath)
-            
+            with self._thread_lock:
+                task = self.task_queue.add_task(
+                    task_id,
+                    self.process_file,
+                    filepath
+                )
+                tasks[task_id] = (task, filepath)
+
         # Procesar tareas
-        while self.is_running and (not self.task_queue.queue.empty() or processed_count < len(self.file_paths)):
+        retry_count = 0
+        max_retries = 3
+        
+        while self.is_running and processed_count < len(self.file_paths):
             task = self.task_queue.get_next_task()
             if not task:
                 if self.task_queue.circuit_breaker.is_open:
-                    self.circuit_breaker_opened.emit()
-                    self.msleep(5000)  # Esperar 5 segundos antes de reintentar
-                    continue
-                break
-                
-            filepath = next(fp for _, (t, fp) in tasks.items() if t == task)
+                    if retry_count < max_retries:
+                        self.circuit_breaker_opened.emit()
+                        self.msleep(min(5000 * (retry_count + 1), 30000))  # Backoff exponencial
+                        retry_count += 1
+                        continue
+                    else:
+                        logger.error("Máximo número de reintentos alcanzado")
+                        break
+                else:
+                    # Si no hay más tareas pero no hemos procesado todo, esperar brevemente
+                    if processed_count < len(self.file_paths):
+                        self.msleep(100)
+                        continue
+                    break
+
+            try:
+                filepath = next(fp for _, (t, fp) in tasks.items() if t == task)
+            except StopIteration:
+                logger.error("No se encontró el filepath asociado a la tarea")
+                continue
             self.progress.emit(f"Procesando {Path(filepath).name}")
             try:
-                self.task_state_changed.emit(task.id, TaskState.RUNNING)
-                result = task.func(task.args[0])
-                
-                actual_error = result.get("error")
-                if actual_error:
-                    self.task_queue.complete_task(task, error=actual_error)
-                    self.task_state_changed.emit(task.id, TaskState.FAILED)
-                    error_count += 1
-                    logger.error(f"Error al procesar {filepath}: {actual_error}")
-                    logger.debug(f"Emitiendo error para {filepath}: {actual_error}")
-                    self.file_processed.emit(filepath, f"Error: {actual_error}", True)
-                self.task_queue.complete_task(task, result=result)
-                self.task_state_changed.emit(task.id, TaskState.COMPLETED)
+                with self._thread_lock:
+                    self.task_state_changed.emit(task.id, TaskState.RUNNING)
+                    result = task.func(task.args[0])
+                    
+                    actual_error = result.get("error")
+                    if actual_error:
+                        self.task_queue.complete_task(task, error=actual_error)
+                        self.task_state_changed.emit(task.id, TaskState.FAILED)
+                        error_count += 1
+                        logger.error(f"Error al procesar {filepath}: {actual_error}")
+                        self.file_processed.emit(filepath, f"Error: {actual_error}", True)
+                    else:
+                        self.task_queue.complete_task(task, result=result)
+                        self.task_state_changed.emit(task.id, TaskState.COMPLETED)
                 
                 if "written" in result:
                     if result["written"]:
@@ -154,16 +174,26 @@ class ProcessingThread(QThread):
                     self.file_processed.emit(filepath, "Error: Resultado inesperado del procesamiento", True)
                 else:
                     success_count += 1
-                    genres = result.get("detected_genres", {})
+                    
+                    # Buscar géneros tanto en detected_genres como en found_genres
+                    genres = result.get("detected_genres", {}) or result.get("found_genres", {})
+                    
                     if genres:
-                        genre_str = ", ".join(f"{g} ({c:.2f})" for g, c in
-                                          sorted(genres.items(), key=lambda x: x[1], reverse=True))
+                        genre_str = ", ".join(
+                            f"{g} ({c:.2f})" if isinstance(c, float) else f"{g}"
+                            for g, c in sorted(genres.items(), key=lambda x: x[1], reverse=True)
+                        )
                         self.file_processed.emit(filepath, f"Éxito en análisis. Géneros detectados: {genre_str}", False)
                     else:
+                        logger.warning(f"No se encontraron géneros en el resultado para {filepath}")
                         self.file_processed.emit(filepath, "No se detectaron géneros", False)
+                        
+                    logger.debug(f"Resultado del análisis para {filepath}: {result}")
 
+                # La señal circuit_breaker_closed se emite en el manejador de éxito
                 if not self.task_queue.circuit_breaker.is_open:
                     self.circuit_breaker_closed.emit()
+                    logger.debug("Circuit breaker cerrado después de procesamiento exitoso")
                 
                 processed_count += 1
                 total_files = len(self.file_paths)
@@ -217,16 +247,28 @@ class ProcessingThread(QThread):
                     "tag_update_error": result.get("tag_update_error", "")
                 })
             except Exception as e:
-                error_count += 1
-                logger.error(f"Error al procesar {filepath}: {str(e)}")
-                error_msg = f"Error: {str(e)}"
-                logger.debug(f"Emitiendo error de excepción para {filepath}: {error_msg}")
-                self.file_processed.emit(filepath, error_msg, True)
+                with self._thread_lock:
+                    error_count += 1
+                    error_msg = f"Error: {str(e)}"
+                    logger.error(f"Error al procesar {filepath}: {str(e)}")
+                    self.task_queue.complete_task(task, error=error_msg)
+                    self.task_state_changed.emit(task.id, TaskState.FAILED)
+                    self.file_processed.emit(filepath, error_msg, True)
 
-        self.finished.emit({
-            "total": total_files, 
-            "success": success_count, 
-            "errors": error_count, 
-            "renamed": renamed_count,
-            "details": results_details
-        })
+        try:
+            # Limpiar tareas completadas
+            with self._thread_lock:
+                self.task_queue._active_tasks = [
+                    t for t in self.task_queue._active_tasks
+                    if t.state not in (TaskState.COMPLETED, TaskState.FAILED)
+                ]
+                
+            self.finished.emit({
+                "total": total_files,
+                "success": success_count,
+                "errors": error_count,
+                "renamed": renamed_count,
+                "details": results_details
+            })
+        except Exception as e:
+            logger.error(f"Error finalizando el procesamiento: {str(e)}")

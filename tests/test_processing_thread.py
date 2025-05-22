@@ -289,3 +289,53 @@ def test_error_result_details(processing_thread, test_files, mock_model):
         assert detail["error"] == "Error de análisis"
         assert "threshold_used" in detail
         assert detail["threshold_used"] == 0.3
+
+def test_real_mp3_processing():
+    """Prueba procesamiento con archivos MP3 reales."""
+    # Directorio con archivos MP3 reales
+    mp3_dir = "/Volumes/My Passport/Dj compilation 2025/DMS/Mayo25/X-Mix Club Classics/X-MIX CLUB CLASSICS BEST OF 320 (Seperated Tracks)"
+    
+    # Obtener lista de archivos MP3
+    file_paths = [
+        os.path.join(mp3_dir, f)
+        for f in os.listdir(mp3_dir)
+        if f.endswith('.mp3')
+    ][:3]  # Tomar solo 3 archivos para la prueba
+    
+    assert len(file_paths) > 0, "No se encontraron archivos MP3"
+    
+    # Crear modelo real
+    model = GenreModel()
+    
+    # Configurar thread
+    thread = ProcessingThread(
+        file_paths=file_paths,
+        model=model,
+        analyze_only=True,
+        confidence=0.3,
+        max_genres=3,
+        rename_files=False
+    )
+    
+    # Capturar señales
+    processed_files = []
+    finished_data = [None]
+    
+    thread.file_processed.connect(
+        lambda fp, msg, error: processed_files.append((fp, msg, error))
+    )
+    thread.finished.connect(lambda data: finished_data.__setitem__(0, data))
+    
+    # Ejecutar procesamiento
+    thread.run()
+    
+    # Verificar resultados
+    assert len(processed_files) == len(file_paths)
+    assert finished_data[0]["total"] == len(file_paths)
+    assert finished_data[0]["success"] + finished_data[0]["errors"] == len(file_paths)
+    
+    # Verificar que cada archivo tenga resultados
+    for fp, msg, error in processed_files:
+        assert os.path.exists(fp), f"Archivo no existe: {fp}"
+        if not error:
+            assert "Géneros detectados" in msg, f"No se detectaron géneros en {fp}"
