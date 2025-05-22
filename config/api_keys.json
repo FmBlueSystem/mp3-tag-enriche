@@ -1,0 +1,18 @@
+{
+    "spotify": {
+        "client_id": "8e5333cb38084470990d70a659336463",
+        "client_secret": "d66221f931694691b5a7157eb5f506a5"
+    },
+    "lastfm": {
+        "api_key": "b7651b3758d74bd0f47df535a5ddf45d",
+        "api_secret": "eb38d3f09f394d652c93d948972a3285"
+    },
+    "discogs": {
+        "api_token": "pTWfxAgLTSTbXzbNFvAvqXNKawGiDVELrBLnfoNv"
+    },
+    "musicbrainz": {
+        "app_name": "GenreDetector",
+        "version": "0.2.0",
+        "email": ""
+    }
+}

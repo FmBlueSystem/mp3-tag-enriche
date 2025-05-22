@@ -1,0 +1,7 @@
+2025-05-22 01:29:57,680 - __main__ - WARNING - Spotify API credentials missing, continuing without Spotify
+2025-05-22 01:29:57,759 - src.core.file_handler - INFO - Backup directory set to: /Volumes/My Passport/Proyectos/basico/mp3_backups
+2025-05-22 01:29:58,496 - __main__ - INFO - [1/205] Processing: /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s/2 Live Crew - Get It Girl Clean - Super Short Edit.mp3
+2025-05-22 01:29:58,549 - src.core.file_handler - INFO - Extraída información de nombre de archivo para: /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s/2 Live Crew - Get It Girl Clean - Super Short Edit.mp3
+2025-05-22 01:30:33,126 - src.core.file_handler - INFO - Backup created for 2 Live Crew - Get It Girl Clean - Super Short Edit.mp3 at /Volumes/My Passport/Proyectos/basico/mp3_backups/2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3
+2025-05-22 01:30:33,178 - src.core.file_handler - INFO - Géneros escritos exitosamente en /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s/2 Live Crew - Get It Girl Clean - Super Short Edit.mp3: ['Hip-Hop']
+2025-05-22 01:30:33,178 - __main__ - INFO - [2/205] Processing: /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s/9 9 - All Of Me For All Of You.mp3

@@ -1,0 +1,279 @@
+2025-05-22 01:43:18,520 [INFO] Successfully initialized Spotify API client
+2025-05-22 01:43:18,520 [INFO] Spotify API enabled
+2025-05-22 01:43:18,520 [WARNING] No backup directory specified or creation/access failed. Backups will be disabled.
+2025-05-22 01:43:18,521 [INFO] Procesando 10 archivos MP3 en /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s
+2025-05-22 01:43:18,521 [INFO] [1/10] Procesando: ./mp3_backups/2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3
+2025-05-22 01:43:18,534 [INFO] Extraída información de nombre de archivo para: ./mp3_backups/2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3
+2025-05-22 01:43:19,769 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,769 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,769 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:19,770 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:19,770 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:20,467 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:20,557 [INFO] track.getTopTags
+2025-05-22 01:43:21,172 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 400 Bad Request"
+2025-05-22 01:43:21,178 [WARNING] Failed to get track tags: Track not found
+2025-05-22 01:43:21,178 [INFO] track.getInfo
+2025-05-22 01:43:21,378 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:21,380 [WARNING] Failed to get album info: Track not found
+2025-05-22 01:43:21,380 [INFO] track.getInfo
+2025-05-22 01:43:21,594 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:21,596 [WARNING] Failed to get wiki date: Track not found
+2025-05-22 01:43:22,159 [INFO] No results found on Discogs for 2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509
+2025-05-22 01:43:22,355 [ERROR] Error getting Spotify data for 2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509: error: invalid_client, error_description: Invalid client
+2025-05-22 01:43:22,357 [INFO] Géneros detectados: ['Electronic', 'Hip-Hop']
+2025-05-22 01:43:22,357 [INFO] Checking year in MusicBrainzAPI: None
+2025-05-22 01:43:22,357 [INFO] Checking year in LastFmAPI: None
+2025-05-22 01:43:22,357 [INFO] Checking year in DiscogsAPI: None
+2025-05-22 01:43:22,357 [INFO] Checking year in SpotifyAPI: None
+2025-05-22 01:43:22,357 [INFO] Year to be written: Desconocido
+2025-05-22 01:43:22,357 [INFO] Backup skipped for ./mp3_backups/2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3 as no backup directory is configured.
+2025-05-22 01:43:22,357 [WARNING] No se pudo crear backup para ./mp3_backups/2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3. Procediendo sin backup.
+2025-05-22 01:43:22,358 [INFO] Géneros escritos exitosamente en ./mp3_backups/2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3: ['Electronic', 'Hip-Hop']
+2025-05-22 01:43:22,363 [INFO] [OK] 2 Live Crew - Get It Girl Clean - Super Short Edit_backup_20250522013032422509.mp3 | Géneros: ['Electronic', 'Hip-Hop'] | Año: Desconocido
+2025-05-22 01:43:22,363 [INFO] [2/10] Procesando: ./mp3_backups/BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3
+2025-05-22 01:43:23,542 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:23,542 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,543 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,543 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,543 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,543 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,543 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:23,543 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,544 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,544 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:23,544 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,544 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,544 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:23,544 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,545 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,545 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:23,545 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,545 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:23,545 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:24,153 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:24,157 [INFO] track.getTopTags
+2025-05-22 01:43:24,351 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:24,363 [INFO] track.getInfo
+2025-05-22 01:43:24,592 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:24,597 [INFO] track.getInfo
+2025-05-22 01:43:24,837 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:24,839 [INFO] track.getInfo
+2025-05-22 01:43:25,066 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:25,279 [INFO] No results found on Discogs for PATRIC HERNANDEZ - BORN TO BE ALIVE
+2025-05-22 01:43:25,390 [ERROR] Error getting Spotify data for PATRIC HERNANDEZ - BORN TO BE ALIVE: error: invalid_client, error_description: Invalid client
+2025-05-22 01:43:25,398 [INFO] Géneros detectados: ['Electronic', 'Pop', 'Electronic Dance Music']
+2025-05-22 01:43:25,398 [INFO] Year to be written: 2018
+2025-05-22 01:43:25,398 [INFO] Backup skipped for ./mp3_backups/BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3 as no backup directory is configured.
+2025-05-22 01:43:25,398 [WARNING] No se pudo crear backup para ./mp3_backups/BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3. Procediendo sin backup.
+2025-05-22 01:43:25,398 [INFO] Géneros escritos exitosamente en ./mp3_backups/BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3: ['Electronic', 'Pop', 'Electronic Dance Music']
+2025-05-22 01:43:25,401 [ERROR] Error escribiendo año en ./mp3_backups/BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:25,401 [INFO] [OK] BORN TO BE ALIVEPATRIC HERNANDEZX-MIX CLASSICS320kbps_20250517_142020.mp3 | Géneros: ['Electronic', 'Pop', 'Electronic Dance Music'] | Año: 2018
+2025-05-22 01:43:25,401 [INFO] [3/10] Procesando: ./mp3_backups/Cheryl Lynn - Got To Be Real ( Part 1 )_20250517_142137.mp3
+2025-05-22 01:43:25,421 [INFO] track.getTopTags
+2025-05-22 01:43:25,616 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:25,617 [INFO] track.getInfo
+2025-05-22 01:43:25,845 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:25,846 [INFO] track.getInfo
+2025-05-22 01:43:26,111 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:26,187 [ERROR] Error getting Spotify data for Cheryl Lynn - Got To Be Real ( Part 1 ): error: invalid_client, error_description: Invalid client
+2025-05-22 01:43:26,196 [INFO] Géneros detectados: ['Funk', 'Soul']
+2025-05-22 01:43:26,196 [INFO] Year to be written: 1997
+2025-05-22 01:43:26,196 [INFO] Backup skipped for ./mp3_backups/Cheryl Lynn - Got To Be Real ( Part 1 )_20250517_142137.mp3 as no backup directory is configured.
+2025-05-22 01:43:26,196 [WARNING] No se pudo crear backup para ./mp3_backups/Cheryl Lynn - Got To Be Real ( Part 1 )_20250517_142137.mp3. Procediendo sin backup.
+2025-05-22 01:43:26,196 [INFO] Géneros escritos exitosamente en ./mp3_backups/Cheryl Lynn - Got To Be Real ( Part 1 )_20250517_142137.mp3: ['Funk', 'Soul']
+2025-05-22 01:43:26,197 [ERROR] Error escribiendo año en ./mp3_backups/Cheryl Lynn - Got To Be Real ( Part 1 )_20250517_142137.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:26,197 [INFO] [OK] Cheryl Lynn - Got To Be Real ( Part 1 )_20250517_142137.mp3 | Géneros: ['Funk', 'Soul'] | Año: 1997
+2025-05-22 01:43:26,197 [INFO] [4/10] Procesando: ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 1 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3
+2025-05-22 01:43:27,554 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:27,555 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:27,555 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:27,555 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:27,555 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:27,555 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:27,556 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:alias>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:27,556 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:27,556 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:28,168 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:29,168 [INFO] in <ws2:artist>, uncaught attribute type-id
+2025-05-22 01:43:29,169 [INFO] in <ws2:area>, uncaught attribute type-id
+2025-05-22 01:43:29,169 [INFO] in <ws2:begin-area>, uncaught attribute type-id
+2025-05-22 01:43:29,172 [INFO] track.getTopTags
+2025-05-22 01:43:29,369 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 400 Bad Request"
+2025-05-22 01:43:29,371 [WARNING] Failed to get track tags: Track not found
+2025-05-22 01:43:29,371 [INFO] track.getInfo
+2025-05-22 01:43:29,575 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:29,577 [WARNING] Failed to get album info: Track not found
+2025-05-22 01:43:29,577 [INFO] track.getInfo
+2025-05-22 01:43:29,776 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:29,776 [WARNING] Failed to get wiki date: Track not found
+2025-05-22 01:43:30,221 [INFO] No results found on Discogs for DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )
+2025-05-22 01:43:30,291 [ERROR] Error getting Spotify data for DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ): error: invalid_client, error_description: Invalid client
+2025-05-22 01:43:30,291 [INFO] Géneros detectados: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:30,291 [INFO] Year to be written: 2017
+2025-05-22 01:43:30,291 [INFO] Backup skipped for ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 1 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3 as no backup directory is configured.
+2025-05-22 01:43:30,291 [WARNING] No se pudo crear backup para ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 1 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3. Procediendo sin backup.
+2025-05-22 01:43:30,292 [INFO] Géneros escritos exitosamente en ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 1 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:30,292 [ERROR] Error escribiendo año en ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 1 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:30,292 [INFO] [OK] CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 1 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3 | Géneros: ['Pop', 'Electronic Dance Music', 'House'] | Año: 2017
+2025-05-22 01:43:30,292 [INFO] [5/10] Procesando: ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 2 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3
+2025-05-22 01:43:31,754 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:31,754 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:31,755 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:31,755 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:31,755 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:31,755 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:31,755 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:31,756 [INFO] in <ws2:recording>, uncaught <first-release-date>
+2025-05-22 01:43:31,756 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:32,436 [INFO] in <ws2:release-group>, uncaught attribute type-id
+2025-05-22 01:43:33,361 [INFO] in <ws2:artist>, uncaught attribute type-id
+2025-05-22 01:43:33,361 [INFO] in <ws2:area>, uncaught attribute type-id
+2025-05-22 01:43:33,361 [INFO] in <ws2:begin-area>, uncaught attribute type-id
+2025-05-22 01:43:33,365 [INFO] track.getTopTags
+2025-05-22 01:43:33,557 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 400 Bad Request"
+2025-05-22 01:43:33,559 [WARNING] Failed to get track tags: Track not found
+2025-05-22 01:43:33,559 [INFO] track.getInfo
+2025-05-22 01:43:33,756 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:33,758 [WARNING] Failed to get album info: Track not found
+2025-05-22 01:43:33,758 [INFO] track.getInfo
+2025-05-22 01:43:33,947 [INFO] HTTP Request: POST https://ws.audioscrobbler.com/2.0/ "HTTP/1.1 200 OK"
+2025-05-22 01:43:33,969 [WARNING] Failed to get wiki date: Track not found
+2025-05-22 01:43:34,189 [INFO] No results found on Discogs for DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )
+2025-05-22 01:43:34,263 [ERROR] Error getting Spotify data for DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ): error: invalid_client, error_description: Invalid client
+2025-05-22 01:43:34,264 [INFO] Géneros detectados: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,264 [INFO] Year to be written: 2017
+2025-05-22 01:43:34,264 [INFO] Backup skipped for ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 2 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3 as no backup directory is configured.
+2025-05-22 01:43:34,264 [WARNING] No se pudo crear backup para ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 2 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3. Procediendo sin backup.
+2025-05-22 01:43:34,264 [INFO] Géneros escritos exitosamente en ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 2 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,265 [ERROR] Error escribiendo año en ./mp3_backups/CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 2 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:34,266 [INFO] [OK] CONT' (PT2) UPTOWN 80'S DANCE MIX ( PART 2 )DJ SABSX-MIX CLASSICS320kbps_20250517_142020.mp3 | Géneros: ['Pop', 'Electronic Dance Music', 'House'] | Año: 2017
+2025-05-22 01:43:34,266 [INFO] [6/10] Procesando: ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ) [X-MIX CLASSICS]_20250517_142121.mp3
+2025-05-22 01:43:34,287 [INFO] Géneros detectados: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,287 [INFO] Year to be written: 2017
+2025-05-22 01:43:34,287 [INFO] Backup skipped for ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ) [X-MIX CLASSICS]_20250517_142121.mp3 as no backup directory is configured.
+2025-05-22 01:43:34,287 [WARNING] No se pudo crear backup para ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ) [X-MIX CLASSICS]_20250517_142121.mp3. Procediendo sin backup.
+2025-05-22 01:43:34,287 [INFO] Géneros escritos exitosamente en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ) [X-MIX CLASSICS]_20250517_142121.mp3: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,288 [ERROR] Error escribiendo año en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ) [X-MIX CLASSICS]_20250517_142121.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:34,288 [INFO] [OK] DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 ) [X-MIX CLASSICS]_20250517_142121.mp3 | Géneros: ['Pop', 'Electronic Dance Music', 'House'] | Año: 2017
+2025-05-22 01:43:34,288 [INFO] [7/10] Procesando: ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )_20250517_142137.mp3
+2025-05-22 01:43:34,309 [INFO] Géneros detectados: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,309 [INFO] Year to be written: 2017
+2025-05-22 01:43:34,309 [INFO] Backup skipped for ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )_20250517_142137.mp3 as no backup directory is configured.
+2025-05-22 01:43:34,309 [WARNING] No se pudo crear backup para ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )_20250517_142137.mp3. Procediendo sin backup.
+2025-05-22 01:43:34,309 [INFO] Géneros escritos exitosamente en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )_20250517_142137.mp3: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,309 [ERROR] Error escribiendo año en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )_20250517_142137.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:34,310 [INFO] [OK] DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 1 )_20250517_142137.mp3 | Géneros: ['Pop', 'Electronic Dance Music', 'House'] | Año: 2017
+2025-05-22 01:43:34,310 [INFO] [8/10] Procesando: ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ) [X-MIX CLASSICS]_20250517_142122.mp3
+2025-05-22 01:43:34,340 [INFO] Géneros detectados: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,340 [INFO] Year to be written: 2017
+2025-05-22 01:43:34,340 [INFO] Backup skipped for ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ) [X-MIX CLASSICS]_20250517_142122.mp3 as no backup directory is configured.
+2025-05-22 01:43:34,340 [WARNING] No se pudo crear backup para ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ) [X-MIX CLASSICS]_20250517_142122.mp3. Procediendo sin backup.
+2025-05-22 01:43:34,340 [INFO] Géneros escritos exitosamente en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ) [X-MIX CLASSICS]_20250517_142122.mp3: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,341 [ERROR] Error escribiendo año en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ) [X-MIX CLASSICS]_20250517_142122.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:34,341 [INFO] [OK] DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 ) [X-MIX CLASSICS]_20250517_142122.mp3 | Géneros: ['Pop', 'Electronic Dance Music', 'House'] | Año: 2017
+2025-05-22 01:43:34,341 [INFO] [9/10] Procesando: ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )_20250517_142137.mp3
+2025-05-22 01:43:34,360 [INFO] Géneros detectados: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,360 [INFO] Year to be written: 2017
+2025-05-22 01:43:34,360 [INFO] Backup skipped for ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )_20250517_142137.mp3 as no backup directory is configured.
+2025-05-22 01:43:34,360 [WARNING] No se pudo crear backup para ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )_20250517_142137.mp3. Procediendo sin backup.
+2025-05-22 01:43:34,361 [INFO] Géneros escritos exitosamente en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )_20250517_142137.mp3: ['Pop', 'Electronic Dance Music', 'House']
+2025-05-22 01:43:34,361 [ERROR] Error escribiendo año en ./mp3_backups/DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )_20250517_142137.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:34,361 [INFO] [OK] DJ SABS - CONT' (PT3) UPTOWN 80'S DANCE MIX ( PART 2 )_20250517_142137.mp3 | Géneros: ['Pop', 'Electronic Dance Music', 'House'] | Año: 2017
+2025-05-22 01:43:34,361 [INFO] [10/10] Procesando: ./mp3_backups/GOT TO BE REAL ( PART 1 )CHERYL LYNNX-MIX CLASSICS320kbps_20250517_142122.mp3
+2025-05-22 01:43:34,374 [INFO] Géneros detectados: ['Funk', 'Soul']
+2025-05-22 01:43:34,374 [INFO] Year to be written: 1997
+2025-05-22 01:43:34,375 [INFO] Backup skipped for ./mp3_backups/GOT TO BE REAL ( PART 1 )CHERYL LYNNX-MIX CLASSICS320kbps_20250517_142122.mp3 as no backup directory is configured.
+2025-05-22 01:43:34,375 [WARNING] No se pudo crear backup para ./mp3_backups/GOT TO BE REAL ( PART 1 )CHERYL LYNNX-MIX CLASSICS320kbps_20250517_142122.mp3. Procediendo sin backup.
+2025-05-22 01:43:34,375 [INFO] Géneros escritos exitosamente en ./mp3_backups/GOT TO BE REAL ( PART 1 )CHERYL LYNNX-MIX CLASSICS320kbps_20250517_142122.mp3: ['Funk', 'Soul']
+2025-05-22 01:43:34,375 [ERROR] Error escribiendo año en ./mp3_backups/GOT TO BE REAL ( PART 1 )CHERYL LYNNX-MIX CLASSICS320kbps_20250517_142122.mp3: 'Mp3FileHandler' object has no attribute 'write_year'
+Traceback (most recent call last):
+  File "/Volumes/My Passport/Proyectos/basico/enriquecer_mp3_cli.py", line 182, in main
+    file_handler.write_year(file_path, year)
+    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Mp3FileHandler' object has no attribute 'write_year'. Did you mean: 'write_genre'?
+
+2025-05-22 01:43:34,375 [INFO] [OK] GOT TO BE REAL ( PART 1 )CHERYL LYNNX-MIX CLASSICS320kbps_20250517_142122.mp3 | Géneros: ['Funk', 'Soul'] | Año: 1997
+2025-05-22 01:43:34,375 [INFO] Procesados: 10, Errores: 0
