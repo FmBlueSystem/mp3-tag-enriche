@@ -62,10 +62,13 @@ class ProcessingThread(QThread):
         
     def process_file(self, filepath: str) -> Dict[str, Any]:
         """Procesa un archivo individual."""
+        logger.debug(f"Iniciando process_file para {filepath}") # Added logging
         try:
             if self.analyze_only:
+                logger.debug(f"Modo análisis para {filepath}") # Added logging
                 result = self.model.analyze(filepath, chunk_size=8192)
             else:
+                logger.debug(f"Modo procesamiento para {filepath}") # Added logging
                 result = self.model.process(
                     filepath,
                     self.confidence,
@@ -73,18 +76,23 @@ class ProcessingThread(QThread):
                     self.rename_files,
                     chunk_size=8192
                 )
+            logger.debug(f"process_file completado para {filepath}. Resultado: {result}") # Added logging
             return result
         except Exception as e:
-            logger.error(f"Error procesando {filepath}: {str(e)}")
+            logger.error(f"Excepción en process_file para {filepath}: {str(e)}", exc_info=True) # Added logging with exc_info
             return {"error": str(e)}
 
     def run(self):
         """Ejecuta el procesamiento de archivos en segundo plano usando la cola de tareas."""
+        logger.info("ProcessingThread.run iniciado.") # Added logging
         if not hasattr(self, '_thread_lock'):
             from threading import Lock
             self._thread_lock = Lock()
-            
+        
+        total_files = len(self.file_paths)  # <-- Inicialización temprana
+        
         if not self.file_paths:
+            logger.info("No hay archivos seleccionados para procesar. Finalizando run.") # Added logging
             self.progress.emit("No hay archivos seleccionados para procesar.")
             self.finished.emit({
                 "total": 0,
@@ -95,6 +103,8 @@ class ProcessingThread(QThread):
             })
             return
 
+        logger.info(f"Total de archivos a procesar: {len(self.file_paths)}") # Added logging
+
         # Inicializar contadores
         processed_count = 0
         success_count = 0
@@ -103,6 +113,7 @@ class ProcessingThread(QThread):
         results_details = []
 
         # Crear tareas para cada archivo
+        logger.info("Creando tareas para cada archivo.") # Added logging
         tasks = {}
         for filepath in self.file_paths:
             task_id = str(uuid.uuid4())
@@ -113,11 +124,13 @@ class ProcessingThread(QThread):
                     filepath
                 )
                 tasks[task_id] = (task, filepath)
+        logger.info(f"Tareas creadas: {len(tasks)}") # Added logging
 
         # Procesar tareas
         retry_count = 0
         max_retries = 3
         
+        logger.info("Iniciando procesamiento de tareas.") # Added logging
         while self.is_running and processed_count < len(self.file_paths):
             task = self.task_queue.get_next_task()
             if not task:
@@ -139,98 +152,94 @@ class ProcessingThread(QThread):
 
             try:
                 filepath = next(fp for _, (t, fp) in tasks.items() if t == task)
+                logger.debug(f"Obtenido filepath {filepath} para tarea {task.id}") # Added logging
             except StopIteration:
                 logger.error("No se encontró el filepath asociado a la tarea")
                 continue
+            logger.info(f"Emitiendo progress signal para {Path(filepath).name}") # Added logging
             self.progress.emit(f"Procesando {Path(filepath).name}")
             try:
+                logger.debug(f"Iniciando ejecución de tarea {task.id} para {filepath}") # Added logging
                 with self._thread_lock:
+                    logger.debug(f"Emitiendo task_state_changed RUNNING para tarea {task.id}") # Added logging
                     self.task_state_changed.emit(task.id, TaskState.RUNNING)
                     result = task.func(task.args[0])
+                    logger.debug(f"Tarea {task.id} ejecutada. Resultado: {result}") # Added logging
                     
                     actual_error = result.get("error")
                     if actual_error:
+                        logger.error(f"Tarea {task.id} fallida con error: {actual_error}") # Added logging
                         self.task_queue.complete_task(task, error=actual_error)
+                        logger.debug(f"Emitiendo task_state_changed FAILED para tarea {task.id}") # Added logging
                         self.task_state_changed.emit(task.id, TaskState.FAILED)
                         error_count += 1
                         logger.error(f"Error al procesar {filepath}: {actual_error}")
+                        logger.info(f"Emitiendo file_processed error para {filepath}") # Added logging
                         self.file_processed.emit(filepath, f"Error: {actual_error}", True)
                     else:
+                        logger.debug(f"Tarea {task.id} completada exitosamente.") # Added logging
                         self.task_queue.complete_task(task, result=result)
+                        logger.debug(f"Emitiendo task_state_changed COMPLETED para tarea {task.id}") # Added logging
                         self.task_state_changed.emit(task.id, TaskState.COMPLETED)
                 
-                if "written" in result:
-                    if result["written"]:
-                        success_count += 1
-                        if not ("renamed" in result and result["renamed"]):
-                            message = str(result.get("message", "Éxito en escritura de metadatos."))
-                            self.file_processed.emit(filepath, message, False)
-                    else:
-                        error_count += 1
-                        err_msg = result.get('error', 'Error desconocido durante escritura de metadatos')
-                        self.file_processed.emit(filepath, f"Error al escribir metadatos: {err_msg}", True)
-                elif not self.analyze_only:
-                    error_count += 1
-                    self.file_processed.emit(filepath, "Error: Resultado inesperado del procesamiento", True)
-                else:
-                    success_count += 1
-                    
-                    # Buscar géneros tanto en detected_genres como en found_genres
+                # Determine message and error status based on result
+                message = ""
+                is_error = False
+
+                if actual_error:
+                    message = f"Error: {actual_error}"
+                    is_error = True
+                    error_count += 1 # Increment error_count here
+                elif self.analyze_only:
                     genres = result.get("detected_genres", {}) or result.get("found_genres", {})
-                    
                     if genres:
                         genre_str = ", ".join(
                             f"{g} ({c:.2f})" if isinstance(c, float) else f"{g}"
                             for g, c in sorted(genres.items(), key=lambda x: x[1], reverse=True)
                         )
-                        self.file_processed.emit(filepath, f"Éxito en análisis. Géneros detectados: {genre_str}", False)
+                        message = f"Éxito en análisis. Géneros detectados: {genre_str}"
                     else:
-                        logger.warning(f"No se encontraron géneros en el resultado para {filepath}")
-                        self.file_processed.emit(filepath, "No se detectaron géneros", False)
-                        
-                    logger.debug(f"Resultado del análisis para {filepath}: {result}")
+                        message = "No se detectaron géneros"
+                    is_error = False
+                    success_count += 1 # Increment success_count here
+                elif "written" in result and result["written"]:
+                    # Metadata written successfully
+                    if "renamed" in result and result["renamed"]:
+                        # File was also renamed
+                        message = result.get("message", f"Renombrado a: {os.path.basename(result.get('new_filepath', ''))}")
+                        renamed_count += 1 # Increment renamed_count here
+                    else:
+                        # Metadata written, but file not renamed (either not requested or name was correct)
+                        message = result.get("message", "Metadatos actualizados.")
+                    success_count += 1 # Increment success_count here
+                    is_error = False
+                elif "written" in result and not result["written"]:
+                    # Metadata writing failed
+                    message = result.get('error', 'Error desconocido durante escritura de metadatos')
+                    is_error = True
+                    error_count += 1 # Increment error_count here
+                elif result.get("success") is False:
+                     # Catch other specific errors or failures not covered above
+                     message = result.get('message', result.get('error', 'Fallo desconocido durante el procesamiento'))
+                     is_error = True
+                     error_count += 1 # Increment error_count here
+                else:
+                    # Unexpected result structure or unhandled success case
+                    message = "Resultado inesperado del procesamiento"
+                    is_error = True
+                    error_count += 1 # Increment error_count here
 
-                # La señal circuit_breaker_closed se emite en el manejador de éxito
-                if not self.task_queue.circuit_breaker.is_open:
+                # Emit the signal with the determined message and error status
+                self.file_processed.emit(filepath, message, is_error)
+
+                # The signal circuit_breaker_closed is emitted in the success handler
+                if not self.task_queue.circuit_breaker.is_open and not is_error:
                     self.circuit_breaker_closed.emit()
                     logger.debug("Circuit breaker cerrado después de procesamiento exitoso")
-                
+
                 processed_count += 1
                 total_files = len(self.file_paths)
                 self.progress.emit(f"Procesado: {processed_count}/{total_files} - {os.path.basename(filepath)}")
-
-                if "renamed" in result:                    
-                    if result["renamed"]:
-                        renamed_count += 1
-                        new_filepath_val = result.get('new_filepath')
-                        if result.get("message"):
-                             msg = str(result.get("message", ""))
-                             logger.debug(f"Emitiendo mensaje de renombrado para {filepath}: {msg}")
-                             self.file_processed.emit(filepath, msg, False)
-                        elif new_filepath_val:
-                             msg = f"Renombrado a: {os.path.basename(new_filepath_val)}"
-                             logger.debug(f"Emitiendo mensaje de renombrado para {filepath}: {msg}")
-                             self.file_processed.emit(filepath, msg, False)
-
-                    elif result.get("success") and result.get("new_path") == filepath:
-                        if result.get("message"):
-                            msg = str(result.get("message", ""))
-                            logger.debug(f"Emitiendo mensaje sin cambios para {filepath}: {msg}")
-                            self.file_processed.emit(filepath, msg, False)
-                        else:
-                            msg = "Tags actualizados (nombre sin cambios)."
-                            logger.debug(f"Emitiendo mensaje de actualización para {filepath}: {msg}")
-                            self.file_processed.emit(filepath, msg, False)
-                    else:
-                        rename_specific_error = result.get("error")
-                        if rename_specific_error and not actual_error:
-                            error_msg = f"Fallo al renombrar/actualizar tags: {rename_specific_error}"
-                            logger.debug(f"Emitiendo error de renombrado para {filepath}: {error_msg}")
-                            self.file_processed.emit(filepath, error_msg, True)
-                        elif not actual_error and not result.get("success"):
-                             error_msg = f"Fallo al renombrar/actualizar tags: {result.get('message', 'Razón desconocida')}"
-                             logger.debug(f"Emitiendo error de actualización para {filepath}: {error_msg}")
-                             self.file_processed.emit(filepath, error_msg, True)
 
                 results_details.append({
                     "filepath": filepath,
@@ -240,29 +249,35 @@ class ProcessingThread(QThread):
                     "threshold_used": result.get("threshold_used", 0.3),
                     "renamed_to": result.get("new_filepath", ""),
                     "error": result.get("error", ""),
-                    "rename_error": result.get("error", ""),
-                    "rename_message": result.get("message", ""),
+                    "rename_error": result.get("error", ""), # Keep for compatibility with existing results_details structure
+                    "rename_message": result.get("message", ""), # Keep for compatibility
                     "detected_genres_initial_clean": result.get("detected_genres_initial_clean", {}),
                     "detected_genres_written": result.get("selected_genres_written", []),
-                    "tag_update_error": result.get("tag_update_error", "")
+                    "tag_update_error": result.get("tag_update_error", "") # Keep for compatibility
                 })
             except Exception as e:
+                logger.error(f"Excepción no manejada durante el procesamiento de tarea {task.id} para {filepath}: {str(e)}", exc_info=True) # Added logging with exc_info
                 with self._thread_lock:
                     error_count += 1
                     error_msg = f"Error: {str(e)}"
                     logger.error(f"Error al procesar {filepath}: {str(e)}")
                     self.task_queue.complete_task(task, error=error_msg)
+                    logger.debug(f"Emitiendo task_state_changed FAILED para tarea {task.id} debido a excepción no manejada.") # Added logging
                     self.task_state_changed.emit(task.id, TaskState.FAILED)
+                    logger.info(f"Emitiendo file_processed error para {filepath} debido a excepción no manejada.") # Added logging
                     self.file_processed.emit(filepath, error_msg, True)
 
         try:
+            logger.info("Limpiando tareas completadas.") # Added logging
             # Limpiar tareas completadas
             with self._thread_lock:
                 self.task_queue._active_tasks = [
                     t for t in self.task_queue._active_tasks
                     if t.state not in (TaskState.COMPLETED, TaskState.FAILED)
                 ]
+                logger.debug(f"Tareas activas después de limpieza: {len(self.task_queue._active_tasks)}") # Added logging
                 
+            logger.info("Emitiendo finished signal.") # Added logging
             self.finished.emit({
                 "total": total_files,
                 "success": success_count,
@@ -270,5 +285,6 @@ class ProcessingThread(QThread):
                 "renamed": renamed_count,
                 "details": results_details
             })
+            logger.info("ProcessingThread.run finalizado.") # Added logging
         except Exception as e:
-            logger.error(f"Error finalizando el procesamiento: {str(e)}")
+            logger.error(f"Error finalizando el procesamiento: {str(e)}", exc_info=True) # Added logging with exc_info

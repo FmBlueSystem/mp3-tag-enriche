@@ -7,6 +7,12 @@ from .music_apis import MusicAPI
 from .file_handler import Mp3FileHandler
 from .genre_normalizer import GenreNormalizer
 
+# Import all available API classes for convenience
+try:
+    from .spotify_api import SpotifyAPI
+except ImportError:
+    SpotifyAPI = None
+
 class GenreDetector:
     """Detect and normalize music genres from various sources."""
     
@@ -71,7 +77,9 @@ class GenreDetector:
             "file_info": {},
             "metadata": {},
             "current_genres": [],
-            "detected_genres": {}
+            "detected_genres": {},
+            "year": None,  # Initialize year field
+            "api_results": {}  # Store individual API results
         }
         
         # Get file info usando chunks
@@ -101,12 +109,15 @@ class GenreDetector:
         
         print(f"\nProcessing: {metadata['artist']} - {metadata['title']}")
         
-        # Check cache first
-        cache_key = f"{metadata['artist']}_{metadata['title']}"
-        if cache_key in self._genre_cache:
-            result["detected_genres"] = self._genre_cache[cache_key]
-            result["source"] = "cache"
-            return result
+        # Check cache first - only use cache for valid artist/title combinations
+        if metadata['artist'] and metadata['title'] and metadata['artist'] != "None" and metadata['title'] != "None":
+            cache_key = f"{metadata['artist']}_{metadata['title']}"
+            if cache_key in self._genre_cache:
+                cached_data = self._genre_cache[cache_key]
+                result["detected_genres"] = cached_data.get("detected_genres", {})
+                result["year"] = cached_data.get("year")
+                result["source"] = "cache"
+                return result
             
         # Query APIs
         api_results = []
@@ -116,6 +127,14 @@ class GenreDetector:
             try:
                 print(f"Querying {api.__class__.__name__}...")
                 track_info = api.get_track_info(metadata['artist'], metadata['title'])
+                
+                # Store complete API result for later access
+                result["api_results"][api.__class__.__name__] = track_info
+                
+                # Extract year information if available
+                if not result["year"] and track_info.get("year"):
+                    result["year"] = track_info["year"]
+                
                 genres = track_info.get('genres', [])
                 # Convert list of genres to dict with confidence scores (1.0 for each)
                 genre_scores = {genre: 1.0 for genre in genres}
@@ -128,18 +147,33 @@ class GenreDetector:
                 api_errors.append(error_msg)
                 
         if not api_results:
-            result["error"] = "API Error" if api_errors else "No genres detected from APIs"
+            # En lugar de error, continuamos con géneros vacíos
+            result["detected_genres"] = {}
+            result["warning"] = "API Error" if api_errors else "No genres detected from APIs"
             return result
             
         # Merge and normalize results
         merged_genres = self._merge_genre_scores(api_results)
         if not merged_genres:
-            result["error"] = "No genres met confidence threshold"
+            # En lugar de error, continuamos con géneros vacíos
+            result["detected_genres"] = {}
+            result["warning"] = "No genres met confidence threshold"
             return result
             
-        # Store original scores in the result
+        # Store original scores and year in the result
         result["detected_genres"] = merged_genres
-        self._genre_cache[cache_key] = merged_genres
+        
+        # Create a cache entry with more comprehensive information
+        cache_entry = {
+            "detected_genres": merged_genres,
+            "year": result.get("year")
+        }
+        
+        # Only cache results for valid metadata
+        if metadata['artist'] and metadata['title'] and metadata['artist'] != "None" and metadata['title'] != "None":
+            cache_key = f"{metadata['artist']}_{metadata['title']}"
+            self._genre_cache[cache_key] = cache_entry
+            
         return result
         
     def analyze_files(self, file_paths: List[str], chunk_size: int = 8192) -> Dict[str, Dict]:

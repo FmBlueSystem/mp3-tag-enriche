@@ -4,9 +4,23 @@ import os
 import json
 import sys
 from typing import Dict, List
-from .core.music_apis import MusicBrainzAPI, LastFmAPI
+from .core.music_apis import MusicBrainzAPI, LastFmAPI, DiscogsAPI
 from .core.genre_detector import GenreDetector
 import logging
+
+# Try to import Spotify API
+try:
+    from .core.spotify_api import SpotifyAPI
+    SPOTIFY_AVAILABLE = True
+except ImportError:
+    SPOTIFY_AVAILABLE = False
+
+# Try to import config loader
+try:
+    from .core.config_loader import load_api_config
+    CONFIG_AVAILABLE = True
+except ImportError:
+    CONFIG_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +43,8 @@ def verify_path(path: str) -> bool:
 def create_detector(lastfm_api_key: str = None, 
                    lastfm_api_secret: str = None,
                    backup_dir: str = None,
+                   use_spotify: bool = True,
+                   config_path: str = None,
                    verbose: bool = True) -> GenreDetector:
     """Create and configure the genre detector.
     
@@ -36,6 +52,8 @@ def create_detector(lastfm_api_key: str = None,
         lastfm_api_key: Last.fm API key
         lastfm_api_secret: Last.fm API secret
         backup_dir: Directory for file backups
+        use_spotify: Whether to use Spotify API
+        config_path: Path to API configuration file
         verbose: Enable verbose output
         
     Returns:
@@ -44,11 +62,33 @@ def create_detector(lastfm_api_key: str = None,
     logger.info("Creating detector...")
     apis = [MusicBrainzAPI()]
     
+    # Add Last.fm API if credentials provided
     if lastfm_api_key and lastfm_api_secret:
         logger.info("Adding Last.fm API")
         apis.append(LastFmAPI(lastfm_api_key, lastfm_api_secret))
     
-    detector = GenreDetector(apis=apis, verbose=verbose)
+    # Add Discogs API
+    apis.append(DiscogsAPI())
+    
+    # Add Spotify API if available and requested
+    if use_spotify and SPOTIFY_AVAILABLE and CONFIG_AVAILABLE:
+        try:
+            # Load configuration
+            config = load_api_config(config_path)
+            spotify_config = config.get("spotify", {})
+            client_id = spotify_config.get("client_id")
+            client_secret = spotify_config.get("client_secret")
+            
+            if client_id and client_secret:
+                logger.info("Adding Spotify API")
+                spotify_api = SpotifyAPI(client_id=client_id, client_secret=client_secret)
+                apis.append(spotify_api)
+            else:
+                logger.warning("Spotify API credentials missing, continuing without Spotify")
+        except Exception as e:
+            logger.error(f"Error initializing Spotify API: {e}")
+    
+    detector = GenreDetector(apis=apis)
     if backup_dir:
         logger.info(f"Setting backup directory for file handler: {backup_dir}")
         detector.file_handler.backup_dir = backup_dir
@@ -175,6 +215,17 @@ def main():
         help='Disable verbose output'
     )
     
+    parser.add_argument(
+        '--no-spotify',
+        action='store_true',
+        help='Disable Spotify API integration'
+    )
+    
+    parser.add_argument(
+        '--config',
+        help='Path to API configuration file'
+    )
+    
     args = parser.parse_args()
     
     if not args.quiet:
@@ -192,7 +243,8 @@ def main():
             lastfm_api_key=args.lastfm_key,
             lastfm_api_secret=args.lastfm_secret,
             backup_dir=args.backup_dir,
-            verbose=not args.quiet
+            use_spotify=not args.no_spotify,
+            config_path=args.config
         )
         
         # Process files

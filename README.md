@@ -11,6 +11,7 @@ A Material Design-compliant application for detecting and normalizing music genr
 - Automatic file backups
 - Genre normalization and filtering
 - Batch processing capabilities
+- **Advanced metadata extraction** from filenames when ID3 tags are missing
 
 ## Installation
 
@@ -49,6 +50,7 @@ pytest --cov=src --cov-report=html tests/
 pytest tests/test_file_handler.py
 pytest tests/test_genre_detection.py
 pytest tests/test_gui.py
+pytest tests/test_improved_extraction.py
 ```
 
 ## Accessibility Features
@@ -106,6 +108,8 @@ make html
 ├── src/
 │   ├── core/           # Core business logic
 │   │   ├── file_handler.py
+│   │   ├── enhanced_mp3_handler.py  # Improved metadata extraction
+│   │   ├── improved_file_handler.py # Advanced extraction algorithms
 │   │   ├── genre_detector.py
 │   │   ├── genre_normalizer.py
 │   │   └── music_apis.py
@@ -115,10 +119,54 @@ make html
 ├── tests/              # Test suite
 │   ├── test_file_handler.py
 │   ├── test_genre_detection.py
-│   └── test_gui.py
+│   ├── test_gui.py
+│   └── test_improved_extraction.py
+├── demo_extractor_mejorado.py  # Demo script for extraction improvements
+├── batch_process_mp3.py        # Batch processing script
+├── compare_extraction_methods.py  # Comparison tool
 ├── .coveragerc         # Coverage configuration
 ├── pytest.ini         # Pytest configuration
 └── requirements.txt    # Project dependencies
+```
+
+## Metadata Extraction Tools
+
+The project now includes enhanced tools for metadata extraction:
+
+### Demo Script
+
+Test the improved extraction capabilities with:
+
+```bash
+# Show predefined test cases
+python demo_extractor_mejorado.py --test-cases
+
+# Analyze real files in a directory
+python demo_extractor_mejorado.py --directory /path/to/mp3/files --limit 20
+
+# Analyze filename patterns in a collection
+python demo_extractor_mejorado.py --directory /path/to/mp3/files --analyze-patterns
+
+# Detailed output
+python demo_extractor_mejorado.py --directory /path/to/mp3/files --verbose
+```
+
+### Batch Processing
+
+Process multiple files with the enhanced extraction algorithm:
+
+```bash
+# Simulation mode (no changes)
+python batch_process_mp3.py --directory /path/to/mp3/files
+
+# Apply changes to files
+python batch_process_mp3.py --directory /path/to/mp3/files --apply
+
+# Force updates even if tags exist
+python batch_process_mp3.py --directory /path/to/mp3/files --apply --force
+
+# Process with more parallelism
+python batch_process_mp3.py --directory /path/to/mp3/files --apply --workers 8
 ```
 
 ## Contributing

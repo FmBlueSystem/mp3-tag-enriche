@@ -89,15 +89,20 @@ class TestFileRenaming:
     """Test file renaming functionality."""
 
     def test_genre_in_filename(self, file_handler, sample_mp3):
-        """Test including genres in filename."""
+        """Test that genres are not included in filename but are written to metadata."""
         genres = ["Rock", "Alternative Rock"]
         result = file_handler.rename_file_by_genre(
             sample_mp3,
             genres_to_write=genres,
-            include_genre_in_filename=True
+            include_genre_in_filename=True  # Este valor ya no afecta el nombre del archivo
         )
         assert result["success"]
-        assert "[Rock, Alternative Rock]" in result["new_path"]
+        assert "[Rock, Alternative Rock]" not in result["new_path"]  # Verificar que el género NO está en el nombre
+        
+        # Verificar que los géneros se escribieron en los metadatos
+        tags = file_handler.read_tags(str(Path(result["new_path"])))
+        assert "genre" in tags
+        assert sorted(tags["genre"]) == sorted(genres)
 
     def test_special_characters(self, file_handler, sample_mp3):
         """Test handling of special characters in filenames."""

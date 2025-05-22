@@ -27,6 +27,13 @@ class MainWindow(QMainWindow):
     """Ventana principal de la aplicación."""
 
     def __init__(self):
+        # Limpiar el log al iniciar la app
+        try:
+            open('app.log', 'w').close()
+            logging.info('app.log limpiado al iniciar la aplicación.')
+        except Exception as e:
+            logging.error(f'No se pudo limpiar app.log al iniciar: {e}')
+        logger.info("Iniciando MainWindow de la aplicación Genre Detector.")
         super().__init__()
         self.setWindowTitle(tr("ui.window.title"))
         self.setGeometry(100, 100, 1200, 800)  # Increased width to accommodate side panel
@@ -212,15 +219,17 @@ class MainWindow(QMainWindow):
         self._ensure_model_backup_dir_updated()
 
     def process_files(self):
-        """Inicia el procesamiento de archivos."""
+        logger.info("Intentando iniciar procesamiento de archivos.")
         files_to_process = self.file_results_table.get_all_files()
-        
+        logger.info(f"Archivos a procesar: {files_to_process}")
         if not files_to_process:
+            logger.warning("No hay archivos para procesar.")
             self.statusBar().showMessage(tr("general.status.no_files"), 3000)
             return
-
+        logger.info("Configurando modelo y UI para procesamiento.")
         self._ensure_model_backup_dir_updated()
         settings = self.control_panel.get_settings()
+        logger.info(f"Configuración de procesamiento: {settings}")
 
         # Configurar UI para procesamiento
         self.progress_bar.setMaximum(len(files_to_process))
@@ -258,10 +267,11 @@ class MainWindow(QMainWindow):
         self.backup_panel.select_backup_dir_btn.setEnabled(False)
         self.cancel_btn.setEnabled(True)
         
+        logger.info("Iniciando hilo de procesamiento.")
         self.processing_thread.start()
 
     def update_table_on_file_processed(self, file_path: str, result_message: str, is_error: bool = False):
-        """Actualiza la tabla cuando un archivo ha sido procesado."""
+        logger.info(f"Archivo procesado: {file_path}, Mensaje: {result_message}, Error: {is_error}")
         try:
             if not isinstance(file_path, str):
                 logger.error(f"TypeError: file_path debe ser str, no {type(file_path)}")
@@ -283,10 +293,26 @@ class MainWindow(QMainWindow):
         """Actualiza la barra de progreso y mensajes de estado."""
         if "Procesado:" in message:
             try:
-                current, total = map(int, message.split(":")[1].split("/"))
-                self.progress_bar.setValue(current)
-            except (ValueError, IndexError):
-                logger.error(f"Error parseando mensaje de progreso: {message}")
+                parts = message.split(":")
+                if len(parts) != 2:
+                    logger.warning(f"Formato de mensaje incorrecto: {message}")
+                    return
+                    
+                numbers = parts[1].strip().split("/")
+                if len(numbers) != 2:
+                    logger.warning(f"Formato de números incorrecto: {parts[1]}")
+                    return
+                    
+                try:
+                    current = int(numbers[0].strip())
+                    total = int(numbers[1].strip())
+                    self.progress_bar.setValue(current)
+                except ValueError:
+                    logger.warning(f"No se pudieron convertir a números: {numbers}")
+                    return
+                    
+            except Exception as e:
+                logger.error(f"Error parseando mensaje de progreso: {message} - {str(e)}")
         
     def on_circuit_breaker_opened(self):
         """Maneja la apertura del circuit breaker."""
@@ -307,7 +333,7 @@ class MainWindow(QMainWindow):
         logger.debug(f"Tarea {task_id} cambió a estado: {state}")
 
     def cancel_processing(self):
-        """Cancela el procesamiento actual."""
+        logger.info("Intentando cancelar procesamiento actual.")
         if hasattr(self, "processing_thread") and self.processing_thread.isRunning():
             reply = QMessageBox.question(
                 self,
@@ -316,17 +342,31 @@ class MainWindow(QMainWindow):
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No
             )
-            
             if reply == QMessageBox.Yes:
+                logger.info("Procesamiento cancelado por el usuario.")
                 self.processing_thread.stop()
                 self.statusBar().showMessage(tr("general.status.cancelled"), 5000)
+            else:
+                logger.info("El usuario decidió no cancelar el procesamiento.")
         
     def processing_complete(self, results: dict):
-        """Maneja la finalización del procesamiento."""
-        total = results.get("total", 0)
+        logger.info(f"Procesamiento completado. Resultados: {results}")
+        # Obtener contadores del resultado
         successful = results.get("success", 0)
         errors = results.get("errors", 0)
         renamed = results.get("renamed", 0)
+        
+        # Calcular total basado en archivos procesados
+        total = successful + errors
+        
+        # Log de contadores finales para debugging
+        logger.debug(
+            f"Contadores finales - "
+            f"Total: {total}, "
+            f"Exitosos: {successful}, "
+            f"Errores: {errors}, "
+            f"Renombrados: {renamed}"
+        )
 
         # Reactivar controles
         self.process_btn.setEnabled(True)
@@ -359,7 +399,7 @@ class MainWindow(QMainWindow):
         logger.info(f"Procesamiento GUI completado. Total: {total}, Exitosos: {successful}, Errores: {errors}, Renombrados: {renamed}")
 
     def browse_files(self):
-        """Abre el diálogo para seleccionar archivos MP3."""
+        logger.info("Abriendo diálogo para seleccionar archivos MP3.")
         files, _ = QFileDialog.getOpenFileNames(
             self,
             tr("dialogs.select_files"),
@@ -367,17 +407,23 @@ class MainWindow(QMainWindow):
             tr("ui.filters.mp3")
         )
         if files:
-            self.file_results_table.add_files(files) # Usar el nuevo widget
+            logger.info(f"Archivos seleccionados: {files}")
+            self.file_results_table.add_files(files)
+        else:
+            logger.info("No se seleccionaron archivos.")
 
     def browse_folder(self):
-        """Abre el diálogo para seleccionar una carpeta con archivos MP3."""
+        logger.info("Abriendo diálogo para seleccionar carpeta.")
         folder = QFileDialog.getExistingDirectory(
             self,
             tr("dialogs.select_folder"),
             os.path.expanduser("~")
         )
         if folder:
-            self.file_results_table.add_folder(folder) # Usar el nuevo widget
+            logger.info(f"Carpeta seleccionada: {folder}")
+            self.file_results_table.add_folder(folder)
+        else:
+            logger.info("No se seleccionó carpeta.")
 
     def toggle_theme(self):
         """Alterna entre tema claro y oscuro."""
@@ -433,10 +479,16 @@ class MainWindow(QMainWindow):
             self.theme_btn.setText(tr("ui.theme.dark.label"))
 
     def closeEvent(self, event):
-        """Asegura que cualquier hilo en ejecución se detenga limpiamente al cerrar la ventana principal."""
+        logger.info("Cerrando la ventana principal. Deteniendo hilos si es necesario.")
         if hasattr(self, "processing_thread") and self.processing_thread is not None:
             if self.processing_thread.isRunning():
+                logger.info("Deteniendo hilo de procesamiento antes de cerrar.")
                 self.processing_thread.stop()
                 self.processing_thread.quit()
                 self.processing_thread.wait()
         super().closeEvent(event)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        # Eliminar la carga automática de la carpeta y el procesamiento
+        # (No hacer nada especial al iniciar)

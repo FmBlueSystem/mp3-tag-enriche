@@ -1,6 +1,7 @@
 """Music API integrations for genre detection."""
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Any
+from collections.abc import Mapping
+from typing import Any, List, Optional
 import requests
 import musicbrainzngs
 import pylast
@@ -96,12 +97,12 @@ class MusicAPI(ABC):
             rate_limited=rate_limited
         )
 
-    def get_metrics(self) -> Dict[str, float]:
+    def get_metrics(self) -> Mapping[str, float]:
         """Get current metrics for this API."""
         return _metrics.get_metrics(self.api_name)
 
     @abstractmethod
-    def get_track_info(self, artist: str, track: str) -> Dict[str, Any]:
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
         """Get track information (genres, year, album).
         
         Args:
@@ -111,9 +112,19 @@ class MusicAPI(ABC):
         Returns:
             Dict with track information
         """
+        # Handle None or empty values
+        if not artist or not track or artist == "None" or track == "None":
+            return {
+                "genres": [],
+                "year": None,
+                "album": None,
+                "source_api": "None",
+                "error": "Missing artist or track"
+            }
+        # Implementation provided by subclasses
         pass
 
-    def get_genres(self, artist: str, track: str) -> Dict[str, float]:
+    def get_genres(self, artist: str, track: str) -> Mapping[str, float]:
         """Get genres with confidence scores for a track.
         
         Args:
@@ -123,6 +134,10 @@ class MusicAPI(ABC):
         Returns:
             Dict mapping genre names to confidence scores
         """
+        # Handle None or empty values
+        if artist is None or track is None or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return {}
+            
         track_info = self.get_track_info(artist, track)
         genres = track_info.get("genres", [])
         
@@ -136,19 +151,15 @@ class MusicAPI(ABC):
             result[genre] = confidence
             
         # Normalize the genre names using GenreNormalizer
-        return GenreNormalizer.normalize_dict(result)
-        """Get track information (genres, year, album).
-        
-        Args:
-            artist: Artist name
-            track: Track title
-            
-        Returns:
-            Dict with keys 'genres': List[str], 'year': Optional[str], 'album': Optional[str]
-        """
-        pass
-
-    # get_genres puede ser un método legacy o un helper si se decide mantenerlo.
+        normalized_genres = {}
+        for genre, score in result.items():
+            norm_genre = GenreNormalizer.normalize(genre)[0]  # Solo tomamos el nombre normalizado
+            if norm_genre in normalized_genres:
+                normalized_genres[norm_genre] = max(normalized_genres[norm_genre], score)
+            else:
+                normalized_genres[norm_genre] = score
+                
+        return normalized_genres
     # Por ahora lo comentamos para enfocarnos en get_track_info.
     # @abstractmethod
     # def get_genres(self, artist: str, track: str) -> Dict[str, float]:
@@ -184,7 +195,7 @@ class MusicBrainzAPI(MusicAPI):
             fill_rate=1.0   # 1 token per second
         )
         
-    def get_track_info(self, artist: str, track: str) -> Dict[str, Any]:
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
         """Get track information from MusicBrainz.
         
         Args:
@@ -198,14 +209,6 @@ class MusicBrainzAPI(MusicAPI):
             RuntimeError: If rate limit is exceeded
             ValueError: If input validation fails
         """
-        cache_key = f"mb_info:{artist}:{track}"
-        cached = self.cache.get(cache_key)
-        if cached is not None:
-            logger.debug(f"Cache hit for MusicBrainz info: {artist} - {track}")
-            return cached
-
-        start_time = time.time()
-        
         # Initialize result with empty values
         result = {
             "genres": [],
@@ -213,6 +216,18 @@ class MusicBrainzAPI(MusicAPI):
             "album": None,
             "source_api": "MusicBrainz"
         }
+        
+        # Handle None or empty values
+        if artist is None or track is None or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return result
+            
+        cache_key = f"mb_info:{artist}:{track}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for MusicBrainz info: {artist} - {track}")
+            return cached
+
+        start_time = time.time()
         genres: List[str] = []
         year: Optional[str] = None
         album: Optional[str] = None
@@ -370,7 +385,7 @@ class LastFmAPI(MusicAPI):
             fill_rate=5.0   # 5 tokens per second
         )
         
-    def get_track_info(self, artist: str, track: str) -> Dict[str, Any]:
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
         """Get track information from Last.fm.
         
         Args:
@@ -383,14 +398,6 @@ class LastFmAPI(MusicAPI):
         Raises:
             RuntimeError: If rate limit is exceeded or API is not initialized
         """
-        cache_key = f"lastfm_info:{artist}:{track}"
-        cached = self.cache.get(cache_key)
-        if cached is not None:
-            logger.debug(f"Cache hit for Last.fm info: {artist} - {track}")
-            return cached
-
-        start_time = time.time()
-        
         # Initialize result with empty values
         result = {
             "genres": [],
@@ -398,6 +405,18 @@ class LastFmAPI(MusicAPI):
             "album": None,
             "source_api": "Last.fm"
         }
+        
+        # Handle None or empty values
+        if artist is None or track is None or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return result
+            
+        cache_key = f"lastfm_info:{artist}:{track}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for Last.fm info: {artist} - {track}")
+            return cached
+
+        start_time = time.time()
 
         if not self.network:
             logger.warning("LastFMNetwork not initialized. Skipping Last.fm query.")
@@ -538,7 +557,7 @@ class DiscogsAPI(MusicAPI):
             fill_rate=1.0   # 1 token per second
         )
         
-    def _request_discogs(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    def _request_discogs(self, endpoint: str, params: Optional[Mapping[str, Any]] = None) -> Optional[Mapping[str, Any]]:
         """Make a request to the Discogs API using connection pooling and circuit breaker.
         
         Args:
@@ -586,7 +605,7 @@ class DiscogsAPI(MusicAPI):
         self._track_api_call(start_time, success=False)
         return None
 
-    def get_track_info(self, artist: str, track: str) -> Dict[str, Any]:
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
         """Get track information from Discogs.
         
         Args:
@@ -599,14 +618,6 @@ class DiscogsAPI(MusicAPI):
         Raises:
             RuntimeError: If rate limit is exceeded
         """
-        cache_key = f"discogs_info:{artist}:{track}"
-        cached = self.cache.get(cache_key)
-        if cached is not None:
-            logger.debug(f"Cache hit for Discogs info: {artist} - {track}")
-            return cached
-
-        start_time = time.time()
-        
         # Initialize result with empty values
         result = {
             "genres": [],
@@ -614,6 +625,18 @@ class DiscogsAPI(MusicAPI):
             "album": None,
             "source_api": "Discogs"
         }
+        
+        # Handle None or empty values
+        if artist is None or track is None or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return result
+            
+        cache_key = f"discogs_info:{artist}:{track}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for Discogs info: {artist} - {track}")
+            return cached
+
+        start_time = time.time()
 
         # Search for release
         search_params = {
