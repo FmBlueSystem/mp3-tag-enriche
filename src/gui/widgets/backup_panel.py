@@ -19,23 +19,68 @@ class BackupPanel(QWidget):
         
     def setup_ui(self) -> None:
         """Configura la interfaz del panel de respaldo."""
-        main_layout = QVBoxLayout(self) # Layout principal para el QGroupBox
-        main_layout.setContentsMargins(0,0,0,0) # El QGroupBox ya tiene márgenes
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
         backup_group = QGroupBox("Configuración de Respaldo")
-        layout = QHBoxLayout(backup_group) # Layout interno del QGroupBox
+        backup_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 11px;
+                border: 2px solid #3E4451;
+                border-radius: 8px;
+                margin-top: 8px;
+                padding-top: 8px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 8px;
+                padding: 0 4px 0 4px;
+            }
+        """)
+        layout = QVBoxLayout(backup_group)
         layout.setSpacing(8)
+        layout.setContentsMargins(12, 15, 12, 12)
         
         # Etiqueta que muestra el directorio actual
         self.backup_dir_label = QLabel("Dir de Respaldo: No establecido")
         self.backup_dir_label.setAccessibleName("Etiqueta Directorio de Respaldo")
         self.backup_dir_label.setToolTip("Directorio donde se guardarán las copias de respaldo")
-        layout.addWidget(self.backup_dir_label, 1) # El 1 hace que la etiqueta se expanda
+        self.backup_dir_label.setWordWrap(True)
+        self.backup_dir_label.setStyleSheet("""
+            QLabel {
+                background-color: #2C323C;
+                border: 1px solid #3E4451;
+                border-radius: 4px;
+                padding: 8px;
+                font-size: 9px;
+                color: #ABB2BF;
+            }
+        """)
+        layout.addWidget(self.backup_dir_label)
         
         # Botón para seleccionar el directorio
-        self.select_backup_dir_btn = QPushButton("Seleccionar...") # Texto más corto
+        self.select_backup_dir_btn = QPushButton("📁 Seleccionar Directorio")
         self.select_backup_dir_btn.setAccessibleName("Botón Seleccionar Directorio de Respaldo")
         self.select_backup_dir_btn.setToolTip("Seleccionar una carpeta para almacenar las copias de respaldo")
+        self.select_backup_dir_btn.setMinimumHeight(35)
+        self.select_backup_dir_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #528BFF;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 10px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #4A7FE7;
+            }
+            QPushButton:pressed {
+                background-color: #3A6FD7;
+            }
+        """)
         layout.addWidget(self.select_backup_dir_btn)
         
         main_layout.addWidget(backup_group)
@@ -53,9 +98,16 @@ class BackupPanel(QWidget):
                 dir_changed = self.backup_dir != dir_path
                 
                 self.backup_dir = dir_path
-                dirname = os.path.basename(dir_path)
-                self.backup_dir_label.setText(f"Dir de Respaldo: {dirname} (...)")
-                self.backup_dir_label.setToolTip(dir_path)
+                
+                # Mostrar el nombre del directorio padre y actual de forma compacta
+                path_parts = dir_path.split(os.sep)
+                if len(path_parts) > 2:
+                    display_path = f".../{path_parts[-2]}/{path_parts[-1]}"
+                else:
+                    display_path = dir_path
+                    
+                self.backup_dir_label.setText(f"✅ {display_path}")
+                self.backup_dir_label.setToolTip(f"Ruta completa: {dir_path}")
                 
                 if dir_changed:
                     logger.debug(f"Emitiendo backup_dir_changed para: {dir_path}")
@@ -65,8 +117,8 @@ class BackupPanel(QWidget):
             else:
                 old_dir = self.backup_dir
                 self.backup_dir = None
-                self.backup_dir_label.setText("Dir de Respaldo: No establecido")
-                self.backup_dir_label.setToolTip("Directorio donde se guardarán las copias de respaldo")
+                self.backup_dir_label.setText("❌ No establecido")
+                self.backup_dir_label.setToolTip("Selecciona un directorio para guardar las copias de respaldo")
                 
                 if old_dir is not None:
                     logger.debug("Emitiendo backup_dir_changed con cadena vacía")
@@ -77,7 +129,8 @@ class BackupPanel(QWidget):
             logger.error(f"Error al establecer directorio de respaldo {dir_path}: {e}")
             old_dir = self.backup_dir
             self.backup_dir = None
-            self.backup_dir_label.setText("Dir de Respaldo: Error")
+            self.backup_dir_label.setText("⚠️ Error en directorio")
+            self.backup_dir_label.setToolTip(f"Error: {str(e)}")
             
             if old_dir is not None:
                 logger.debug("Emitiendo backup_dir_changed con cadena vacía debido a error")

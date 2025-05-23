@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal
 from typing import Dict
+from PySide6.QtGui import QFont
 
 from ..i18n import tr
 
@@ -22,12 +23,29 @@ class ControlPanel(QWidget):
     def setup_ui(self):
         """Set up the control panel interface."""
         layout = QVBoxLayout(self)
-        layout.setSpacing(10) # Reducir espaciado entre QGroupBoxes
+        layout.setSpacing(8)  # Reducir espaciado entre QGroupBoxes
+        layout.setContentsMargins(0, 0, 0, 0)
         
         # Grupo de opciones de análisis
         analysis_group = QGroupBox(tr("analysis_options"))
+        analysis_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 11px;
+                border: 2px solid #3E4451;
+                border-radius: 8px;
+                margin-top: 8px;
+                padding-top: 8px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 8px;
+                padding: 0 4px 0 4px;
+            }
+        """)
         analysis_layout = QVBoxLayout(analysis_group)
         analysis_layout.setSpacing(8)
+        analysis_layout.setContentsMargins(12, 15, 12, 12)
         
         self.rename_files = QCheckBox(tr("rename_files_checkbox"))
         self.rename_files.setAccessibleName(tr("accessibility_rename_files"))
@@ -39,63 +57,97 @@ class ControlPanel(QWidget):
         
         # Grupo de parámetros de detección
         detection_params_group = QGroupBox(tr("detection_params"))
+        detection_params_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 11px;
+                border: 2px solid #3E4451;
+                border-radius: 8px;
+                margin-top: 8px;
+                padding-top: 8px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 8px;
+                padding: 0 4px 0 4px;
+            }
+        """)
         detection_params_layout = QVBoxLayout(detection_params_group)
-        detection_params_layout.setSpacing(8)
+        detection_params_layout.setSpacing(12)
+        detection_params_layout.setContentsMargins(12, 15, 12, 12)
 
         # Control de umbral de confianza
-        confidence_row = QHBoxLayout()
-        confidence_row.setSpacing(8)
+        confidence_container = QVBoxLayout()
+        confidence_container.setSpacing(6)
+        
+        # Etiqueta y valor en una fila
+        confidence_header = QHBoxLayout()
+        confidence_header.setSpacing(8)
         
         self.confidence_label = QLabel(tr("confidence_threshold"))
         self.confidence_label.setAccessibleName(tr("accessibility_confidence"))
-        confidence_row.addWidget(self.confidence_label)
+        self.confidence_label.setFont(QFont("Arial", 9))
+        confidence_header.addWidget(self.confidence_label)
         
-        self.confidence_slider = QSlider(Qt.Horizontal)
-        self.confidence_slider.setAccessibleName(tr("accessibility_confidence_slider"))
-        self.confidence_slider.setAccessibleDescription(tr("accessibility_confidence_desc"))
-        self.confidence_slider.setMinimumWidth(64)  # Material Design minimum width
-        self.confidence_slider.setMinimum(10)
-        self.confidence_slider.setMaximum(90)
-        self.confidence_slider.setValue(30)
-        self.confidence_slider.setTickInterval(10)
-        self.confidence_slider.setTickPosition(QSlider.TicksBelow)
-        self.confidence_slider.valueChanged.connect(self.update_confidence_label)
-        self.confidence_slider.setToolTip(tr("tooltip_confidence"))
-        confidence_row.addWidget(self.confidence_slider, 1) # Slider ocupa más espacio
+        confidence_header.addStretch()
         
         self.confidence_value = QLabel("0.3")
         self.confidence_value.setAccessibleName(tr("accessibility_confidence_value"))
-        self.confidence_value.setMinimumWidth(30) # Ancho mínimo para el valor
-        confidence_row.addWidget(self.confidence_value)
+        self.confidence_value.setFont(QFont("Arial", 9, QFont.Bold))
+        self.confidence_value.setStyleSheet("color: #61AFEF; background-color: #2C323C; padding: 2px 6px; border-radius: 3px;")
+        self.confidence_value.setMinimumWidth(35)
+        self.confidence_value.setAlignment(Qt.AlignCenter)
+        confidence_header.addWidget(self.confidence_value)
         
-        detection_params_layout.addLayout(confidence_row)
+        confidence_container.addLayout(confidence_header)
+        
+        # Slider en línea separada
+        self.confidence_slider = QSlider(Qt.Horizontal)
+        self.confidence_slider.setAccessibleName(tr("accessibility_confidence_slider"))
+        self.confidence_slider.setAccessibleDescription(tr("accessibility_confidence_desc"))
+        self.confidence_slider.setMinimumHeight(25)
+        self.confidence_slider.setMinimum(10)
+        self.confidence_slider.setMaximum(90)
+        self.confidence_slider.setValue(30)
+        self.confidence_slider.setTickInterval(20)
+        self.confidence_slider.setTickPosition(QSlider.TicksBelow)
+        self.confidence_slider.valueChanged.connect(self.update_confidence_label)
+        self.confidence_slider.setToolTip(tr("tooltip_confidence"))
+        confidence_container.addWidget(self.confidence_slider)
+        
+        detection_params_layout.addLayout(confidence_container)
         
         # Control de géneros máximos
-        max_genres_row = QHBoxLayout()
-        max_genres_row.setSpacing(8)
+        max_genres_container = QVBoxLayout()
+        max_genres_container.setSpacing(6)
+        
+        # Etiqueta y control en una fila
+        max_genres_header = QHBoxLayout()
+        max_genres_header.setSpacing(8)
         
         self.max_genres_label = QLabel(tr("max_genres"))
         self.max_genres_label.setAccessibleName(tr("accessibility_max_genres"))
-        max_genres_row.addWidget(self.max_genres_label)
+        self.max_genres_label.setFont(QFont("Arial", 9))
+        max_genres_header.addWidget(self.max_genres_label)
+        
+        max_genres_header.addStretch()
         
         self.max_genres_spinner = QSpinBox()
         self.max_genres_spinner.setAccessibleName(tr("accessibility_max_genres_control"))
         self.max_genres_spinner.setAccessibleDescription(tr("accessibility_max_genres_desc"))
-        self.max_genres_spinner.setMinimumWidth(64)  # Material Design minimum width
+        self.max_genres_spinner.setMinimumWidth(60)
+        self.max_genres_spinner.setMinimumHeight(28)
         self.max_genres_spinner.setMinimum(1)
         self.max_genres_spinner.setMaximum(10)
         self.max_genres_spinner.setValue(3)
-        self.max_genres_spinner.valueChanged.connect(self.update_max_genres_label)
+        self.max_genres_spinner.valueChanged.connect(self.emit_settings)
         self.max_genres_spinner.setToolTip(tr("tooltip_max_genres"))
-        max_genres_row.addWidget(self.max_genres_spinner)
+        self.max_genres_spinner.setAlignment(Qt.AlignCenter)
+        max_genres_header.addWidget(self.max_genres_spinner)
         
-        self.max_genres_value = QLabel("3") # Este QLabel podría ser redundante si el QSpinBox ya muestra el valor
-        self.max_genres_value.setAccessibleName(tr("accessibility_max_genres_value"))
-        self.max_genres_value.setMinimumWidth(30) # Ancho mínimo
-        # max_genres_row.addWidget(self.max_genres_value) # Opcional, QSpinBox ya muestra el valor
-        max_genres_row.addStretch() # Empujar el spinner a la izquierda si no se usa el label de valor
-
-        detection_params_layout.addLayout(max_genres_row)
+        max_genres_container.addLayout(max_genres_header)
+        detection_params_layout.addLayout(max_genres_container)
+        
         layout.addWidget(detection_params_group)
         
         # Conectar cambios
@@ -107,10 +159,6 @@ class ControlPanel(QWidget):
         """Update the confidence value label."""
         confidence = value / 100
         self.confidence_value.setText(f"{confidence:.1f}")
-        
-    def update_max_genres_label(self, value: int) -> None:
-        """Update the maximum genres value label."""
-        self.max_genres_value.setText(str(value))
         
     def emit_settings(self, *args) -> None:
         """Emit the current settings."""

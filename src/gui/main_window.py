@@ -18,6 +18,8 @@ from .models.genre_model import GenreModel
 from .widgets.control_panel import ControlPanel
 from .widgets.backup_panel import BackupPanel
 from .widgets.file_results_table_widget import FileResultsTableWidget
+from .widgets.memory_indicator import MemoryIndicator
+from .widgets.cpu_indicator import CPUIndicator
 from .threads.processing_thread import ProcessingThread
 from .style import apply_dark_theme, apply_light_theme
 
@@ -78,38 +80,80 @@ class MainWindow(QMainWindow):
     def setup_ui(self):
         """Set up the user interface."""
         self.setWindowTitle(tr("ui.window.title"))
-        self.setMinimumSize(1100, 650)
+        self.setMinimumSize(1200, 700)  # Aumentar tamaño mínimo
 
         central_widget = QWidget()
         central_widget.setAccessibleName(tr("accessibility_main_window"))
         self.setCentralWidget(central_widget)
 
-        layout = QVBoxLayout(central_widget)
-        layout.setSpacing(10)
-        layout.setContentsMargins(12, 12, 12, 12)
+        # Layout principal horizontal
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setSpacing(8)
+        main_layout.setContentsMargins(8, 8, 8, 8)
 
-        top_controls = QHBoxLayout()
+        # Crear splitter principal horizontal
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_splitter.setHandleWidth(6)
+        main_splitter.setChildrenCollapsible(False)
 
+        # === PANEL IZQUIERDO: Área principal ===
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+        left_layout.setSpacing(8)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Barra superior con indicadores y controles
+        top_bar = QHBoxLayout()
+        top_bar.setSpacing(12)
+
+        # Selector de idioma
         self.lang_selector = QComboBox()
         self.lang_selector.addItem("English", "en")
         self.lang_selector.addItem("Español", "es")
         self.lang_selector.setMinimumWidth(120)
+        self.lang_selector.setMaximumWidth(150)
         self.lang_selector.currentIndexChanged.connect(self.change_language)
-        top_controls.addWidget(self.lang_selector)
+        top_bar.addWidget(self.lang_selector)
 
+        # Separador visual
+        top_bar.addSpacing(20)
+
+        # Indicadores de sistema
+        indicators_layout = QHBoxLayout()
+        indicators_layout.setSpacing(15)
+
+        self.memory_indicator = MemoryIndicator()
+        self.memory_indicator.memory_critical.connect(self.on_memory_critical)
+        self.memory_indicator.memory_high.connect(self.on_memory_high)
+        self.memory_indicator.memory_normal.connect(self.on_memory_normal)
+        indicators_layout.addWidget(self.memory_indicator)
+
+        self.cpu_indicator = CPUIndicator()
+        self.cpu_indicator.cpu_critical.connect(self.on_cpu_critical)
+        self.cpu_indicator.cpu_high.connect(self.on_cpu_high)
+        self.cpu_indicator.cpu_normal.connect(self.on_cpu_normal)
+        indicators_layout.addWidget(self.cpu_indicator)
+
+        top_bar.addLayout(indicators_layout)
+        top_bar.addStretch()  # Empujar botón tema a la derecha
+
+        # Botón de tema
         self.theme_btn = QPushButton()
         self.theme_btn.setAccessibleName(tr("accessibility.buttons.theme.name"))
         self.theme_btn.setAccessibleDescription(tr("accessibility.buttons.theme.desc"))
         self.theme_btn.clicked.connect(self.toggle_theme)
         self.theme_btn.setToolTip(tr("tooltips.theme"))
         self.theme_btn.setShortcut("Ctrl+T")
-        self.theme_btn.setMinimumWidth(64)
+        self.theme_btn.setMinimumWidth(100)
+        self.theme_btn.setMaximumWidth(120)
         self.update_theme_button()
-        top_controls.addStretch()
-        top_controls.addWidget(self.theme_btn)
-        layout.addLayout(top_controls)
+        top_bar.addWidget(self.theme_btn)
 
+        left_layout.addLayout(top_bar)
+
+        # Botones de archivos
         buttons_layout = QHBoxLayout()
+        buttons_layout.setSpacing(10)
 
         self.add_files_btn = QPushButton(tr("ui.buttons.add_files"))
         self.add_files_btn.setAccessibleName(tr("accessibility.buttons.add_files.name"))
@@ -117,7 +161,7 @@ class MainWindow(QMainWindow):
         self.add_files_btn.clicked.connect(self.browse_files)
         self.add_files_btn.setToolTip(tr("tooltips.add_files"))
         self.add_files_btn.setShortcut("Ctrl+O")
-        self.add_files_btn.setMinimumWidth(64)
+        self.add_files_btn.setMinimumHeight(40)
         buttons_layout.addWidget(self.add_files_btn)
 
         self.add_folder_btn = QPushButton(tr("ui.buttons.add_folder"))
@@ -126,41 +170,52 @@ class MainWindow(QMainWindow):
         self.add_folder_btn.clicked.connect(self.browse_folder)
         self.add_folder_btn.setToolTip(tr("tooltips.add_folder"))
         self.add_folder_btn.setShortcut("Ctrl+D")
-        self.add_folder_btn.setMinimumWidth(64)
+        self.add_folder_btn.setMinimumHeight(40)
         buttons_layout.addWidget(self.add_folder_btn)
 
-        buttons_layout.addStretch()
-        layout.addLayout(buttons_layout)
+        buttons_layout.addStretch()  # Empujar botones hacia la izquierda
+        left_layout.addLayout(buttons_layout)
 
-        # Usar el nuevo FileResultsTableWidget
+        # Tabla de archivos (ocupa la mayor parte del espacio)
         self.file_results_table = FileResultsTableWidget()
         self.file_results_table.files_added.connect(self.on_files_added)
-        layout.addWidget(self.file_results_table, 1)
+        left_layout.addWidget(self.file_results_table, 1)  # Factor de estiramiento 1
 
-        side_panel = QWidget()
-        side_layout = QVBoxLayout(side_panel)
-        side_layout.setSpacing(10)
+        # === PANEL DERECHO: Panel de control ===
+        right_panel = QWidget()
+        right_panel.setMaximumWidth(350)  # Limitar ancho del panel derecho
+        right_panel.setMinimumWidth(280)
+        right_layout = QVBoxLayout(right_panel)
+        right_layout.setSpacing(12)
+        right_layout.setContentsMargins(0, 0, 0, 0)
 
+        # Panel de control
         self.control_panel = ControlPanel()
         self.control_panel.settings_changed.connect(self.on_settings_changed)
-        side_layout.addWidget(self.control_panel)
+        right_layout.addWidget(self.control_panel)
 
+        # Panel de respaldo
         self.backup_panel = BackupPanel()
         self.backup_panel.backup_dir_changed.connect(self.on_backup_dir_changed)
         self.backup_panel.select_backup_dir_btn.clicked.connect(self.select_backup_directory)
         if self.backup_dir:
             self.backup_panel.set_backup_dir(self.backup_dir)
-        side_layout.addWidget(self.backup_panel)
+        right_layout.addWidget(self.backup_panel)
 
         # Barra de progreso
         self.progress_bar = QProgressBar()
         self.progress_bar.setTextVisible(True)
         self.progress_bar.setFormat("%v/%m archivos - %p%")
+        self.progress_bar.setMinimumHeight(30)
         self.progress_bar.hide()
-        side_layout.addWidget(self.progress_bar)
+        right_layout.addWidget(self.progress_bar)
 
-        # Botones de proceso
-        process_buttons = QHBoxLayout()
+        # Espaciador flexible
+        right_layout.addStretch()
+
+        # Botones de proceso en la parte inferior
+        process_buttons = QVBoxLayout()
+        process_buttons.setSpacing(8)
         
         self.process_btn = QPushButton(tr("ui.buttons.process"))
         self.process_btn.setAccessibleName(tr("accessibility.buttons.process.name"))
@@ -169,7 +224,7 @@ class MainWindow(QMainWindow):
         self.process_btn.setEnabled(False)
         self.process_btn.setToolTip(tr("tooltips.process"))
         self.process_btn.setShortcut("Ctrl+P")
-        self.process_btn.setMinimumWidth(100)
+        self.process_btn.setMinimumHeight(45)
         process_buttons.addWidget(self.process_btn)
 
         self.cancel_btn = QPushButton(tr("ui.buttons.cancel"))
@@ -177,13 +232,24 @@ class MainWindow(QMainWindow):
         self.cancel_btn.clicked.connect(self.cancel_processing)
         self.cancel_btn.setEnabled(False)
         self.cancel_btn.setToolTip(tr("tooltips.cancel"))
-        self.cancel_btn.setMinimumWidth(100)
+        self.cancel_btn.setMinimumHeight(35)
         process_buttons.addWidget(self.cancel_btn)
         
-        side_layout.addLayout(process_buttons)
+        right_layout.addLayout(process_buttons)
 
-        layout.addWidget(side_panel)
+        # Agregar paneles al splitter
+        main_splitter.addWidget(left_panel)
+        main_splitter.addWidget(right_panel)
+        
+        # Configurar proporciones del splitter (70% izquierda, 30% derecha)
+        main_splitter.setSizes([800, 350])
+        main_splitter.setStretchFactor(0, 1)  # Panel izquierdo se estira
+        main_splitter.setStretchFactor(1, 0)  # Panel derecho mantiene tamaño fijo
 
+        # Agregar splitter al layout principal
+        main_layout.addWidget(main_splitter)
+
+        # Barra de estado
         status_bar = self.statusBar()
         status_bar.setAccessibleName(tr("accessibility.controls.status"))
         status_bar.showMessage(tr("general.status.ready"))
@@ -259,6 +325,9 @@ class MainWindow(QMainWindow):
         self.processing_thread.circuit_breaker_opened.connect(self.on_circuit_breaker_opened)
         self.processing_thread.circuit_breaker_closed.connect(self.on_circuit_breaker_closed)
         self.processing_thread.task_state_changed.connect(self.on_task_state_changed)
+        # **NUEVO: Configurar indicadores de sistema para modo procesamiento**
+        self.memory_indicator.set_processing_mode(True)
+        self.cpu_indicator.set_processing_mode(True)
 
         # Deshabilitar controles
         self.process_btn.setEnabled(False)
@@ -373,6 +442,10 @@ class MainWindow(QMainWindow):
         self.backup_panel.select_backup_dir_btn.setEnabled(True)
         self.cancel_btn.setEnabled(False)
         self.progress_bar.hide()
+
+        # **NUEVO: Reestablecer indicadores de sistema a modo normal**
+        self.memory_indicator.set_processing_mode(False)
+        self.cpu_indicator.set_processing_mode(False)
 
         if total == 0:
             self.statusBar().showMessage(tr("general.status.no_selection"), 7000)
@@ -491,3 +564,40 @@ class MainWindow(QMainWindow):
         super().showEvent(event)
         # Eliminar la carga automática de la carpeta y el procesamiento
         # (No hacer nada especial al iniciar)
+
+    def on_memory_critical(self):
+        """Maneja estado crítico de memoria (solo logging, sin interrumpir)."""
+        logger.critical("Estado crítico de memoria detectado")
+        # Opcional: mostrar mensaje discreto en status bar
+        self.statusBar().showMessage("⚠️ Memoria crítica", 3000)
+        
+    def on_memory_high(self):
+        """Maneja estado alto de memoria (solo logging, sin interrumpir)."""
+        logger.warning("Estado alto de memoria detectado")
+        self.statusBar().showMessage("⚠️ Memoria alta", 2000)
+        
+    def on_memory_normal(self):
+        """Maneja estado normal de memoria."""
+        logger.info("Memoria ha vuelto a niveles normales")
+        self.statusBar().showMessage("✅ Memoria normal", 1000)
+
+    def on_memory_warning(self, message: str):
+        """Método obsoleto - mantenido para compatibilidad pero ya no se usa."""
+        logger.warning(f"Método obsoleto on_memory_warning llamado: {message}")
+        # Ya no mostramos diálogos que interrumpen - el indicador visual maneja esto
+
+    def on_cpu_critical(self):
+        """Maneja estado crítico de CPU (solo logging, sin interrumpir)."""
+        logger.critical("Estado crítico de CPU detectado")
+        # Opcional: mostrar mensaje discreto en status bar
+        self.statusBar().showMessage("⚠️ CPU crítica", 3000)
+        
+    def on_cpu_high(self):
+        """Maneja estado alto de CPU (solo logging, sin interrumpir)."""
+        logger.warning("Estado alto de CPU detectado")
+        self.statusBar().showMessage("⚠️ CPU alta", 2000)
+        
+    def on_cpu_normal(self):
+        """Maneja estado normal de CPU."""
+        logger.info("CPU ha vuelto a niveles normales")
+        self.statusBar().showMessage("✅ CPU normal", 1000)
