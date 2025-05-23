@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "dart": {
+      "command": "npx",
+      "args": ["-y", "dart-mcp-server"],
+      "env": {
+        "DART_TOKEN": "dsa_df88b54b32408afbe42489b08d25bfbf91759ab7d2d1cdac26f4d72b51c71583"
+      }
+    }
+  }
+} 

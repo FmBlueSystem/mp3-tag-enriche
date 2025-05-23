@@ -1,0 +1,775 @@
+2025-05-22 17:59:58,958 - Backup directory set to: /Volumes/My Passport/Proyectos/basico/mp3_backups
+2025-05-22 17:59:58,958 - 🎵 PROCESADOR SIMPLE MP3 - MODO SEGURO
+2025-05-22 17:59:58,958 - 📁 Directorio: /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s
+2025-05-22 17:59:58,958 - 📋 Modo: SIMULACIÓN
+2025-05-22 17:59:58,958 - 🔍 Buscando archivos MP3...
+2025-05-22 17:59:59,065 - 🎵 Encontrados 3 archivos MP3
+2025-05-22 17:59:59,065 - ⚙️ Rate limit: 2.0s por archivo
+2025-05-22 17:59:59,065 - ⏱️ Timeout: 30s por archivo
+2025-05-22 17:59:59,065 - ⏳ Tiempo estimado: 0.1 minutos
+2025-05-22 17:59:59,065 - 🔄 Iniciando procesamiento...
+2025-05-22 17:59:59,065 - 
+📊 Archivo 1/3 (33.3%)
+2025-05-22 17:59:59,065 - 🔄 Procesando: 2 Live Crew - Get It Girl Clean - Super Short Edit.mp3
+2025-05-22 18:00:01,087 - ✅ Exitoso: 2 Live Crew - Get It Girl Clean - Super Short Edit
+2025-05-22 18:00:01,089 - ⏱️ Completado en 2.0s
+2025-05-22 18:00:01,089 - 📈 Progreso: 1 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:00:01,089 - 
+📊 Archivo 2/3 (66.7%)
+2025-05-22 18:00:01,089 - 🔄 Procesando: 9 9 - All Of Me For All Of You.mp3
+2025-05-22 18:00:03,136 - ✅ Exitoso: 9 9 - All Of Me For All Of You
+2025-05-22 18:00:03,138 - ⏱️ Completado en 2.0s
+2025-05-22 18:00:03,138 - 📈 Progreso: 2 procesados, 0 errores, 2.1s/archivo promedio
+2025-05-22 18:00:03,138 - 
+📊 Archivo 3/3 (100.0%)
+2025-05-22 18:00:03,138 - 🔄 Procesando: A Ha - Take On Me Hype - Short Edit.mp3
+2025-05-22 18:00:05,172 - ✅ Exitoso: A Ha - Take On Me Hype - Short Edit
+2025-05-22 18:00:05,174 - ⏱️ Completado en 2.0s
+2025-05-22 18:00:05,174 - 📈 Progreso: 3 procesados, 0 errores, 2.1s/archivo promedio
+2025-05-22 18:00:05,174 - 🧹 Limpiando memoria...
+2025-05-22 18:00:05,678 - 
+🏁 RESUMEN FINAL
+2025-05-22 18:00:05,679 - ========================================
+2025-05-22 18:00:05,679 - 📁 Total archivos: 3
+2025-05-22 18:00:05,679 - 🔄 Procesados: 3
+2025-05-22 18:00:05,679 - ✅ Exitosos: 3 (100.0%)
+2025-05-22 18:00:05,679 - ❌ Errores: 0 (0.0%)
+2025-05-22 18:00:05,679 - ⏱️ Tiempo total: 0.1 minutos
+2025-05-22 18:00:05,679 - ⚡ Promedio: 2.3s por archivo
+2025-05-22 18:00:05,680 - 
+🎵 ARCHIVOS CON METADATA (primeros 5):
+2025-05-22 18:00:05,680 -    🎤 2 Live Crew - Get It Girl Clean - Super Short Edit
+2025-05-22 18:00:05,680 -    🎤 9 9 - All Of Me For All Of You
+2025-05-22 18:00:05,680 -    🎤 A Ha - Take On Me Hype - Short Edit
+2025-05-22 18:00:05,680 - 
+🎉 Procesamiento completado sin congelamiento!
+2025-05-22 18:00:05,680 - 📝 Ver detalles en: simple_processing.log
+2025-05-22 18:05:17,454 - Backup directory set to: /Volumes/My Passport/Proyectos/basico/mp3_backups
+2025-05-22 18:05:17,454 - 🎵 PROCESADOR SIMPLE MP3 - MODO SEGURO
+2025-05-22 18:05:17,454 - 📁 Directorio: /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s
+2025-05-22 18:05:17,454 - 📋 Modo: APLICAR CAMBIOS
+2025-05-22 18:05:17,454 - 🔍 Buscando archivos MP3...
+2025-05-22 18:05:17,561 - 🎵 Encontrados 50 archivos MP3
+2025-05-22 18:05:17,561 - ⚙️ Rate limit: 2.0s por archivo
+2025-05-22 18:05:17,561 - ⏱️ Timeout: 30s por archivo
+2025-05-22 18:05:17,561 - ⏳ Tiempo estimado: 1.7 minutos
+2025-05-22 18:05:17,561 - 🔄 Iniciando procesamiento...
+2025-05-22 18:05:17,561 - 
+📊 Archivo 1/50 (2.0%)
+2025-05-22 18:05:17,561 - 🔄 Procesando: 2 Live Crew - Get It Girl Clean - Super Short Edit.mp3
+2025-05-22 18:05:19,676 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:19,676 - ✅ Exitoso: 2 Live Crew - Get It Girl Clean - Super Short Edit
+2025-05-22 18:05:19,678 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:19,678 - 📈 Progreso: 1 procesados, 0 errores, 2.5s/archivo promedio
+2025-05-22 18:05:19,678 - 
+📊 Archivo 2/50 (4.0%)
+2025-05-22 18:05:19,678 - 🔄 Procesando: 9 9 - All Of Me For All Of You.mp3
+2025-05-22 18:05:21,744 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:21,744 - ✅ Exitoso: 9 9 - All Of Me For All Of You
+2025-05-22 18:05:21,746 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:21,746 - 📈 Progreso: 2 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:21,746 - 
+📊 Archivo 3/50 (6.0%)
+2025-05-22 18:05:21,746 - 🔄 Procesando: A Ha - Take On Me Hype - Short Edit.mp3
+2025-05-22 18:05:23,797 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:23,797 - ✅ Exitoso: A Ha - Take On Me Hype - Short Edit
+2025-05-22 18:05:23,799 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:23,799 - 📈 Progreso: 3 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:05:23,800 - 🧹 Limpiando memoria...
+2025-05-22 18:05:24,306 - 
+📊 Archivo 4/50 (8.0%)
+2025-05-22 18:05:24,307 - 🔄 Procesando: Ashford Simpson - Solid Stone G 0 Rokk Super Short Edit.mp3
+2025-05-22 18:05:26,339 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:26,339 - ✅ Exitoso: Ashford Simpson - Solid Stone G 0 Rokk Super Short Edit
+2025-05-22 18:05:26,341 - ⏱️ Completado en 2.0s
+2025-05-22 18:05:26,341 - 📈 Progreso: 4 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:26,341 - 
+📊 Archivo 5/50 (10.0%)
+2025-05-22 18:05:26,341 - 🔄 Procesando: Audio Two - Top Billin Rhythm Scholar Jazzy Funk Rmx - Cutdown.mp3
+2025-05-22 18:05:28,389 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:28,389 - ✅ Exitoso: Audio Two - Top Billin Rhythm Scholar Jazzy Funk Rmx - Cutdown
+2025-05-22 18:05:28,392 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:28,392 - 📈 Progreso: 5 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:05:28,392 - 
+📊 Archivo 6/50 (12.0%)
+2025-05-22 18:05:28,392 - 🔄 Procesando: B52s - Love Shack Cutdown.mp3
+2025-05-22 18:05:30,433 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:30,433 - ✅ Exitoso: B52s - Love Shack Cutdown
+2025-05-22 18:05:30,435 - ⏱️ Completado en 2.0s
+2025-05-22 18:05:30,435 - 📈 Progreso: 6 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:05:30,435 - 🧹 Limpiando memoria...
+2025-05-22 18:05:30,942 - 
+📊 Archivo 7/50 (14.0%)
+2025-05-22 18:05:30,943 - 🔄 Procesando: B52s - Summer Of Love Summer Party Mix - Cutdown.mp3
+2025-05-22 18:05:33,082 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:33,082 - ✅ Exitoso: B52s - Summer Of Love Summer Party Mix - Cutdown
+2025-05-22 18:05:33,084 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:33,084 - 📈 Progreso: 7 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:33,084 - 
+📊 Archivo 8/50 (16.0%)
+2025-05-22 18:05:33,084 - 🔄 Procesando: Bananarama - Venus Static Mix Short Edit.mp3
+2025-05-22 18:05:35,187 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:35,188 - ✅ Exitoso: Bananarama - Venus Static Mix Short Edit
+2025-05-22 18:05:35,189 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:35,189 - 📈 Progreso: 8 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:05:35,189 - 
+📊 Archivo 9/50 (18.0%)
+2025-05-22 18:05:35,189 - 🔄 Procesando: Beastie Boys - Slow Ride Short Edit.mp3
+2025-05-22 18:05:37,283 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:37,283 - ✅ Exitoso: Beastie Boys - Slow Ride Short Edit
+2025-05-22 18:05:37,285 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:37,285 - 📈 Progreso: 9 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:05:37,285 - 🧹 Limpiando memoria...
+2025-05-22 18:05:37,791 - 
+📊 Archivo 10/50 (20.0%)
+2025-05-22 18:05:37,792 - 🔄 Procesando: Belinda Carlisle - Circle In The Sand.mp3
+2025-05-22 18:05:39,928 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:39,954 - ✅ Exitoso: Belinda Carlisle - Circle In The Sand
+2025-05-22 18:05:39,955 - ⏱️ Completado en 2.2s
+2025-05-22 18:05:39,956 - 📈 Progreso: 10 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:39,956 - 
+📊 Archivo 11/50 (22.0%)
+2025-05-22 18:05:39,956 - 🔄 Procesando: Belinda Carlisle - Heaven Is A Place On Earth Re Drum - Short Edit.mp3
+2025-05-22 18:05:42,060 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:42,060 - ✅ Exitoso: Belinda Carlisle - Heaven Is A Place On Earth Re Drum - Short Edit
+2025-05-22 18:05:42,062 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:42,062 - 📈 Progreso: 11 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:42,062 - 
+📊 Archivo 12/50 (24.0%)
+2025-05-22 18:05:42,062 - 🔄 Procesando: Berlin - Masquerade Short Edit.mp3
+2025-05-22 18:05:44,166 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:44,166 - ✅ Exitoso: Berlin - Masquerade Short Edit
+2025-05-22 18:05:44,168 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:44,168 - 📈 Progreso: 12 procesados, 0 errores, 2.2s/archivo promedio
+2025-05-22 18:05:44,168 - 🧹 Limpiando memoria...
+2025-05-22 18:05:44,670 - 
+📊 Archivo 13/50 (26.0%)
+2025-05-22 18:05:44,671 - 🔄 Procesando: Berlin - Take My Breath Away Re Drum.mp3
+2025-05-22 18:05:46,780 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:46,780 - ✅ Exitoso: Berlin - Take My Breath Away Re Drum
+2025-05-22 18:05:46,787 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:46,787 - 📈 Progreso: 13 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:46,787 - 
+📊 Archivo 14/50 (28.0%)
+2025-05-22 18:05:46,787 - 🔄 Procesando: Bill Medley Jennifer Warnes - I Had The Time Of My Life Short Edit.mp3
+2025-05-22 18:05:48,883 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:48,883 - ✅ Exitoso: Bill Medley Jennifer Warnes - I Had The Time Of My Life Short Edit
+2025-05-22 18:05:48,885 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:48,885 - 📈 Progreso: 14 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:48,885 - 
+📊 Archivo 15/50 (30.0%)
+2025-05-22 18:05:48,885 - 🔄 Procesando: Billy Joel - For The Longest Time Flat Intro - Re Drum Cutdown.mp3
+2025-05-22 18:05:51,001 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:51,001 - ✅ Exitoso: Billy Joel - For The Longest Time Flat Intro - Re Drum Cutdown
+2025-05-22 18:05:51,002 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:51,002 - 📈 Progreso: 15 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:51,002 - 🧹 Limpiando memoria...
+2025-05-22 18:05:51,508 - 
+📊 Archivo 16/50 (32.0%)
+2025-05-22 18:05:51,509 - 🔄 Procesando: Billy Joel - We Didn'T Start The Fire Chorus First - Re Drum Short Edit.mp3
+2025-05-22 18:05:53,621 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:53,621 - ✅ Exitoso: Billy Joel - We Didn'T Start The Fire Chorus First - Re Drum Short Edit
+2025-05-22 18:05:53,623 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:53,623 - 📈 Progreso: 16 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:53,623 - 
+📊 Archivo 17/50 (34.0%)
+2025-05-22 18:05:53,623 - 🔄 Procesando: Billy Joel - We Didn'T Start The Fire Short Edit.mp3
+2025-05-22 18:05:55,748 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:55,748 - ✅ Exitoso: Billy Joel - We Didn'T Start The Fire Short Edit
+2025-05-22 18:05:55,749 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:55,749 - 📈 Progreso: 17 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:55,749 - 
+📊 Archivo 18/50 (36.0%)
+2025-05-22 18:05:55,749 - 🔄 Procesando: Billy Ocean - When The Going Gets Tough Short Edit.mp3
+2025-05-22 18:05:57,894 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:05:57,894 - ✅ Exitoso: Billy Ocean - When The Going Gets Tough Short Edit
+2025-05-22 18:05:57,896 - ⏱️ Completado en 2.1s
+2025-05-22 18:05:57,896 - 📈 Progreso: 18 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:05:57,896 - 🧹 Limpiando memoria...
+2025-05-22 18:05:58,402 - 
+📊 Archivo 19/50 (38.0%)
+2025-05-22 18:05:58,403 - 🔄 Procesando: Blancmange - Blind Vision.mp3
+2025-05-22 18:06:00,521 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:00,521 - ✅ Exitoso: Blancmange - Blind Vision
+2025-05-22 18:06:00,523 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:00,523 - 📈 Progreso: 19 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:00,523 - 
+📊 Archivo 20/50 (40.0%)
+2025-05-22 18:06:00,523 - 🔄 Procesando: Blancmange - Don'T Tell Me 1.mp3
+2025-05-22 18:06:02,644 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:02,644 - ✅ Exitoso: Blancmange - Don'T Tell Me 1
+2025-05-22 18:06:02,645 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:02,645 - 📈 Progreso: 20 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:02,645 - 
+📊 Archivo 21/50 (42.0%)
+2025-05-22 18:06:02,645 - 🔄 Procesando: Blue Oyster Cult - Burnin' For You Pale Force Rmx - Short Edit.mp3
+2025-05-22 18:06:04,759 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:04,759 - ✅ Exitoso: Blue Oyster Cult - Burnin' For You Pale Force Rmx - Short Edit
+2025-05-22 18:06:04,761 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:04,761 - 📈 Progreso: 21 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:04,761 - 🧹 Limpiando memoria...
+2025-05-22 18:06:05,267 - 
+📊 Archivo 22/50 (44.0%)
+2025-05-22 18:06:05,268 - 🔄 Procesando: Bob Marley - Buffalo Soldier DJ Scene Rmx.mp3
+2025-05-22 18:06:07,362 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:07,362 - ✅ Exitoso: Bob Marley - Buffalo Soldier DJ Scene Rmx
+2025-05-22 18:06:07,364 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:07,364 - 📈 Progreso: 22 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:07,364 - 
+📊 Archivo 23/50 (46.0%)
+2025-05-22 18:06:07,364 - 🔄 Procesando: Bob Marley - Three Little Birds.mp3
+2025-05-22 18:06:09,456 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:09,456 - ✅ Exitoso: Bob Marley - Three Little Birds
+2025-05-22 18:06:09,458 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:09,458 - 📈 Progreso: 23 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:09,458 - 
+📊 Archivo 24/50 (48.0%)
+2025-05-22 18:06:09,458 - 🔄 Procesando: Bon Jovi - Livin' On A Prayer Super Short Edit.mp3
+2025-05-22 18:06:11,559 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:11,575 - ✅ Exitoso: Bon Jovi - Livin' On A Prayer Super Short Edit
+2025-05-22 18:06:11,576 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:11,576 - 📈 Progreso: 24 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:11,577 - 🧹 Limpiando memoria...
+2025-05-22 18:06:12,079 - 
+📊 Archivo 25/50 (50.0%)
+2025-05-22 18:06:12,079 - 🔄 Procesando: Brenda Russell - Piano In The Dark Re Drum.mp3
+2025-05-22 18:06:14,179 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:14,179 - ✅ Exitoso: Brenda Russell - Piano In The Dark Re Drum
+2025-05-22 18:06:14,181 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:14,181 - 📈 Progreso: 25 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:14,181 - 
+📊 Archivo 26/50 (52.0%)
+2025-05-22 18:06:14,181 - 🔄 Procesando: Buster Poindexter - Hot Hot Hot Beat In - Aca Out Super Short Edit.mp3
+2025-05-22 18:06:16,296 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:16,296 - ✅ Exitoso: Buster Poindexter - Hot Hot Hot Beat In - Aca Out Super Short Edit
+2025-05-22 18:06:16,297 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:16,297 - 📈 Progreso: 26 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:16,297 - 
+📊 Archivo 27/50 (54.0%)
+2025-05-22 18:06:16,297 - 🔄 Procesando: Cameo - Candy.mp3
+2025-05-22 18:06:18,466 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:18,466 - ✅ Exitoso: Cameo - Candy
+2025-05-22 18:06:18,467 - ⏱️ Completado en 2.2s
+2025-05-22 18:06:18,467 - 📈 Progreso: 27 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:18,467 - 🧹 Limpiando memoria...
+2025-05-22 18:06:18,973 - 
+📊 Archivo 28/50 (56.0%)
+2025-05-22 18:06:18,975 - 🔄 Procesando: Captain Rapp ft Kimberly Bell - Bad Times (I Can't Stand It) (No Rap - Cutdown).mp3
+2025-05-22 18:06:21,113 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:21,113 - ✅ Exitoso: Captain Rapp ft. Kimberly Bell - Bad Times (i Can't Stand It) (no Rap - Cutdown)
+2025-05-22 18:06:21,114 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:21,114 - 📈 Progreso: 28 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:21,114 - 
+📊 Archivo 29/50 (58.0%)
+2025-05-22 18:06:21,114 - 🔄 Procesando: Captain Rapp ft Kimberly Bell - Bad Times (I Can't Stand It).mp3
+2025-05-22 18:06:23,223 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:23,223 - ✅ Exitoso: Captain Rapp ft. Kimberly Bell - Bad Times (i Can't Stand It)
+2025-05-22 18:06:23,225 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:23,225 - 📈 Progreso: 29 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:23,225 - 
+📊 Archivo 30/50 (60.0%)
+2025-05-22 18:06:23,225 - 🔄 Procesando: Cee Farrow - Should I Love You .mp3
+2025-05-22 18:06:25,338 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:25,338 - ✅ Exitoso: Cee Farrow - Should I Love You
+2025-05-22 18:06:25,341 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:25,341 - 📈 Progreso: 30 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:25,341 - 🧹 Limpiando memoria...
+2025-05-22 18:06:25,843 - 
+📊 Archivo 31/50 (62.0%)
+2025-05-22 18:06:25,844 - 🔄 Procesando: Chaka Khan - Fate Super Short Edit.mp3
+2025-05-22 18:06:27,969 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:27,969 - ✅ Exitoso: Chaka Khan - Fate Super Short Edit
+2025-05-22 18:06:27,970 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:27,970 - 📈 Progreso: 31 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:27,970 - 
+📊 Archivo 32/50 (64.0%)
+2025-05-22 18:06:27,970 - 🔄 Procesando: Change Luther Vandross - Glow Of Love.mp3
+2025-05-22 18:06:30,084 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:30,084 - ✅ Exitoso: Change Luther Vandross - Glow Of Love
+2025-05-22 18:06:30,086 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:30,086 - 📈 Progreso: 32 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:30,086 - 
+📊 Archivo 33/50 (66.0%)
+2025-05-22 18:06:30,086 - 🔄 Procesando: Cher - If I Could Turn Back Time Re Drum - Short Edit.mp3
+2025-05-22 18:06:32,191 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:32,191 - ✅ Exitoso: Cher - If I Could Turn Back Time Re Drum - Short Edit
+2025-05-22 18:06:32,192 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:32,192 - 📈 Progreso: 33 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:32,192 - 🧹 Limpiando memoria...
+2025-05-22 18:06:32,696 - 
+📊 Archivo 34/50 (68.0%)
+2025-05-22 18:06:32,697 - 🔄 Procesando: Cherrelle Ft Alexander O'Neal - Saturday Love 1.mp3
+2025-05-22 18:06:34,836 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:34,836 - ✅ Exitoso: Cherrelle Ft Alexander O'Neal - Saturday Love 1
+2025-05-22 18:06:34,837 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:34,838 - 📈 Progreso: 34 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:34,838 - 
+📊 Archivo 35/50 (70.0%)
+2025-05-22 18:06:34,838 - 🔄 Procesando: Corey Hart - Sunglasses At Night Short Edit.mp3
+2025-05-22 18:06:36,958 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:36,958 - ✅ Exitoso: Corey Hart - Sunglasses At Night Short Edit
+2025-05-22 18:06:36,960 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:36,960 - 📈 Progreso: 35 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:36,960 - 
+📊 Archivo 36/50 (72.0%)
+2025-05-22 18:06:36,960 - 🔄 Procesando: Cowboy Junkies - Sweet Jane.mp3
+2025-05-22 18:06:39,068 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:39,068 - ✅ Exitoso: Cowboy Junkies - Sweet Jane
+2025-05-22 18:06:39,069 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:39,070 - 📈 Progreso: 36 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:39,070 - 🧹 Limpiando memoria...
+2025-05-22 18:06:39,576 - 
+📊 Archivo 37/50 (74.0%)
+2025-05-22 18:06:39,576 - 🔄 Procesando: Culture Club - Karma Chameleon.mp3
+2025-05-22 18:06:41,685 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:41,685 - ✅ Exitoso: Culture Club - Karma Chameleon
+2025-05-22 18:06:41,687 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:41,687 - 📈 Progreso: 37 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:41,687 - 
+📊 Archivo 38/50 (76.0%)
+2025-05-22 18:06:41,687 - 🔄 Procesando: Curiosity Killed The Cat - Misfit Short Edit.mp3
+2025-05-22 18:06:43,799 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:43,799 - ✅ Exitoso: Curiosity Killed The Cat - Misfit Short Edit
+2025-05-22 18:06:43,800 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:43,800 - 📈 Progreso: 38 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:43,800 - 
+📊 Archivo 39/50 (78.0%)
+2025-05-22 18:06:43,800 - 🔄 Procesando: Dan Hartman - I Can Dream About You Short Edit.mp3
+2025-05-22 18:06:45,917 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:45,917 - ✅ Exitoso: Dan Hartman - I Can Dream About You Short Edit
+2025-05-22 18:06:45,919 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:45,919 - 📈 Progreso: 39 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:45,919 - 🧹 Limpiando memoria...
+2025-05-22 18:06:46,425 - 
+📊 Archivo 40/50 (80.0%)
+2025-05-22 18:06:46,425 - 🔄 Procesando: De G 0 Barge - Rhythm Of The Night Short Edit.mp3
+2025-05-22 18:06:48,534 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:48,534 - ✅ Exitoso: De G 0 Barge - Rhythm Of The Night Short Edit
+2025-05-22 18:06:48,536 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:48,536 - 📈 Progreso: 40 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:48,536 - 
+📊 Archivo 41/50 (82.0%)
+2025-05-22 18:06:48,536 - 🔄 Procesando: Dead Or Alive - My Heart Goes Bang Get Me To The Doctor.mp3
+2025-05-22 18:06:50,647 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:50,647 - ✅ Exitoso: Dead Or Alive - My Heart Goes Bang Get Me To The Doctor
+2025-05-22 18:06:50,649 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:50,649 - 📈 Progreso: 41 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:50,649 - 
+📊 Archivo 42/50 (84.0%)
+2025-05-22 18:06:50,649 - 🔄 Procesando: Debbie Gibson - Only In My Dreams Short Edit.mp3
+2025-05-22 18:06:52,785 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:52,785 - ✅ Exitoso: Debbie Gibson - Only In My Dreams Short Edit
+2025-05-22 18:06:52,787 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:52,787 - 📈 Progreso: 42 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:52,787 - 🧹 Limpiando memoria...
+2025-05-22 18:06:53,293 - 
+📊 Archivo 43/50 (86.0%)
+2025-05-22 18:06:53,293 - 🔄 Procesando: Def Leppard - Pour Some Sugar On Me Mochipet Electric Rmx - Short Edit.mp3
+2025-05-22 18:06:55,431 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:55,448 - ✅ Exitoso: Def Leppard - Pour Some Sugar On Me Mochipet Electric Rmx - Short Edit
+2025-05-22 18:06:55,449 - ⏱️ Completado en 2.2s
+2025-05-22 18:06:55,450 - 📈 Progreso: 43 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:55,450 - 
+📊 Archivo 44/50 (88.0%)
+2025-05-22 18:06:55,450 - 🔄 Procesando: Depeche Mode - Nothing Justin Strauss Rmx - Cutdown.mp3
+2025-05-22 18:06:57,592 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:57,592 - ✅ Exitoso: Depeche Mode - Nothing Justin Strauss Rmx - Cutdown
+2025-05-22 18:06:57,594 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:57,594 - 📈 Progreso: 44 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:57,594 - 
+📊 Archivo 45/50 (90.0%)
+2025-05-22 18:06:57,594 - 🔄 Procesando: Depeche Mode - Strangelove Maxi Mix - Cutdown.mp3
+2025-05-22 18:06:59,704 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:06:59,704 - ✅ Exitoso: Depeche Mode - Strangelove Maxi Mix - Cutdown
+2025-05-22 18:06:59,705 - ⏱️ Completado en 2.1s
+2025-05-22 18:06:59,705 - 📈 Progreso: 45 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:06:59,705 - 🧹 Limpiando memoria...
+2025-05-22 18:07:00,212 - 
+📊 Archivo 46/50 (92.0%)
+2025-05-22 18:07:00,212 - 🔄 Procesando: Devo - That'S Good.mp3
+2025-05-22 18:07:02,323 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:07:02,345 - ✅ Exitoso: Devo - That'S Good
+2025-05-22 18:07:02,347 - ⏱️ Completado en 2.1s
+2025-05-22 18:07:02,347 - 📈 Progreso: 46 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:07:02,347 - 
+📊 Archivo 47/50 (94.0%)
+2025-05-22 18:07:02,347 - 🔄 Procesando: Devo - Whip It Short Edit.mp3
+2025-05-22 18:07:04,467 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:07:04,467 - ✅ Exitoso: Devo - Whip It Short Edit
+2025-05-22 18:07:04,469 - ⏱️ Completado en 2.1s
+2025-05-22 18:07:04,469 - 📈 Progreso: 47 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:07:04,469 - 
+📊 Archivo 48/50 (96.0%)
+2025-05-22 18:07:04,469 - 🔄 Procesando: Dire Straits - Money For Nothing Savoy Rmx - Short Edit.mp3
+2025-05-22 18:07:06,589 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:07:06,589 - ✅ Exitoso: Dire Straits - Money For Nothing Savoy Rmx - Short Edit
+2025-05-22 18:07:06,591 - ⏱️ Completado en 2.1s
+2025-05-22 18:07:06,591 - 📈 Progreso: 48 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:07:06,591 - 🧹 Limpiando memoria...
+2025-05-22 18:07:07,097 - 
+📊 Archivo 49/50 (98.0%)
+2025-05-22 18:07:07,097 - 🔄 Procesando: Duran Duran - Hungry Like The Wolf Re Drum.mp3
+2025-05-22 18:07:09,222 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:07:09,222 - ✅ Exitoso: Duran Duran - Hungry Like The Wolf Re Drum
+2025-05-22 18:07:09,224 - ⏱️ Completado en 2.1s
+2025-05-22 18:07:09,224 - 📈 Progreso: 49 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:07:09,224 - 
+📊 Archivo 50/50 (100.0%)
+2025-05-22 18:07:09,224 - 🔄 Procesando: Duran Duran - Skin Trade.mp3
+2025-05-22 18:07:11,330 - 📝 (Cambios se aplicarían aquí)
+2025-05-22 18:07:11,330 - ✅ Exitoso: Duran Duran - Skin Trade
+2025-05-22 18:07:11,332 - ⏱️ Completado en 2.1s
+2025-05-22 18:07:11,332 - 📈 Progreso: 50 procesados, 0 errores, 2.3s/archivo promedio
+2025-05-22 18:07:11,332 - 
+🏁 RESUMEN FINAL
+2025-05-22 18:07:11,332 - ========================================
+2025-05-22 18:07:11,332 - 📁 Total archivos: 50
+2025-05-22 18:07:11,332 - 🔄 Procesados: 50
+2025-05-22 18:07:11,332 - ✅ Exitosos: 50 (100.0%)
+2025-05-22 18:07:11,332 - ❌ Errores: 0 (0.0%)
+2025-05-22 18:07:11,332 - ⏱️ Tiempo total: 1.9 minutos
+2025-05-22 18:07:11,332 - ⚡ Promedio: 2.3s por archivo
+2025-05-22 18:07:11,332 - 
+🎵 ARCHIVOS CON METADATA (primeros 5):
+2025-05-22 18:07:11,332 -    🎤 2 Live Crew - Get It Girl Clean - Super Short Edit
+2025-05-22 18:07:11,332 -    🎤 9 9 - All Of Me For All Of You
+2025-05-22 18:07:11,332 -    🎤 A Ha - Take On Me Hype - Short Edit
+2025-05-22 18:07:11,332 -    🎤 Ashford Simpson - Solid Stone G 0 Rokk Super Short Edit
+2025-05-22 18:07:11,332 -    🎤 Audio Two - Top Billin Rhythm Scholar Jazzy Funk Rmx - Cutdown
+2025-05-22 18:07:11,332 - 
+🎉 Procesamiento completado sin congelamiento!
+2025-05-22 18:07:11,332 - 📝 Ver detalles en: simple_processing.log
+2025-05-22 18:43:50,684 - Backup directory set to: /Volumes/My Passport/Proyectos/basico/mp3_backups
+2025-05-22 18:43:50,707 - 🎵 PROCESADOR SIMPLE MP3 - MODO SEGURO
+2025-05-22 18:43:50,707 - 📁 Directorio: /Volumes/My Passport/Dj compilation 2025/DMS/DMS 80s
+2025-05-22 18:43:50,707 - 📋 Modo: SIMULACIÓN
+2025-05-22 18:43:50,707 - 🔍 Buscando archivos MP3...
+2025-05-22 18:43:50,936 - 🎵 Encontrados 50 archivos MP3
+2025-05-22 18:43:50,936 - ⚙️ Rate limit: 0.5s por archivo
+2025-05-22 18:43:50,936 - ⏱️ Timeout: 30s por archivo
+2025-05-22 18:43:50,936 - ⏳ Tiempo estimado: 0.4 minutos
+2025-05-22 18:43:50,936 - 🔄 Iniciando procesamiento...
+2025-05-22 18:43:50,936 - 
+📊 Archivo 1/50 (2.0%)
+2025-05-22 18:43:50,936 - 🔄 Procesando: 2 Live Crew - Get It Girl Clean - Super Short Edit.mp3
+2025-05-22 18:43:51,580 - ✅ Exitoso: 2 Live Crew - Get It Girl Clean - Super Short Edit
+2025-05-22 18:43:51,589 - ⏱️ Completado en 0.7s
+2025-05-22 18:43:51,589 - 📈 Progreso: 1 procesados, 0 errores, 0.9s/archivo promedio
+2025-05-22 18:43:51,589 - 
+📊 Archivo 2/50 (4.0%)
+2025-05-22 18:43:51,589 - 🔄 Procesando: 9 9 - All Of Me For All Of You.mp3
+2025-05-22 18:43:52,204 - ✅ Exitoso: 9 9 - All Of Me For All Of You
+2025-05-22 18:43:52,209 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:52,209 - 📈 Progreso: 2 procesados, 0 errores, 0.8s/archivo promedio
+2025-05-22 18:43:52,209 - 
+📊 Archivo 3/50 (6.0%)
+2025-05-22 18:43:52,209 - 🔄 Procesando: A Ha - Take On Me Hype - Short Edit.mp3
+2025-05-22 18:43:52,834 - ✅ Exitoso: A Ha - Take On Me Hype - Short Edit
+2025-05-22 18:43:52,840 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:52,840 - 📈 Progreso: 3 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:43:52,840 - 
+📊 Archivo 4/50 (8.0%)
+2025-05-22 18:43:52,840 - 🔄 Procesando: Ashford Simpson - Solid Stone G 0 Rokk Super Short Edit.mp3
+2025-05-22 18:43:53,447 - ✅ Exitoso: Ashford Simpson - Solid Stone G 0 Rokk Super Short Edit
+2025-05-22 18:43:53,455 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:53,455 - 📈 Progreso: 4 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:43:53,455 - 
+📊 Archivo 5/50 (10.0%)
+2025-05-22 18:43:53,455 - 🔄 Procesando: Audio Two - Top Billin Rhythm Scholar Jazzy Funk Rmx - Cutdown.mp3
+2025-05-22 18:43:54,084 - ✅ Exitoso: Audio Two - Top Billin Rhythm Scholar Jazzy Funk Rmx - Cutdown
+2025-05-22 18:43:54,091 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:54,091 - 📈 Progreso: 5 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:43:54,091 - 
+📊 Archivo 6/50 (12.0%)
+2025-05-22 18:43:54,091 - 🔄 Procesando: B52s - Love Shack Cutdown.mp3
+2025-05-22 18:43:54,626 - ✅ Exitoso: B52s - Love Shack Cutdown
+2025-05-22 18:43:54,633 - ⏱️ Completado en 0.5s
+2025-05-22 18:43:54,633 - 📈 Progreso: 6 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:43:54,633 - 
+📊 Archivo 7/50 (14.0%)
+2025-05-22 18:43:54,633 - 🔄 Procesando: B52s - Summer Of Love Summer Party Mix - Cutdown.mp3
+2025-05-22 18:43:55,163 - ✅ Exitoso: B52s - Summer Of Love Summer Party Mix - Cutdown
+2025-05-22 18:43:55,169 - ⏱️ Completado en 0.5s
+2025-05-22 18:43:55,169 - 📈 Progreso: 7 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:55,169 - 
+📊 Archivo 8/50 (16.0%)
+2025-05-22 18:43:55,169 - 🔄 Procesando: Bananarama - Venus Static Mix Short Edit.mp3
+2025-05-22 18:43:55,725 - ✅ Exitoso: Bananarama - Venus Static Mix Short Edit
+2025-05-22 18:43:55,732 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:55,732 - 📈 Progreso: 8 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:55,732 - 
+📊 Archivo 9/50 (18.0%)
+2025-05-22 18:43:55,732 - 🔄 Procesando: Beastie Boys - Slow Ride Short Edit.mp3
+2025-05-22 18:43:56,264 - ✅ Exitoso: Beastie Boys - Slow Ride Short Edit
+2025-05-22 18:43:56,270 - ⏱️ Completado en 0.5s
+2025-05-22 18:43:56,270 - 📈 Progreso: 9 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:56,270 - 
+📊 Archivo 10/50 (20.0%)
+2025-05-22 18:43:56,270 - 🔄 Procesando: Belinda Carlisle - Circle In The Sand.mp3
+2025-05-22 18:43:56,822 - ✅ Exitoso: Belinda Carlisle - Circle In The Sand
+2025-05-22 18:43:56,829 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:56,829 - 📈 Progreso: 10 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:56,829 - 🧹 Limpiando memoria...
+2025-05-22 18:43:57,342 - 
+📊 Archivo 11/50 (22.0%)
+2025-05-22 18:43:57,342 - 🔄 Procesando: Belinda Carlisle - Heaven Is A Place On Earth Re Drum - Short Edit.mp3
+2025-05-22 18:43:57,891 - ✅ Exitoso: Belinda Carlisle - Heaven Is A Place On Earth Re Drum - Short Edit
+2025-05-22 18:43:57,897 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:57,898 - 📈 Progreso: 11 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:43:57,898 - 
+📊 Archivo 12/50 (24.0%)
+2025-05-22 18:43:57,898 - 🔄 Procesando: Berlin - Masquerade Short Edit.mp3
+2025-05-22 18:43:58,432 - ✅ Exitoso: Berlin - Masquerade Short Edit
+2025-05-22 18:43:58,443 - ⏱️ Completado en 0.5s
+2025-05-22 18:43:58,443 - 📈 Progreso: 12 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:58,443 - 
+📊 Archivo 13/50 (26.0%)
+2025-05-22 18:43:58,443 - 🔄 Procesando: Berlin - Take My Breath Away Re Drum.mp3
+2025-05-22 18:43:59,062 - ✅ Exitoso: Berlin - Take My Breath Away Re Drum
+2025-05-22 18:43:59,071 - ⏱️ Completado en 0.6s
+2025-05-22 18:43:59,071 - 📈 Progreso: 13 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:59,071 - 
+📊 Archivo 14/50 (28.0%)
+2025-05-22 18:43:59,071 - 🔄 Procesando: Bill Medley Jennifer Warnes - I Had The Time Of My Life Short Edit.mp3
+2025-05-22 18:43:59,605 - ✅ Exitoso: Bill Medley Jennifer Warnes - I Had The Time Of My Life Short Edit
+2025-05-22 18:43:59,616 - ⏱️ Completado en 0.5s
+2025-05-22 18:43:59,616 - 📈 Progreso: 14 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:43:59,616 - 
+📊 Archivo 15/50 (30.0%)
+2025-05-22 18:43:59,617 - 🔄 Procesando: Billy Joel - For The Longest Time Flat Intro - Re Drum Cutdown.mp3
+2025-05-22 18:44:00,204 - ✅ Exitoso: Billy Joel - For The Longest Time Flat Intro - Re Drum Cutdown
+2025-05-22 18:44:00,210 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:00,210 - 📈 Progreso: 15 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:00,210 - 
+📊 Archivo 16/50 (32.0%)
+2025-05-22 18:44:00,210 - 🔄 Procesando: Billy Joel - We Didn'T Start The Fire Chorus First - Re Drum Short Edit.mp3
+2025-05-22 18:44:00,815 - ✅ Exitoso: Billy Joel - We Didn'T Start The Fire Chorus First - Re Drum Short Edit
+2025-05-22 18:44:00,825 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:00,825 - 📈 Progreso: 16 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:00,825 - 
+📊 Archivo 17/50 (34.0%)
+2025-05-22 18:44:00,825 - 🔄 Procesando: Billy Joel - We Didn'T Start The Fire Short Edit.mp3
+2025-05-22 18:44:01,430 - ✅ Exitoso: Billy Joel - We Didn'T Start The Fire Short Edit
+2025-05-22 18:44:01,436 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:01,436 - 📈 Progreso: 17 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:01,436 - 
+📊 Archivo 18/50 (36.0%)
+2025-05-22 18:44:01,436 - 🔄 Procesando: Billy Ocean - When The Going Gets Tough Short Edit.mp3
+2025-05-22 18:44:02,051 - ✅ Exitoso: Billy Ocean - When The Going Gets Tough Short Edit
+2025-05-22 18:44:02,059 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:02,059 - 📈 Progreso: 18 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:02,060 - 
+📊 Archivo 19/50 (38.0%)
+2025-05-22 18:44:02,060 - 🔄 Procesando: Blancmange - Blind Vision.mp3
+2025-05-22 18:44:02,653 - ✅ Exitoso: Blancmange - Blind Vision
+2025-05-22 18:44:02,661 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:02,661 - 📈 Progreso: 19 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:02,661 - 
+📊 Archivo 20/50 (40.0%)
+2025-05-22 18:44:02,661 - 🔄 Procesando: Blancmange - Don'T Tell Me 1.mp3
+2025-05-22 18:44:03,289 - ✅ Exitoso: Blancmange - Don'T Tell Me 1
+2025-05-22 18:44:03,295 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:03,296 - 📈 Progreso: 20 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:03,296 - 🧹 Limpiando memoria...
+2025-05-22 18:44:03,807 - 
+📊 Archivo 21/50 (42.0%)
+2025-05-22 18:44:03,807 - 🔄 Procesando: Blue Oyster Cult - Burnin' For You Pale Force Rmx - Short Edit.mp3
+2025-05-22 18:44:04,424 - ✅ Exitoso: Blue Oyster Cult - Burnin' For You Pale Force Rmx - Short Edit
+2025-05-22 18:44:04,431 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:04,431 - 📈 Progreso: 21 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:04,431 - 
+📊 Archivo 22/50 (44.0%)
+2025-05-22 18:44:04,431 - 🔄 Procesando: Bob Marley - Buffalo Soldier DJ Scene Rmx.mp3
+2025-05-22 18:44:05,052 - ✅ Exitoso: Bob Marley - Buffalo Soldier DJ Scene Rmx
+2025-05-22 18:44:05,059 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:05,059 - 📈 Progreso: 22 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:05,059 - 
+📊 Archivo 23/50 (46.0%)
+2025-05-22 18:44:05,059 - 🔄 Procesando: Bob Marley - Three Little Birds.mp3
+2025-05-22 18:44:05,676 - ✅ Exitoso: Bob Marley - Three Little Birds
+2025-05-22 18:44:05,684 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:05,684 - 📈 Progreso: 23 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:05,684 - 
+📊 Archivo 24/50 (48.0%)
+2025-05-22 18:44:05,684 - 🔄 Procesando: Bon Jovi - Livin' On A Prayer Super Short Edit.mp3
+2025-05-22 18:44:06,272 - ✅ Exitoso: Bon Jovi - Livin' On A Prayer Super Short Edit
+2025-05-22 18:44:06,280 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:06,280 - 📈 Progreso: 24 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:06,280 - 
+📊 Archivo 25/50 (50.0%)
+2025-05-22 18:44:06,280 - 🔄 Procesando: Brenda Russell - Piano In The Dark Re Drum.mp3
+2025-05-22 18:44:06,877 - ✅ Exitoso: Brenda Russell - Piano In The Dark Re Drum
+2025-05-22 18:44:06,885 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:06,885 - 📈 Progreso: 25 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:06,885 - 
+📊 Archivo 26/50 (52.0%)
+2025-05-22 18:44:06,885 - 🔄 Procesando: Buster Poindexter - Hot Hot Hot Beat In - Aca Out Super Short Edit.mp3
+2025-05-22 18:44:07,491 - ✅ Exitoso: Buster Poindexter - Hot Hot Hot Beat In - Aca Out Super Short Edit
+2025-05-22 18:44:07,499 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:07,499 - 📈 Progreso: 26 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:07,499 - 
+📊 Archivo 27/50 (54.0%)
+2025-05-22 18:44:07,499 - 🔄 Procesando: Cameo - Candy.mp3
+2025-05-22 18:44:08,097 - ✅ Exitoso: Cameo - Candy
+2025-05-22 18:44:08,104 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:08,104 - 📈 Progreso: 27 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:08,104 - 
+📊 Archivo 28/50 (56.0%)
+2025-05-22 18:44:08,104 - 🔄 Procesando: Captain Rapp ft Kimberly Bell - Bad Times (I Can't Stand It) (No Rap - Cutdown).mp3
+2025-05-22 18:44:08,725 - ✅ Exitoso: Captain Rapp ft. Kimberly Bell - Bad Times (i Can't Stand It) (no Rap - Cutdown)
+2025-05-22 18:44:08,733 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:08,733 - 📈 Progreso: 28 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:08,733 - 
+📊 Archivo 29/50 (58.0%)
+2025-05-22 18:44:08,733 - 🔄 Procesando: Captain Rapp ft Kimberly Bell - Bad Times (I Can't Stand It).mp3
+2025-05-22 18:44:09,327 - ✅ Exitoso: Captain Rapp ft. Kimberly Bell - Bad Times (i Can't Stand It)
+2025-05-22 18:44:09,334 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:09,334 - 📈 Progreso: 29 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:09,334 - 
+📊 Archivo 30/50 (60.0%)
+2025-05-22 18:44:09,334 - 🔄 Procesando: Cee Farrow - Should I Love You .mp3
+2025-05-22 18:44:09,976 - ✅ Exitoso: Cee Farrow - Should I Love You
+2025-05-22 18:44:10,019 - ⏱️ Completado en 0.7s
+2025-05-22 18:44:10,019 - 📈 Progreso: 30 procesados, 0 errores, 0.6s/archivo promedio
+2025-05-22 18:44:10,019 - 🧹 Limpiando memoria...
+2025-05-22 18:44:10,532 - 
+📊 Archivo 31/50 (62.0%)
+2025-05-22 18:44:10,533 - 🔄 Procesando: Chaka Khan - Fate Super Short Edit.mp3
+2025-05-22 18:44:11,152 - ✅ Exitoso: Chaka Khan - Fate Super Short Edit
+2025-05-22 18:44:11,158 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:11,158 - 📈 Progreso: 31 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:11,158 - 
+📊 Archivo 32/50 (64.0%)
+2025-05-22 18:44:11,158 - 🔄 Procesando: Change Luther Vandross - Glow Of Love.mp3
+2025-05-22 18:44:11,791 - ✅ Exitoso: Change Luther Vandross - Glow Of Love
+2025-05-22 18:44:11,799 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:11,799 - 📈 Progreso: 32 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:11,799 - 
+📊 Archivo 33/50 (66.0%)
+2025-05-22 18:44:11,799 - 🔄 Procesando: Cher - If I Could Turn Back Time Re Drum - Short Edit.mp3
+2025-05-22 18:44:12,412 - ✅ Exitoso: Cher - If I Could Turn Back Time Re Drum - Short Edit
+2025-05-22 18:44:12,418 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:12,419 - 📈 Progreso: 33 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:12,419 - 
+📊 Archivo 34/50 (68.0%)
+2025-05-22 18:44:12,419 - 🔄 Procesando: Cherrelle Ft Alexander O'Neal - Saturday Love 1.mp3
+2025-05-22 18:44:13,053 - ✅ Exitoso: Cherrelle Ft Alexander O'Neal - Saturday Love 1
+2025-05-22 18:44:13,060 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:13,060 - 📈 Progreso: 34 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:13,060 - 
+📊 Archivo 35/50 (70.0%)
+2025-05-22 18:44:13,060 - 🔄 Procesando: Corey Hart - Sunglasses At Night Short Edit.mp3
+2025-05-22 18:44:13,680 - ✅ Exitoso: Corey Hart - Sunglasses At Night Short Edit
+2025-05-22 18:44:13,688 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:13,688 - 📈 Progreso: 35 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:13,688 - 
+📊 Archivo 36/50 (72.0%)
+2025-05-22 18:44:13,688 - 🔄 Procesando: Cowboy Junkies - Sweet Jane.mp3
+2025-05-22 18:44:14,299 - ✅ Exitoso: Cowboy Junkies - Sweet Jane
+2025-05-22 18:44:14,306 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:14,306 - 📈 Progreso: 36 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:14,306 - 
+📊 Archivo 37/50 (74.0%)
+2025-05-22 18:44:14,306 - 🔄 Procesando: Culture Club - Karma Chameleon.mp3
+2025-05-22 18:44:14,918 - ✅ Exitoso: Culture Club - Karma Chameleon
+2025-05-22 18:44:14,925 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:14,925 - 📈 Progreso: 37 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:14,925 - 
+📊 Archivo 38/50 (76.0%)
+2025-05-22 18:44:14,925 - 🔄 Procesando: Curiosity Killed The Cat - Misfit Short Edit.mp3
+2025-05-22 18:44:15,530 - ✅ Exitoso: Curiosity Killed The Cat - Misfit Short Edit
+2025-05-22 18:44:15,537 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:15,537 - 📈 Progreso: 38 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:15,537 - 
+📊 Archivo 39/50 (78.0%)
+2025-05-22 18:44:15,537 - 🔄 Procesando: Dan Hartman - I Can Dream About You Short Edit.mp3
+2025-05-22 18:44:16,156 - ✅ Exitoso: Dan Hartman - I Can Dream About You Short Edit
+2025-05-22 18:44:16,162 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:16,162 - 📈 Progreso: 39 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:16,162 - 
+📊 Archivo 40/50 (80.0%)
+2025-05-22 18:44:16,162 - 🔄 Procesando: De G 0 Barge - Rhythm Of The Night Short Edit.mp3
+2025-05-22 18:44:16,775 - ✅ Exitoso: De G 0 Barge - Rhythm Of The Night Short Edit
+2025-05-22 18:44:16,783 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:16,783 - 📈 Progreso: 40 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:16,783 - 🧹 Limpiando memoria...
+2025-05-22 18:44:17,294 - 
+📊 Archivo 41/50 (82.0%)
+2025-05-22 18:44:17,295 - 🔄 Procesando: Dead Or Alive - My Heart Goes Bang Get Me To The Doctor.mp3
+2025-05-22 18:44:17,909 - ✅ Exitoso: Dead Or Alive - My Heart Goes Bang Get Me To The Doctor
+2025-05-22 18:44:17,918 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:17,918 - 📈 Progreso: 41 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:17,918 - 
+📊 Archivo 42/50 (84.0%)
+2025-05-22 18:44:17,918 - 🔄 Procesando: Debbie Gibson - Only In My Dreams Short Edit.mp3
+2025-05-22 18:44:18,531 - ✅ Exitoso: Debbie Gibson - Only In My Dreams Short Edit
+2025-05-22 18:44:18,537 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:18,537 - 📈 Progreso: 42 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:18,537 - 
+📊 Archivo 43/50 (86.0%)
+2025-05-22 18:44:18,537 - 🔄 Procesando: Def Leppard - Pour Some Sugar On Me Mochipet Electric Rmx - Short Edit.mp3
+2025-05-22 18:44:19,165 - ✅ Exitoso: Def Leppard - Pour Some Sugar On Me Mochipet Electric Rmx - Short Edit
+2025-05-22 18:44:19,173 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:19,173 - 📈 Progreso: 43 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:19,173 - 
+📊 Archivo 44/50 (88.0%)
+2025-05-22 18:44:19,173 - 🔄 Procesando: Depeche Mode - Nothing Justin Strauss Rmx - Cutdown.mp3
+2025-05-22 18:44:19,801 - ✅ Exitoso: Depeche Mode - Nothing Justin Strauss Rmx - Cutdown
+2025-05-22 18:44:19,808 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:19,808 - 📈 Progreso: 44 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:19,808 - 
+📊 Archivo 45/50 (90.0%)
+2025-05-22 18:44:19,808 - 🔄 Procesando: Depeche Mode - Strangelove Maxi Mix - Cutdown.mp3
+2025-05-22 18:44:20,416 - ✅ Exitoso: Depeche Mode - Strangelove Maxi Mix - Cutdown
+2025-05-22 18:44:20,423 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:20,423 - 📈 Progreso: 45 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:20,423 - 
+📊 Archivo 46/50 (92.0%)
+2025-05-22 18:44:20,423 - 🔄 Procesando: Devo - That'S Good.mp3
+2025-05-22 18:44:21,020 - ✅ Exitoso: Devo - That'S Good
+2025-05-22 18:44:21,026 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:21,026 - 📈 Progreso: 46 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:21,026 - 
+📊 Archivo 47/50 (94.0%)
+2025-05-22 18:44:21,026 - 🔄 Procesando: Devo - Whip It Short Edit.mp3
+2025-05-22 18:44:21,651 - ✅ Exitoso: Devo - Whip It Short Edit
+2025-05-22 18:44:21,657 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:21,657 - 📈 Progreso: 47 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:21,657 - 
+📊 Archivo 48/50 (96.0%)
+2025-05-22 18:44:21,657 - 🔄 Procesando: Dire Straits - Money For Nothing Savoy Rmx - Short Edit.mp3
+2025-05-22 18:44:22,273 - ✅ Exitoso: Dire Straits - Money For Nothing Savoy Rmx - Short Edit
+2025-05-22 18:44:22,281 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:22,281 - 📈 Progreso: 48 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:22,281 - 
+📊 Archivo 49/50 (98.0%)
+2025-05-22 18:44:22,281 - 🔄 Procesando: Duran Duran - Hungry Like The Wolf Re Drum.mp3
+2025-05-22 18:44:22,882 - ✅ Exitoso: Duran Duran - Hungry Like The Wolf Re Drum
+2025-05-22 18:44:22,888 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:22,888 - 📈 Progreso: 49 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:22,888 - 
+📊 Archivo 50/50 (100.0%)
+2025-05-22 18:44:22,888 - 🔄 Procesando: Duran Duran - Skin Trade.mp3
+2025-05-22 18:44:23,482 - ✅ Exitoso: Duran Duran - Skin Trade
+2025-05-22 18:44:23,489 - ⏱️ Completado en 0.6s
+2025-05-22 18:44:23,489 - 📈 Progreso: 50 procesados, 0 errores, 0.7s/archivo promedio
+2025-05-22 18:44:23,489 - 🧹 Limpiando memoria...
+2025-05-22 18:44:24,000 - 
+🏁 RESUMEN FINAL
+2025-05-22 18:44:24,000 - ========================================
+2025-05-22 18:44:24,000 - 📁 Total archivos: 50
+2025-05-22 18:44:24,000 - 🔄 Procesados: 50
+2025-05-22 18:44:24,000 - ✅ Exitosos: 50 (100.0%)
+2025-05-22 18:44:24,000 - ❌ Errores: 0 (0.0%)
+2025-05-22 18:44:24,000 - ⏱️ Tiempo total: 0.6 minutos
+2025-05-22 18:44:24,000 - ⚡ Promedio: 0.7s por archivo
+2025-05-22 18:44:24,001 - 
+🎵 ARCHIVOS CON METADATA (primeros 5):
+2025-05-22 18:44:24,001 -    🎤 2 Live Crew - Get It Girl Clean - Super Short Edit
+2025-05-22 18:44:24,001 -    🎤 9 9 - All Of Me For All Of You
+2025-05-22 18:44:24,001 -    🎤 A Ha - Take On Me Hype - Short Edit
+2025-05-22 18:44:24,001 -    🎤 Ashford Simpson - Solid Stone G 0 Rokk Super Short Edit
+2025-05-22 18:44:24,001 -    🎤 Audio Two - Top Billin Rhythm Scholar Jazzy Funk Rmx - Cutdown
+2025-05-22 18:44:24,001 - 
+🎉 Procesamiento completado sin congelamiento!
+2025-05-22 18:44:24,001 - 📝 Ver detalles en: simple_processing.log

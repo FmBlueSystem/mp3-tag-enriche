@@ -1,0 +1,140 @@
+2025-05-22 17:10:09,634 - INFO - 📋 ARCHIVOS QUE SERÁN ELIMINADOS:
+2025-05-22 17:10:09,635 - INFO - 
+📂 EMPTY_FILES:
+2025-05-22 17:10:09,635 - INFO -    - mp3_tool.py
+2025-05-22 17:10:09,635 - INFO - 
+📂 DEBUG_SCRIPTS:
+2025-05-22 17:10:09,635 - INFO -    - analyze_directory.py
+2025-05-22 17:10:09,635 - INFO -    - analyze_file.py
+2025-05-22 17:10:09,635 - INFO -    - check_metadata.py
+2025-05-22 17:10:09,635 - INFO -    - test_path.py
+2025-05-22 17:10:09,635 - INFO -    - verify_changes.py
+2025-05-22 17:10:09,635 - INFO -    - fix_cases.py
+2025-05-22 17:10:09,635 - INFO -    - fix_api.py
+2025-05-22 17:10:09,635 - INFO -    - clear_api_caches.py
+2025-05-22 17:10:09,635 - INFO - 
+📂 OBSOLETE_TESTS:
+2025-05-22 17:10:09,635 - INFO -    - test_backup.py
+2025-05-22 17:10:09,635 - INFO -    - test_filename_extraction.py
+2025-05-22 17:10:09,635 - INFO -    - test_genre_year.py
+2025-05-22 17:10:09,635 - INFO -    - test_metadata_handling.py
+2025-05-22 17:10:09,635 - INFO -    - test_rename.py
+2025-05-22 17:10:09,635 - INFO -    - test_real_files.py
+2025-05-22 17:10:09,635 - INFO -    - test_spotify_credentials.py
+2025-05-22 17:10:09,635 - INFO -    - test_spotify_api.py
+2025-05-22 17:10:09,635 - INFO - 
+📂 DEMO_SCRIPTS:
+2025-05-22 17:10:09,635 - INFO -    - demo_extractor_mejorado.py
+2025-05-22 17:10:09,635 - INFO -    - spotify_demo.py
+2025-05-22 17:10:09,635 - INFO -    - compare_extraction_methods.py
+2025-05-22 17:10:09,635 - INFO - 
+📂 OBSOLETE_UTILITIES:
+2025-05-22 17:10:09,635 - INFO -    - genre_summary.py
+2025-05-22 17:10:09,635 - INFO -    - limpiar_metadatos_mp3.py
+2025-05-22 17:10:09,635 - INFO -    - show_mp3_tags.py
+2025-05-22 17:10:09,635 - INFO -    - write_genres.py
+2025-05-22 17:10:09,635 - INFO - 
+📂 DUPLICATE_FILES:
+2025-05-22 17:10:09,635 - INFO -    - src/run_gui.py
+2025-05-22 17:10:09,635 - INFO - 
+📊 TOTAL: 25 archivos serán eliminados
+2025-05-22 17:11:44,858 - INFO - 📋 ARCHIVOS QUE SERÁN ELIMINADOS:
+2025-05-22 17:11:44,878 - INFO - 
+📂 EMPTY_FILES:
+2025-05-22 17:11:44,878 - INFO -    - mp3_tool.py
+2025-05-22 17:11:44,878 - INFO - 
+📂 DEBUG_SCRIPTS:
+2025-05-22 17:11:44,878 - INFO -    - analyze_directory.py
+2025-05-22 17:11:44,879 - INFO -    - analyze_file.py
+2025-05-22 17:11:44,879 - INFO -    - check_metadata.py
+2025-05-22 17:11:44,879 - INFO -    - test_path.py
+2025-05-22 17:11:44,879 - INFO -    - verify_changes.py
+2025-05-22 17:11:44,879 - INFO -    - fix_cases.py
+2025-05-22 17:11:44,879 - INFO -    - fix_api.py
+2025-05-22 17:11:44,879 - INFO -    - clear_api_caches.py
+2025-05-22 17:11:44,879 - INFO - 
+📂 OBSOLETE_TESTS:
+2025-05-22 17:11:44,879 - INFO -    - test_backup.py
+2025-05-22 17:11:44,879 - INFO -    - test_filename_extraction.py
+2025-05-22 17:11:44,879 - INFO -    - test_genre_year.py
+2025-05-22 17:11:44,879 - INFO -    - test_metadata_handling.py
+2025-05-22 17:11:44,879 - INFO -    - test_rename.py
+2025-05-22 17:11:44,879 - INFO -    - test_real_files.py
+2025-05-22 17:11:44,879 - INFO -    - test_spotify_credentials.py
+2025-05-22 17:11:44,879 - INFO -    - test_spotify_api.py
+2025-05-22 17:11:44,879 - INFO - 
+📂 DEMO_SCRIPTS:
+2025-05-22 17:11:44,879 - INFO -    - demo_extractor_mejorado.py
+2025-05-22 17:11:44,879 - INFO -    - spotify_demo.py
+2025-05-22 17:11:44,879 - INFO -    - compare_extraction_methods.py
+2025-05-22 17:11:44,879 - INFO - 
+📂 OBSOLETE_UTILITIES:
+2025-05-22 17:11:44,879 - INFO -    - genre_summary.py
+2025-05-22 17:11:44,879 - INFO -    - limpiar_metadatos_mp3.py
+2025-05-22 17:11:44,879 - INFO -    - show_mp3_tags.py
+2025-05-22 17:11:44,879 - INFO -    - write_genres.py
+2025-05-22 17:11:44,879 - INFO - 
+📂 DUPLICATE_FILES:
+2025-05-22 17:11:44,879 - INFO -    - src/run_gui.py
+2025-05-22 17:11:44,879 - INFO - 
+📊 TOTAL: 25 archivos serán eliminados
+2025-05-22 17:11:44,879 - INFO - 🧹 INICIANDO LIMPIEZA AUTOMÁTICA DEL CÓDIGO
+2025-05-22 17:11:44,879 - INFO - ============================================================
+2025-05-22 17:11:44,879 - INFO - 🔄 Creando backup del proyecto...
+2025-05-22 17:11:45,200 - INFO - ✅ Backup completado en: backup_cleanup
+2025-05-22 17:11:45,200 - INFO - 🔍 Verificando imports antes de eliminar...
+2025-05-22 17:11:48,765 - INFO - 🚀 FASE 1: Eliminando archivos de bajo riesgo
+2025-05-22 17:11:48,765 - INFO - 📂 Archivos vacíos...
+2025-05-22 17:11:48,765 - INFO - 🗑️ Eliminando archivos de categoría: empty_files
+2025-05-22 17:11:48,796 - INFO -    ❌ Eliminado: mp3_tool.py
+2025-05-22 17:11:48,796 - INFO - 📂 Scripts de debug...
+2025-05-22 17:11:48,796 - INFO - 🗑️ Eliminando archivos de categoría: debug_scripts
+2025-05-22 17:11:48,802 - INFO -    ❌ Eliminado: analyze_directory.py
+2025-05-22 17:11:48,811 - INFO -    ❌ Eliminado: analyze_file.py
+2025-05-22 17:11:48,821 - INFO -    ❌ Eliminado: check_metadata.py
+2025-05-22 17:11:48,836 - INFO -    ❌ Eliminado: test_path.py
+2025-05-22 17:11:48,837 - INFO -    ❌ Eliminado: verify_changes.py
+2025-05-22 17:11:48,837 - INFO -    ❌ Eliminado: fix_cases.py
+2025-05-22 17:11:48,837 - INFO -    ❌ Eliminado: fix_api.py
+2025-05-22 17:11:48,837 - INFO -    ❌ Eliminado: clear_api_caches.py
+2025-05-22 17:11:48,837 - INFO - 📂 Tests obsoletos individuales...
+2025-05-22 17:11:48,837 - INFO - 🗑️ Eliminando archivos de categoría: obsolete_tests
+2025-05-22 17:11:48,837 - INFO -    ❌ Eliminado: test_backup.py
+2025-05-22 17:11:48,882 - INFO -    ❌ Eliminado: test_filename_extraction.py
+2025-05-22 17:11:48,882 - INFO -    ❌ Eliminado: test_genre_year.py
+2025-05-22 17:11:48,882 - INFO -    ❌ Eliminado: test_metadata_handling.py
+2025-05-22 17:11:48,882 - INFO -    ❌ Eliminado: test_rename.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: test_real_files.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: test_spotify_credentials.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: test_spotify_api.py
+2025-05-22 17:11:48,899 - INFO - 📂 Scripts de demo...
+2025-05-22 17:11:48,899 - INFO - 🗑️ Eliminando archivos de categoría: demo_scripts
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: demo_extractor_mejorado.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: spotify_demo.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: compare_extraction_methods.py
+2025-05-22 17:11:48,899 - INFO - 📂 Utilidades obsoletas...
+2025-05-22 17:11:48,899 - INFO - 🗑️ Eliminando archivos de categoría: obsolete_utilities
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: genre_summary.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: limpiar_metadatos_mp3.py
+2025-05-22 17:11:48,899 - INFO -    ❌ Eliminado: show_mp3_tags.py
+2025-05-22 17:11:48,910 - INFO -    ❌ Eliminado: write_genres.py
+2025-05-22 17:11:48,910 - INFO - 📂 Archivos duplicados...
+2025-05-22 17:11:48,910 - INFO - 🗑️ Eliminando archivos de categoría: duplicate_files
+2025-05-22 17:11:48,918 - INFO -    ❌ Eliminado: src/run_gui.py
+2025-05-22 17:11:48,918 - INFO - 🧪 Ejecutando verificación de tests...
+2025-05-22 17:11:49,788 - INFO - ✅ Tests de mejoras pasaron correctamente
+2025-05-22 17:11:50,000 - INFO - 📋 Reporte guardado en: cleanup_report.json
+2025-05-22 17:11:50,000 - INFO - 📊 RESUMEN DE LIMPIEZA:
+2025-05-22 17:11:50,000 - INFO -    ✅ Archivos eliminados: 25
+2025-05-22 17:11:50,000 - INFO -    📦 Archivos respaldados: 25
+2025-05-22 17:11:50,000 - INFO -    ⚠️ Errores: 0
+2025-05-22 17:11:50,000 - INFO -    📁 Archivos Python restantes: 6288
+2025-05-22 17:11:50,000 - INFO - 🎉 LIMPIEZA COMPLETADA EXITOSAMENTE
+2025-05-22 17:11:50,000 - INFO - 📦 Backup disponible en: backup_cleanup
+2025-05-22 17:11:50,000 - INFO - 
+✅ Limpieza completada exitosamente!
+2025-05-22 17:11:50,000 - INFO - 💡 Recomendaciones post-limpieza:
+2025-05-22 17:11:50,000 - INFO -    1. Ejecutar tests completos: python -m pytest tests/
+2025-05-22 17:11:50,000 - INFO -    2. Verificar funcionalidad GUI: python run_gui.py
+2025-05-22 17:11:50,000 - INFO -    3. Revisar imports problemáticos si los hay
+2025-05-22 17:11:50,000 - INFO -    4. Considerar consolidar file handlers en Fase 2

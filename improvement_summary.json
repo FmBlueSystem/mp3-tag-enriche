@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-01-20",
+  "version": "2.1.0",
+  "improvements": [
+    {
+      "category": "Cache Management",
+      "description": "Sanitización de nombres de archivo en cache",
+      "impact": "Elimina errores de sistema de archivos",
+      "files_affected": [
+        "src/core/persistent_cache.py"
+      ]
+    },
+    {
+      "category": "Genre Detection",
+      "description": "Sistema de fallback para géneros",
+      "impact": "Reduce archivos sin géneros detectados",
+      "files_affected": [
+        "src/core/genre_detector.py"
+      ]
+    },
+    {
+      "category": "Configuration",
+      "description": "Configuración dinámica de umbrales",
+      "impact": "Mejora adaptabilidad del sistema",
+      "files_affected": [
+        "src/core/config_loader.py",
+        "config/dynamic_settings.json"
+      ]
+    },
+    {
+      "category": "Performance",
+      "description": "Optimización de procesamiento por lotes",
+      "impact": "Mejora velocidad y robustez",
+      "files_affected": [
+        "batch_process_mp3.py"
+      ]
+    }
+  ],
+  "statistics": {
+    "files_modified": 4,
+    "new_features": 6,
+    "bugs_fixed": 3,
+    "performance_improvements": 2
+  }
+}
