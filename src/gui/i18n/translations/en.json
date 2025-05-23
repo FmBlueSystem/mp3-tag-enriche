@@ -5,10 +5,10 @@
             "ready": "Ready - Dark AI Mode",
             "processing": "Processing files...",
             "no_files": "No files to process.",
-            "files_added": "{count} file(s) added.",
+            "files_added": "{count} MP3 file(s) added.",
             "no_selection": "No files selected for processing.",
             "complete": {
-                "success": "Processing complete: {success} file(s) successful. {renamed} renamed.",
+                "success": "Processing completed: {success} file(s) successful. {renamed} renamed.",
                 "with_errors": "Processing finished: {success} successful, {errors} error(s). {renamed} renamed."
             },
             "cancelled": "Processing cancelled by user"
@@ -57,7 +57,7 @@
             },
             "process": {
                 "name": "Process Files Button",
-                "desc": "Start processing selected files"
+                "desc": "Start processing the selected files"
             },
             "cancel": "Cancel Processing Button"
         },
@@ -75,19 +75,18 @@
         "controls": {
             "progress": "Progress Label",
             "status": "Status Bar",
-            "analyze_only": "Analyze Only Checkbox",
             "rename_files": "Rename Files Checkbox",
             "confidence": {
                 "label": "Confidence Threshold Label",
-                "slider": "Confidence Slider Control",
+                "slider": "Confidence Slider",
                 "desc": "Set minimum confidence level for detection",
                 "value": "Confidence Value"
             },
             "max_genres": {
-                "label": "Maximum Genres Label",
-                "control": "Maximum Genres Control",
+                "label": "Max Genres Label",
+                "control": "Max Genres Control",
                 "desc": "Set maximum number of genres to detect",
-                "value": "Maximum Genres Value"
+                "value": "Max Genres Value"
             }
         }
     },
@@ -95,11 +94,10 @@
         "theme": "Toggle light/dark theme (Ctrl+T)",
         "add_files": "Select MP3 files (Ctrl+O)",
         "add_folder": "Select a folder with MP3 files (Ctrl+D)",
-        "process": "Process selected files (Ctrl+P)",
+        "process": "Process the selected files (Ctrl+P)",
         "cancel": "Cancel current processing",
         "file_list": "Drag and drop MP3 files here or use the buttons above",
-        "results": "File processing results",
-        "analyze_only": "Analyze files without making changes",
+        "results": "Processing results for files",
         "rename_files": "Rename files using format: 'Artist - Title [Genre]'",
         "confidence": "Adjust minimum confidence level for detection",
         "max_genres": "Maximum number of genres to detect per file"
@@ -112,7 +110,7 @@
             "title": "Circuit Breaker Activated",
             "opened": "Too many errors detected",
             "closed": "Circuit breaker reset - continuing processing",
-            "info": "The system has detected many consecutive errors and has temporarily stopped to prevent further failures. It will automatically retry in a moment."
+            "info": "The system has detected many consecutive errors and has temporarily stopped to prevent further failures. It will retry automatically in a few moments."
         },
         "confirm_cancel": {
             "title": "Confirm Cancellation",
@@ -125,7 +123,6 @@
     "analysis": {
         "options": {
             "title": "Analysis Options",
-            "analyze_only": "Analyze Only",
             "rename_files": "Rename Files After Update"
         },
         "parameters": {

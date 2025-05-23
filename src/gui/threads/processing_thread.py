@@ -21,7 +21,7 @@ class ProcessingThread(QThread):
     circuit_breaker_opened = Signal()
     circuit_breaker_closed = Signal()
 
-    def __init__(self, file_paths: List[str] = None, model: GenreModel = None, analyze_only: bool = True,
+    def __init__(self, file_paths: List[str] = None, model: GenreModel = None,
                  confidence: float = 0.3, max_genres: int = 3,
                  rename_files: bool = False, backup_dir: Optional[str] = None,
                  task_queue: Optional[TaskQueue] = None, parent=None):
@@ -29,7 +29,6 @@ class ProcessingThread(QThread):
         from threading import Lock
         self._thread_lock = Lock()
         self.file_paths = file_paths if file_paths is not None else []
-        self.analyze_only = analyze_only
         self.confidence = confidence
         self.max_genres = max_genres
         self.rename_files = rename_files
@@ -64,18 +63,14 @@ class ProcessingThread(QThread):
         """Procesa un archivo individual."""
         logger.debug(f"Iniciando process_file para {filepath}") # Added logging
         try:
-            if self.analyze_only:
-                logger.debug(f"Modo análisis para {filepath}") # Added logging
-                result = self.model.analyze(filepath, chunk_size=8192)
-            else:
-                logger.debug(f"Modo procesamiento para {filepath}") # Added logging
-                result = self.model.process(
-                    filepath,
-                    self.confidence,
-                    self.max_genres,
-                    self.rename_files,
-                    chunk_size=8192
-                )
+            logger.debug(f"Modo procesamiento para {filepath}") # Added logging
+            result = self.model.process(
+                filepath,
+                self.confidence,
+                self.max_genres,
+                self.rename_files,
+                chunk_size=8192
+            )
             logger.debug(f"process_file completado para {filepath}. Resultado: {result}") # Added logging
             return result
         except Exception as e:
@@ -190,18 +185,6 @@ class ProcessingThread(QThread):
                     message = f"Error: {actual_error}"
                     is_error = True
                     error_count += 1 # Increment error_count here
-                elif self.analyze_only:
-                    genres = result.get("detected_genres", {}) or result.get("found_genres", {})
-                    if genres:
-                        genre_str = ", ".join(
-                            f"{g} ({c:.2f})" if isinstance(c, float) else f"{g}"
-                            for g, c in sorted(genres.items(), key=lambda x: x[1], reverse=True)
-                        )
-                        message = f"Éxito en análisis. Géneros detectados: {genre_str}"
-                    else:
-                        message = "No se detectaron géneros"
-                    is_error = False
-                    success_count += 1 # Increment success_count here
                 elif "written" in result and result["written"]:
                     # Metadata written successfully
                     if "renamed" in result and result["renamed"]:
@@ -224,10 +207,18 @@ class ProcessingThread(QThread):
                      is_error = True
                      error_count += 1 # Increment error_count here
                 else:
-                    # Unexpected result structure or unhandled success case
-                    message = "Resultado inesperado del procesamiento"
-                    is_error = True
-                    error_count += 1 # Increment error_count here
+                    # Processing completed successfully
+                    genres = result.get("detected_genres", {}) or result.get("found_genres", {})
+                    if genres:
+                        genre_str = ", ".join(
+                            f"{g} ({c:.2f})" if isinstance(c, float) else f"{g}"
+                            for g, c in sorted(genres.items(), key=lambda x: x[1], reverse=True)
+                        )
+                        message = f"Procesamiento exitoso. Géneros: {genre_str}"
+                    else:
+                        message = result.get("message", "Procesamiento completado")
+                    success_count += 1 # Increment success_count here
+                    is_error = False
 
                 # Emit the signal with the determined message and error status
                 self.file_processed.emit(filepath, message, is_error)

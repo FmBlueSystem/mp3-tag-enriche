@@ -244,7 +244,6 @@ class MainWindow(QMainWindow):
         self.processing_thread = ProcessingThread(
             file_paths=files_to_process,
             model=self.model,
-            analyze_only=settings['analyze_only'],
             confidence=settings['confidence'],
             max_genres=settings['max_genres'],
             rename_files=settings['rename_files'],

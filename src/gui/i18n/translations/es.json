@@ -75,7 +75,6 @@
         "controls": {
             "progress": "Etiqueta de Progreso",
             "status": "Barra de Estado",
-            "analyze_only": "Casilla Solo Análisis",
             "rename_files": "Casilla Renombrar Archivos",
             "confidence": {
                 "label": "Etiqueta Umbral de Confianza",
@@ -99,7 +98,6 @@
         "cancel": "Cancelar el procesamiento actual",
         "file_list": "Arrastre y suelte archivos MP3 aquí o use los botones de arriba",
         "results": "Resultados del procesamiento de archivos",
-        "analyze_only": "Solo analizar archivos sin hacer cambios",
         "rename_files": "Renombrar archivos usando el formato: 'Artista - Título [Género]'",
         "confidence": "Ajustar nivel mínimo de confianza para la detección",
         "max_genres": "Número máximo de géneros a detectar por archivo"
@@ -125,7 +123,6 @@
     "analysis": {
         "options": {
             "title": "Opciones de Análisis",
-            "analyze_only": "Solo Análisis",
             "rename_files": "Renombrar Archivos Después de Actualizar"
         },
         "parameters": {

@@ -41,33 +41,25 @@ class SpotifyAPI(MusicAPI):
                 client_secret=client_secret
             )
             self.sp = spotipy.Spotify(auth_manager=auth_manager)
-            
-            # Configure timeout for requests (simpler approach)
-            if hasattr(self.sp, '_session'):
-                self.sp._session.timeout = 15
-            
             logger.info("Successfully initialized Spotify API client")
         except Exception as e:
             logger.error(f"Failed to initialize Spotify API client: {e}")
             self.sp = None
-        
-        # Setup rate limits
-        self._setup_rate_limits()
     
     def _setup_rate_limits(self):
         """Configure Spotify-specific rate limits."""
         # Spotify allows ~1 request per second for search endpoints
         _rate_limiter.create_limit(
             f"{self.api_name}_search",
-            capacity=10,    # Allow burst of 10 requests
-            fill_rate=5.0   # 5 tokens per second (300/min)
+            capacity=5,     # Allow burst of 5 requests
+            fill_rate=1.0   # 1 token per second
         )
         
         # Separate limit for artist/track/album lookups
         _rate_limiter.create_limit(
             f"{self.api_name}_lookup",
-            capacity=10,    # Allow burst of 10 requests
-            fill_rate=5.0   # 5 tokens per second (300/min)
+            capacity=5,     # Allow burst of 5 requests
+            fill_rate=1.0   # 1 token per second
         )
     
     def get_track_info(self, artist: str, track: str) -> Dict[str, Any]:

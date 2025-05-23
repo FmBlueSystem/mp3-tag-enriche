@@ -13,6 +13,25 @@ from ...core.genre_detector import GenreDetector
 from ...core.file_handler import Mp3FileHandler
 from ...core.music_apis import MusicBrainzAPI
 
+# Try to import all available APIs
+try:
+    from ...core.spotify_api import SpotifyAPI
+    SPOTIFY_AVAILABLE = True
+except ImportError:
+    SPOTIFY_AVAILABLE = False
+
+try:
+    from ...core.music_apis import LastFmAPI, DiscogsAPI
+    EXTENDED_APIS_AVAILABLE = True
+except ImportError:
+    EXTENDED_APIS_AVAILABLE = False
+
+try:
+    from ...core.config_loader import load_api_config
+    CONFIG_AVAILABLE = True
+except ImportError:
+    CONFIG_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 BLACKLIST_GENRE_TERMS_MODEL = {
@@ -125,10 +144,43 @@ class GenreModel:
     """Modelo para el procesamiento de géneros musicales."""
     def __init__(self, backup_dir: Optional[str] = None):
         self.file_handler = Mp3FileHandler(backup_dir=backup_dir)
+        
+        # Configure all available APIs
+        apis = [MusicBrainzAPI()]
+        
+        # Add Spotify API if available
+        if SPOTIFY_AVAILABLE and CONFIG_AVAILABLE:
+            try:
+                # Try to load Spotify configuration
+                config = load_api_config()
+                spotify_config = config.get("spotify", {})
+                client_id = spotify_config.get("client_id")
+                client_secret = spotify_config.get("client_secret")
+                
+                if client_id and client_secret:
+                    logger.info("Añadiendo Spotify API al GenreModel GUI")
+                    spotify_api = SpotifyAPI(client_id=client_id, client_secret=client_secret)
+                    apis.append(spotify_api)
+                else:
+                    logger.warning("Credenciales de Spotify faltantes en la configuración")
+            except Exception as e:
+                logger.warning(f"Error al inicializar Spotify API en GUI: {e}")
+        
+        # Add other APIs if available
+        if EXTENDED_APIS_AVAILABLE:
+            try:
+                apis.append(DiscogsAPI())
+                logger.info("Añadiendo Discogs API al GenreModel GUI")
+            except Exception as e:
+                logger.warning(f"Error al inicializar Discogs API en GUI: {e}")
+        
         self.detector = GenreDetector(
-            apis=[MusicBrainzAPI()],
+            apis=apis,
             file_handler=self.file_handler
         )
+        
+        logger.info(f"GenreModel inicializado con {len(apis)} APIs: {[api.__class__.__name__ for api in apis]}")
+        
         self.min_confidence = 0.2
         self.max_api_tags = 100
         self.rename_after_update = True

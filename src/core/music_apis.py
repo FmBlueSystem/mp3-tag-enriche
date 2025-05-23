@@ -26,6 +26,7 @@ LASTFM_API_KEY_MUSIC_APIS = "b7651b3758d74bd0f47df535a5ddf45d"
 LASTFM_API_SECRET_MUSIC_APIS = "eb38d3f09f394d652c93d948972a3285" # Necesitarás el secret si no está ya
 
 # Configure logging
+# API_IMPROVEMENTS_APPLIED - Parches aplicados para prevenir congelamiento
 logger = logging.getLogger(__name__)
 
 # Global rate limiter, cache, and metrics instances
@@ -59,8 +60,8 @@ class MusicAPI(ABC):
         # Default conservative limits
         _rate_limiter.create_limit(
             f"{self.api_name}_default",
-            capacity=10,   # burst capacity
-            fill_rate=1.0  # tokens per second
+            capacity=2,    # burst capacity reducido
+            fill_rate=0.5  # tokens per second más conservador
         )
     
     def _enforce_rate_limit(self, limit_key: str = None):
@@ -181,11 +182,11 @@ class MusicBrainzAPI(MusicAPI):
     
     def _setup_rate_limits(self):
         """Configure MusicBrainz-specific rate limits."""
-        # Main search rate limit (1 request/sec)
+        # Main search rate limit (más conservador)
         _rate_limiter.create_limit(
             f"{self.api_name}_search",
-            capacity=2,     # Allow burst of 2 requests
-            fill_rate=1.0   # 1 token per second
+            capacity=1,     # Solo 1 request en burst
+            fill_rate=0.5   # 1 token cada 2 segundos
         )
         
         # Release lookup rate limit

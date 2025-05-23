@@ -9,8 +9,31 @@ import logging
 from pathlib import Path
 from collections import OrderedDict
 import sys
+import re
 
 logger = logging.getLogger(__name__)
+
+def sanitize_cache_filename(filename: str) -> str:
+    """
+    Sanitiza nombres de archivo para cache, eliminando caracteres problemáticos.
+    
+    Args:
+        filename: Nombre de archivo original
+        
+    Returns:
+        Nombre de archivo sanitizado para sistema de archivos
+    """
+    # Reemplazar caracteres problemáticos
+    sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    
+    # Eliminar espacios dobles y caracteres de control
+    sanitized = re.sub(r'\s+', ' ', sanitized).strip()
+    
+    # Limitar longitud para evitar problemas de sistema de archivos
+    if len(sanitized) > 200:
+        sanitized = sanitized[:200] + '_truncated'
+    
+    return sanitized
 
 class CacheEntry:
     """Representa una entrada en el caché con metadatos."""
@@ -217,7 +240,7 @@ class PersistentCache:
         
     def _get_cache_path(self, key: str) -> Path:
         """Obtiene la ruta del sistema de archivos para una clave de caché."""
-        return self._cache_dir / f"{key}.json"
+        return self._cache_dir / f"{sanitize_cache_filename(key)}.json"
 
     def cleanup(self) -> None:
         """Elimina todas las entradas expiradas del caché."""

@@ -29,12 +29,6 @@ class ControlPanel(QWidget):
         analysis_layout = QVBoxLayout(analysis_group)
         analysis_layout.setSpacing(8)
         
-        self.analyze_only = QCheckBox(tr("analyze_only_checkbox"))
-        self.analyze_only.setAccessibleName(tr("accessibility_analyze_only"))
-        self.analyze_only.setToolTip(tr("tooltip_analyze_only"))
-        self.analyze_only.setChecked(True)
-        analysis_layout.addWidget(self.analyze_only)
-        
         self.rename_files = QCheckBox(tr("rename_files_checkbox"))
         self.rename_files.setAccessibleName(tr("accessibility_rename_files"))
         self.rename_files.setToolTip(tr("tooltip_rename_files"))
@@ -105,7 +99,6 @@ class ControlPanel(QWidget):
         layout.addWidget(detection_params_group)
         
         # Conectar cambios
-        self.analyze_only.stateChanged.connect(self.emit_settings)
         self.rename_files.stateChanged.connect(self.emit_settings)
         self.confidence_slider.valueChanged.connect(self.emit_settings)
         self.max_genres_spinner.valueChanged.connect(self.emit_settings)
@@ -126,7 +119,6 @@ class ControlPanel(QWidget):
     def get_settings(self) -> Dict:
         """Get the current settings."""
         return {
-            'analyze_only': self.analyze_only.isChecked(),
             'rename_files': self.rename_files.isChecked(),
             'confidence': self.confidence_slider.value() / 100.0,
             'max_genres': self.max_genres_spinner.value()
@@ -134,8 +126,6 @@ class ControlPanel(QWidget):
 
     def set_settings(self, settings: Dict) -> None:
         """Set the panel settings."""
-        if 'analyze_only' in settings:
-            self.analyze_only.setChecked(settings['analyze_only'])
         if 'rename_files' in settings:
             self.rename_files.setChecked(settings['rename_files'])
         if 'confidence' in settings:

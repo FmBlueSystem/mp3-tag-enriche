@@ -33,7 +33,7 @@ def test_basic_metrics_recording(tracker):
     metrics = tracker.get_metrics("TestAPI")
     assert metrics["total_calls"] == 2
     assert metrics["success_rate"] == 0.5
-    assert metrics["avg_latency"] == 0.15  # (0.1 + 0.2) / 2
+    assert metrics["avg_latency"] == pytest.approx(0.15)  # (0.1 + 0.2) / 2
     assert metrics["rate_limit_ratio"] == 0.0
 
 def test_rate_limit_tracking(tracker):
@@ -62,7 +62,7 @@ def test_multiple_apis(tracker):
     metrics1 = tracker.get_metrics("API1")
     assert metrics1["total_calls"] == 2
     assert metrics1["success_rate"] == 1.0
-    assert metrics1["avg_latency"] == 0.15
+    assert metrics1["avg_latency"] == pytest.approx(0.15)
     
     # Check API2 metrics
     metrics2 = tracker.get_metrics("API2")
@@ -84,7 +84,7 @@ def test_metrics_persistence(metrics_file):
     metrics = tracker2.get_metrics("TestAPI")
     assert metrics["total_calls"] == 2
     assert metrics["success_rate"] == 0.5
-    assert metrics["avg_latency"] == 0.15
+    assert metrics["avg_latency"] == pytest.approx(0.15)
 
 def test_nonexistent_api(tracker):
     """Test getting metrics for nonexistent API."""

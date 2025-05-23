@@ -190,3 +190,56 @@ class GenreDetector:
             except Exception as e:
                 results[path] = {"error": f"Error al analizar {path}: {str(e)}"}
         return results
+
+def get_fallback_genres(artist: str, title: str) -> Dict[str, float]:
+    """
+    Proporciona géneros de fallback basados en heurísticas cuando las APIs fallan.
+    
+    Args:
+        artist: Nombre del artista
+        title: Título de la canción
+        
+    Returns:
+        Diccionario de géneros con puntuaciones de confianza
+    """
+    fallback_genres = {}
+    
+    # Heurísticas basadas en palabras clave en título
+    title_lower = title.lower()
+    
+    # Detectar remix/edits -> Electronic
+    if any(word in title_lower for word in ['remix', 'mix', 'edit', 'club', 'dance', 'house']):
+        fallback_genres['electronic'] = 0.7
+        fallback_genres['dance'] = 0.5
+    
+    # Detectar características clásicas
+    if any(word in title_lower for word in ['acoustic', 'unplugged', 'live']):
+        fallback_genres['folk'] = 0.6
+        fallback_genres['acoustic'] = 0.5
+    
+    # Detectar hip-hop/rap características
+    if any(word in title_lower for word in ['feat.', 'ft.', 'featuring']):
+        fallback_genres['hip hop'] = 0.4
+        fallback_genres['pop'] = 0.4
+    
+    # Heurísticas basadas en artista
+    artist_lower = artist.lower()
+    
+    # Artistas electrónicos conocidos (muestra)
+    electronic_artists = ['daft punk', 'calvin harris', 'david guetta', 'deadmau5']
+    if any(ea in artist_lower for ea in electronic_artists):
+        fallback_genres['electronic'] = 0.8
+        fallback_genres['dance'] = 0.6
+    
+    # Si no hay géneros específicos, usar géneros generales
+    if not fallback_genres:
+        fallback_genres = {
+            'pop': 0.5,
+            'rock': 0.3,
+            'electronic': 0.2
+        }
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Géneros de fallback para '{artist} - {title}': {fallback_genres}")
+    return fallback_genres

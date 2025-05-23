@@ -1,6 +1,17 @@
 import os
 import sys
 import logging
+
+# 🔧 PARCHE: Suprimir logs verbosos que causan congelamiento
+import logging
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('musicbrainzngs').setLevel(logging.ERROR)
+logging.getLogger('musicbrainzngs.musicbrainzngs').setLevel(logging.ERROR)
+logging.getLogger('mutagen').setLevel(logging.WARNING)
+logging.getLogger('spotipy').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger('pylast').setLevel(logging.WARNING)
+
 import traceback
 from src.core.genre_detector import GenreDetector
 from src.core.music_apis import MusicBrainzAPI, LastFmAPI, DiscogsAPI

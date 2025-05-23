@@ -4,6 +4,17 @@ import os
 import re
 import logging
 from pathlib import Path
+
+# 🔧 PARCHE: Suprimir logs verbosos que causan congelamiento
+import logging
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('musicbrainzngs').setLevel(logging.ERROR)
+logging.getLogger('musicbrainzngs.musicbrainzngs').setLevel(logging.ERROR)
+logging.getLogger('mutagen').setLevel(logging.WARNING)
+logging.getLogger('spotipy').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger('pylast').setLevel(logging.WARNING)
+
 import mutagen
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TCON, TCOM, TCOP, TENC, TLEN, TMOO, TPE2, TPUB, TLAN, TRCK, TPOS, TSRC, TXXX
 
@@ -50,6 +61,40 @@ class EnhancedMp3FileHandler(Mp3FileHandler):
         }
         logger.debug("EnhancedMp3FileHandler inicializado")
     
+    # PARCHE: Timeout y gestión de memoria
+    # timeout_patch_applied
+    def get_file_info_with_timeout(self, file_path: str, chunk_size: int = 8192, timeout: float = 30.0) -> Dict[str, str]:
+        """Versión con timeout del get_file_info."""
+        import signal
+        import gc
+        
+        def timeout_handler(signum, frame):
+            raise TimeoutError(f"Timeout procesando {file_path}")
+        
+        # Configurar timeout
+        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(int(timeout))
+        
+        try:
+            result = self.get_file_info_original(file_path, chunk_size)
+            # Limpiar memoria después de cada archivo
+            gc.collect()
+            return result
+        except TimeoutError as e:
+            logger.warning(f"Timeout en {file_path}: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Error en {file_path}: {e}")
+            return {}
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old_handler)
+    
+    # Aplicar parche si no existe
+    if not hasattr(self, 'get_file_info_original'):
+        self.get_file_info_original = self.get_file_info
+        self.get_file_info = self.get_file_info_with_timeout
+
     def extract_artist_title_from_filename(self, filename: str, fallback_artist: str = "", fallback_title: str = "") -> Tuple[str, str]:
         """Versión mejorada que reemplaza la función original.
         

@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QAbstractItemView
 from PySide6.QtCore import Qt, Signal
 from typing import List, Optional
+import os
 
 class FileResultsTableWidget(QTableWidget):
     """Tabla para mostrar archivos, estado y resultados."""
@@ -26,7 +27,11 @@ class FileResultsTableWidget(QTableWidget):
             if file_path.lower().endswith('.mp3') and file_path not in self.file_paths_all:
                 row = self.rowCount()
                 self.insertRow(row)
-                self.setItem(row, self.COL_FILE, QTableWidgetItem(file_path))
+                # Mostrar solo el nombre del archivo, pero guardar la ruta completa como data
+                file_item = QTableWidgetItem(os.path.basename(file_path))
+                file_item.setData(Qt.UserRole, file_path)  # Guardar la ruta completa como data
+                file_item.setToolTip(file_path)  # Mostrar ruta completa en tooltip
+                self.setItem(row, self.COL_FILE, file_item)
                 self.setItem(row, self.COL_STATUS, QTableWidgetItem("Pendiente"))
                 self.setItem(row, self.COL_RESULT, QTableWidgetItem(""))
                 self.file_paths_all.append(file_path)
@@ -43,7 +48,11 @@ class FileResultsTableWidget(QTableWidget):
             if file_path not in self.file_paths_all:
                 row = self.rowCount()
                 self.insertRow(row)
-                self.setItem(row, self.COL_FILE, QTableWidgetItem(file_path))
+                # Mostrar solo el nombre del archivo, pero guardar la ruta completa como data
+                file_item = QTableWidgetItem(os.path.basename(file_path))
+                file_item.setData(Qt.UserRole, file_path)  # Guardar la ruta completa como data
+                file_item.setToolTip(file_path)  # Mostrar ruta completa en tooltip
+                self.setItem(row, self.COL_FILE, file_item)
                 self.setItem(row, self.COL_STATUS, QTableWidgetItem("Pendiente"))
                 self.setItem(row, self.COL_RESULT, QTableWidgetItem(""))
                 self.file_paths_all.append(file_path)
@@ -54,17 +63,21 @@ class FileResultsTableWidget(QTableWidget):
 
     def update_status(self, file_path: str, status: str):
         for row in range(self.rowCount()):
-            if self.item(row, self.COL_FILE).text() == file_path:
+            # Buscar por la ruta completa guardada en data
+            item = self.item(row, self.COL_FILE)
+            if item and item.data(Qt.UserRole) == file_path:
                 self.setItem(row, self.COL_STATUS, QTableWidgetItem(status))
                 break
 
     def update_result(self, file_path: str, result: str, error: bool = False):
         for row in range(self.rowCount()):
-            if self.item(row, self.COL_FILE).text() == file_path:
-                item = QTableWidgetItem(result)
+            # Buscar por la ruta completa guardada en data
+            item = self.item(row, self.COL_FILE)
+            if item and item.data(Qt.UserRole) == file_path:
+                result_item = QTableWidgetItem(result)
                 if error:
-                    item.setForeground(Qt.red)
-                self.setItem(row, self.COL_RESULT, item)
+                    result_item.setForeground(Qt.red)
+                self.setItem(row, self.COL_RESULT, result_item)
                 break
 
     def clear_table(self):
@@ -72,7 +85,16 @@ class FileResultsTableWidget(QTableWidget):
         self.file_paths_all.clear()
 
     def get_selected_files(self) -> List[str]:
-        return [self.item(row, self.COL_FILE).text() for row in range(self.rowCount()) if self.isRowSelected(row)]
+        selected_files = []
+        for row in range(self.rowCount()):
+            if self.isRowSelected(row):
+                item = self.item(row, self.COL_FILE)
+                if item:
+                    # Devolver la ruta completa desde los datos guardados
+                    full_path = item.data(Qt.UserRole)
+                    if full_path:
+                        selected_files.append(full_path)
+        return selected_files
 
     def get_all_files(self) -> List[str]:
         return self.file_paths_all.copy() 

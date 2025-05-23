@@ -1,10 +1,7 @@
 {
     "spotify": {
         "client_id": "8e5333cb38084470990d70a659336463",
-        "client_secret": "aeb7675f344d4c83986a444190b0eb6d",
-        "app_name": "MusicMetadataExplorer",
-        "configured_by": "bluesystem0cr@gmail.com",
-        "configured_date": "2025-05-22"
+        "client_secret": "d66221f931694691b5a7157eb5f506a5"
     },
     "lastfm": {
         "api_key": "b7651b3758d74bd0f47df535a5ddf45d",

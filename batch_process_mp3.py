@@ -12,6 +12,17 @@ import mutagen
 from mutagen.id3 import ID3, TIT2, TPE1
 from typing import Dict, List, Tuple
 from pathlib import Path
+
+# 🔧 PARCHE: Suprimir logs verbosos que causan congelamiento
+import logging
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('musicbrainzngs').setLevel(logging.ERROR)
+logging.getLogger('musicbrainzngs.musicbrainzngs').setLevel(logging.ERROR)
+logging.getLogger('mutagen').setLevel(logging.WARNING)
+logging.getLogger('spotipy').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger('pylast').setLevel(logging.WARNING)
+
 from concurrent.futures import ThreadPoolExecutor
 from tabulate import tabulate
 
@@ -29,6 +40,50 @@ if project_dir not in sys.path:
 
 # Importar los manipuladores de archivos
 from src.core.enhanced_mp3_handler import EnhancedMp3FileHandler
+
+# Spotify API integration
+try:
+    from src.core.spotify_api import SpotifyAPI
+    SPOTIFY_AVAILABLE = True
+except ImportError:
+    SPOTIFY_AVAILABLE = False
+    print("⚠️ Spotify API no disponible")
+
+# PARCHE APLICADO - Limitación de recursos
+import gc
+import time
+
+# Configuración optimizada
+MAX_WORKERS = 2          # Reducir de 4 a 2 workers
+CHUNK_SIZE = 10          # Procesar de 10 en 10 archivos
+RATE_LIMIT = 1.0         # 1 segundo entre archivos
+MEMORY_CLEANUP_INTERVAL = 5  # Limpiar memoria cada 5 archivos
+
+def process_file_patched(file_path: str, dry_run: bool = True, force: bool = False, debug: bool = False) -> Dict:
+    """Versión parcheada del process_file con gestión de memoria."""
+    # Rate limiting para evitar sobrecarga
+    time.sleep(RATE_LIMIT)
+    
+    try:
+        # Llamar función original
+        result = process_file_original(file_path, dry_run, force, debug)
+        
+        # Forzar liberación de memoria
+        gc.collect()
+        
+        return result
+    except Exception as e:
+        return {
+            'file': file_path,
+            'filename': os.path.basename(file_path),
+            'error': f'Error parcheado: {str(e)}',
+            'updated': False
+        }
+
+# Guardar función original
+if 'process_file_original' not in globals():
+    process_file_original = process_file
+    process_file = process_file_patched
 
 # Crear directorio de backups
 backup_dir = os.path.join(project_dir, "mp3_backups")

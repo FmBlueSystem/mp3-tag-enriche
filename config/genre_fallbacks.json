@@ -1,0 +1,101 @@
+{
+  "keywords": {
+    "electronic": [
+      "remix",
+      "mix",
+      "edit",
+      "club",
+      "dance",
+      "house",
+      "techno",
+      "edm"
+    ],
+    "rock": [
+      "rock",
+      "metal",
+      "punk",
+      "grunge",
+      "alternative"
+    ],
+    "pop": [
+      "pop",
+      "mainstream",
+      "hit",
+      "chart",
+      "radio"
+    ],
+    "hip_hop": [
+      "rap",
+      "hip hop",
+      "hip-hop",
+      "feat.",
+      "ft.",
+      "featuring"
+    ],
+    "acoustic": [
+      "acoustic",
+      "unplugged",
+      "live",
+      "stripped"
+    ],
+    "classical": [
+      "symphony",
+      "concerto",
+      "classical",
+      "orchestral"
+    ],
+    "jazz": [
+      "jazz",
+      "blues",
+      "swing",
+      "bebop"
+    ],
+    "country": [
+      "country",
+      "folk",
+      "bluegrass",
+      "americana"
+    ]
+  },
+  "artists": {
+    "electronic": [
+      "daft punk",
+      "calvin harris",
+      "david guetta",
+      "deadmau5",
+      "skrillex",
+      "avicii",
+      "tiesto",
+      "armin van buuren"
+    ],
+    "rock": [
+      "led zeppelin",
+      "the beatles",
+      "pink floyd",
+      "queen",
+      "ac/dc",
+      "metallica",
+      "nirvana",
+      "radiohead"
+    ],
+    "pop": [
+      "madonna",
+      "michael jackson",
+      "prince",
+      "whitney houston",
+      "britney spears",
+      "taylor swift",
+      "ariana grande"
+    ],
+    "hip_hop": [
+      "tupac",
+      "biggie",
+      "eminem",
+      "jay-z",
+      "kanye west",
+      "drake",
+      "kendrick lamar",
+      "notorious b.i.g."
+    ]
+  }
+}
