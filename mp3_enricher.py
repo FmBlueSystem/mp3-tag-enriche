@@ -17,13 +17,14 @@ sys.path.insert(0, project_root)
 
 from src.core.genre_detector import GenreDetector
 from src.core.file_handler import Mp3FileHandler
-from src.core.music_apis import MusicBrainzAPI, LastFmAPI, DiscogsAPI
+from src.core.music_apis import MusicBrainzAPI, LastFmAPI, DiscogsAPI, WikipediaAPI, AcousticBrainzAPI, iTunesAPI
 try:
     from src.core.spotify_api import SpotifyAPI
     SPOTIFY_AVAILABLE = True
 except ImportError:
     SPOTIFY_AVAILABLE = False
 from src.core.config_loader import load_api_config
+from src.core.database.db_manager import DBManager # Importar DBManager
 
 # Configure logging
 logging.basicConfig(
@@ -105,6 +106,12 @@ def parse_args():
         help="Run in interactive mode, prompting for each file"
     )
     
+    parser.add_argument(
+        "--organize",
+        action="store_true",
+        help="Organize files into a folder structure based on metadata after processing"
+    )
+    
     return parser.parse_args()
 
 def configure_apis(config: Dict[str, Any], use_spotify: bool) -> List[Any]:
@@ -142,31 +149,43 @@ def configure_apis(config: Dict[str, Any], use_spotify: bool) -> List[Any]:
         api_token=discogs_config.get("api_token")
     )
     apis.append(discogs_api)
+
+    # Initialize Wikipedia API
+    wikipedia_api = WikipediaAPI()
+    apis.append(wikipedia_api)
+
+    # Initialize AcousticBrainz API
+    acousticbrainz_api = AcousticBrainzAPI()
+    apis.append(acousticbrainz_api)
+
+    # Initialize iTunes API
+    itunes_api = iTunesAPI()
+    apis.append(itunes_api)
     
-        # Initialize Spotify API if requested and available
-        if use_spotify and SPOTIFY_AVAILABLE:
-            try:
-                spotify_config = config.get("spotify", {})
-                client_id = spotify_config.get("client_id")
-                client_secret = spotify_config.get("client_secret")
-                
-                # Check environment variables as fallback
-                if not client_id or not client_secret:
-                    client_id = os.environ.get("SPOTIPY_CLIENT_ID")
-                    client_secret = os.environ.get("SPOTIPY_CLIENT_SECRET")
-                
-                if client_id and client_secret:
-                    spotify_api = SpotifyAPI(client_id=client_id, client_secret=client_secret)
-                    if spotify_api.sp:  # Only add if successfully initialized
-                        apis.append(spotify_api)
-                        logger.info("Spotify API enabled")
-                    else:
-                        logger.warning("Spotify API client initialization failed, continuing without Spotify")
+    # Initialize Spotify API if requested and available
+    if use_spotify and SPOTIFY_AVAILABLE:
+        try:
+            spotify_config = config.get("spotify", {})
+            client_id = spotify_config.get("client_id")
+            client_secret = spotify_config.get("client_secret")
+            
+            # Check environment variables as fallback
+            if not client_id or not client_secret:
+                client_id = os.environ.get("SPOTIPY_CLIENT_ID")
+                client_secret = os.environ.get("SPOTIPY_CLIENT_SECRET")
+            
+            if client_id and client_secret:
+                spotify_api = SpotifyAPI(client_id=client_id, client_secret=client_secret)
+                if spotify_api.sp:  # Only add if successfully initialized
+                    apis.append(spotify_api)
+                    logger.info("Spotify API enabled")
                 else:
-                    logger.warning("Spotify API credentials missing, continuing without Spotify")
-            except Exception as e:
-                logger.error(f"Error initializing Spotify API: {e}")
-                logger.info("Continuing without Spotify API integration")
+                    logger.warning("Spotify API client initialization failed, continuing without Spotify")
+            else:
+                logger.warning("Spotify API credentials missing, continuing without Spotify")
+        except Exception as e:
+            logger.error(f"Error initializing Spotify API: {e}")
+            logger.info("Continuing without Spotify API integration")
     
     return apis
 
@@ -295,11 +314,20 @@ def main():
     # Initialize file handler with backup directory if specified
     file_handler = Mp3FileHandler(backup_dir=args.backup_dir)
     
+    # Initialize DB Manager
+    db_manager = DBManager()
+
     # Initialize genre detector
-    genre_detector = GenreDetector(apis=apis, file_handler=file_handler)
+    genre_detector = GenreDetector(apis=apis, file_handler=file_handler, db_manager=db_manager)
     genre_detector.confidence_threshold = args.confidence
     genre_detector.max_genres = args.max_genres
     
+    # Initialize Folder Organizer if requested
+    folder_organizer = None
+    if args.organize:
+        from src.core.folder_organizer import FolderOrganizer
+        folder_organizer = FolderOrganizer(db_manager=db_manager)
+
     # Get directory to process
     directory = args.directory
     if not directory:
@@ -337,6 +365,26 @@ def main():
         interactive=args.interactive
     )
     
+    # Perform folder organization if requested
+    if folder_organizer:
+        logger.info("\nStarting folder organization...")
+        # Fetch tracks from DB to ensure we have the latest metadata and filepaths
+        all_tracks_from_db = db_manager.fetch_query("SELECT * FROM tracks")
+        
+        organization_results = []
+        for track_row in all_tracks_from_db:
+            track_obj = Track.from_row(track_row)
+            # Only organize tracks that were successfully processed and have valid metadata
+            if track_obj.filepath and os.path.exists(track_obj.filepath) and track_obj.genre and track_obj.year:
+                org_result = folder_organizer.organize_track_file(track_obj, dry_run=False)
+                organization_results.append(org_result)
+            else:
+                logger.warning(f"Skipping organization for track {track_obj.title} - missing metadata or file: {track_obj.filepath}")
+                organization_results.append({"success": False, "error": "Missing metadata or file for organization", "filepath": track_obj.filepath})
+        
+        logger.info(f"Folder organization completed for {len(organization_results)} tracks.")
+        # You might want to save organization_results to a separate file or log them more verbosely
+    
     # Write results to file if requested
     if args.output:
         with open(args.output, 'w') as f:
@@ -346,6 +394,9 @@ def main():
     elapsed = time.time() - start_time
     print(f"\nProcessed {len(results)} files in {elapsed:.2f} seconds")
     
+    # Close DB connection
+    db_manager.close()
+
     return 0
 
 if __name__ == "__main__":

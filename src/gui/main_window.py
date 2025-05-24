@@ -14,6 +14,10 @@ from pathlib import Path
 from .i18n import tr, set_language
 
 from ..core.genre_detector import GenreDetector
+from ..core.database.db_manager import DBManager # Importar DBManager
+from ..core.rule_engine import RuleEngine # Importar RuleEngine
+from ..core.folder_organizer import FolderOrganizer # Importar FolderOrganizer
+
 from .models.genre_model import GenreModel
 from .widgets.control_panel import ControlPanel
 from .widgets.backup_panel import BackupPanel
@@ -58,7 +62,12 @@ class MainWindow(QMainWindow):
             logger.error(f"Error con dir de respaldo '{default_backup_path}': {e}. Seleccione manualmente.")
             self.backup_dir = None
 
-        self.model = GenreModel(backup_dir=self.backup_dir)
+        # Inicializar DBManager aquí y pasarlo a los componentes que lo necesiten
+        self.db_manager = DBManager()
+        self.model = GenreModel(backup_dir=self.backup_dir, db_manager=self.db_manager) # Pasar db_manager al modelo
+        self.rule_engine = RuleEngine(db_manager=self.db_manager) # Inicializar RuleEngine
+        self.folder_organizer = FolderOrganizer(db_manager=self.db_manager) # Inicializar FolderOrganizer
+
         self.is_dark_theme = True
         self.setup_ui()
         self.apply_current_theme()
@@ -68,13 +77,18 @@ class MainWindow(QMainWindow):
         # Comprobación básica para evitar errores si el modelo no está completamente inicializado
         if not hasattr(self, 'model') or self.model is None:
             logger.warning("El modelo no está inicializado. Creando una nueva instancia.")
-            # Crear el modelo si no existe
-            self.model = GenreModel(backup_dir=self.backup_dir)
+            # Crear el modelo si no existe, pasando el db_manager
+            self.model = GenreModel(backup_dir=self.backup_dir, db_manager=self.db_manager)
         
         # Actualizar el directorio de respaldo del modelo solo si ha cambiado
         if self.model.backup_dir != self.backup_dir:
             self.model.update_backup_dir(self.backup_dir)
             logger.info(f"Directorio de respaldo del modelo actualizado a: {self.backup_dir}")
+        
+        # Asegurar que el db_manager del modelo sea el mismo
+        if self.model.db_manager != self.db_manager:
+            self.model.db_manager = self.db_manager
+            logger.info("DBManager del modelo actualizado.")
 
 
     def setup_ui(self):
@@ -313,7 +327,11 @@ class MainWindow(QMainWindow):
             confidence=settings['confidence'],
             max_genres=settings['max_genres'],
             rename_files=settings['rename_files'],
-            backup_dir=self.backup_dir
+            backup_dir=self.backup_dir,
+            db_manager=self.db_manager, # Pasar DBManager
+            rule_engine=self.rule_engine, # Pasar RuleEngine
+            folder_organizer=self.folder_organizer, # Pasar FolderOrganizer
+            organize_files=settings['organize_files'] # Nueva opción para organizar
         )
         
         # Conectar señales

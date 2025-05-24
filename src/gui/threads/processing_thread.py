@@ -7,6 +7,9 @@ from PySide6.QtCore import QThread, Signal
 from typing import Optional, List, Dict, Any
 
 from ...core.file_handler import Mp3FileHandler
+from ...core.rules.rule_engine import RuleEngine
+from ...core.rules.utils import PlaylistGenerator, M3UExporter
+from ...core.rules.triggers import TriggerSystem
 from ..models.genre_model import GenreModel
 from .task_queue import TaskQueue, TaskState, Task
 
@@ -24,7 +27,8 @@ class ProcessingThread(QThread):
     def __init__(self, file_paths: List[str] = None, model: GenreModel = None,
                  confidence: float = 0.3, max_genres: int = 3,
                  rename_files: bool = False, backup_dir: Optional[str] = None,
-                 task_queue: Optional[TaskQueue] = None, parent=None):
+                 db_manager=None, rule_engine=None, folder_organizer=None,
+                 organize_files: bool = False, task_queue: Optional[TaskQueue] = None, parent=None):
         super().__init__(parent)
         from threading import Lock
         self._thread_lock = Lock()
@@ -34,6 +38,10 @@ class ProcessingThread(QThread):
         self.rename_files = rename_files
         self.backup_dir = backup_dir
         self.model = model
+        self.db_manager = db_manager
+        self.rule_engine = rule_engine
+        self.folder_organizer = folder_organizer
+        self.organize_files = organize_files
         # Inicializar TaskQueue si no se proporciona una
         self.task_queue = task_queue if task_queue is not None else TaskQueue()
         self.is_running = True
@@ -71,6 +79,58 @@ class ProcessingThread(QThread):
                 self.rename_files,
                 chunk_size=8192
             )
+            
+            # Si se completó exitosamente y se solicitó organización, organizar el archivo
+            if (not result.get("error") and self.organize_files and 
+                self.folder_organizer and self.db_manager):
+                try:
+                    # Buscar el track en la DB usando la ruta del archivo
+                    tracks_data = self.db_manager.fetch_query("SELECT * FROM tracks WHERE filepath = ?", (filepath,))
+                    if tracks_data:
+                        from ...core.database.models import Track
+                        track_obj = Track.from_row(tracks_data[0])
+                        
+                        # Solo organizar si tiene metadatos completos
+                        if track_obj.genre and track_obj.year:
+                            org_result = self.folder_organizer.organize_track_file(track_obj, dry_run=False)
+                            if org_result.get("success"):
+                                # Actualizar el resultado para indicar que se organizó
+                                result["organized"] = True
+                                result["new_organized_path"] = org_result.get("new_path")
+                                logger.info(f"Archivo organizado: {filepath} -> {org_result.get('new_path')}")
+                                
+                                # Aplicar reglas al track procesado
+                                if self.rule_engine:
+                                    track_data = track_obj.__dict__
+                                    # Incluir datos adicionales relevantes para reglas
+                                    track_data.update({
+                                        "processing_result": result,
+                                        "new_filepath": org_result.get("new_path")
+                                    })
+                                    
+                                    # Configurar contexto para acciones
+                                    context = {
+                                        "db_manager": self.db_manager,
+                                        "file_handler": self.model.file_handler if hasattr(self.model, "file_handler") else None
+                                    }
+                                    
+                                    # Aplicar reglas
+                                    rule_results = self.rule_engine.apply_rules(track_data, context)
+                                    result["rule_results"] = rule_results
+                                    
+                                    if rule_results.get("applied_rules"):
+                                        logger.info(f"Reglas aplicadas a {filepath}: {', '.join(rule_results.get('applied_rules', []))}")
+                            else:
+                                logger.warning(f"Falló la organización de {filepath}: {org_result.get('error')}")
+                                result["organize_error"] = org_result.get("error")
+                        else:
+                            logger.info(f"Saltando organización de {filepath} - metadatos incompletos")
+                    else:
+                        logger.warning(f"Track no encontrado en DB para organización: {filepath}")
+                except Exception as org_e:
+                    logger.error(f"Error durante organización de {filepath}: {org_e}", exc_info=True)
+                    result["organize_error"] = str(org_e)
+            
             logger.debug(f"process_file completado para {filepath}. Resultado: {result}") # Added logging
             return result
         except Exception as e:

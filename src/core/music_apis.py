@@ -725,3 +725,367 @@ class DiscogsAPI(MusicAPI):
         self._track_api_call(start_time, success=True)
         self.cache.set(cache_key, result)
         return result
+
+class WikipediaAPI(MusicAPI):
+    """Wikipedia API integration for genre detection via scraping."""
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = "https://en.wikipedia.org/w/api.php"
+        self.http_client = HTTPClient(
+            base_url=self.base_url,
+            pool_connections=5,
+            pool_maxsize=10,
+            max_retries=3,
+            timeout=15,
+            circuit_breaker_config=CircuitBreakerConfig(
+                failure_threshold=5,
+                reset_timeout=60.0,
+                half_open_timeout=30.0
+            )
+        )
+
+    def _setup_rate_limits(self):
+        """Configure Wikipedia-specific rate limits."""
+        # Wikipedia API has generous limits, but be polite
+        _rate_limiter.create_limit(
+            f"{self.api_name}_default",
+            capacity=10,    # burst capacity
+            fill_rate=2.0   # tokens per second
+        )
+
+    def _request_wikipedia(self, params: Optional[Mapping[str, Any]] = None) -> Optional[Mapping[str, Any]]:
+        """Make a request to the Wikipedia API."""
+        start_time = time.time()
+        self._enforce_rate_limit()
+
+        default_params = {
+            "action": "query",
+            "format": "json",
+            "prop": "revisions",
+            "rvprop": "content",
+            "rvsection": "0", # Get content of the first section (infobox usually)
+            "redirects": 1 # Automatically resolve redirects
+        }
+        full_params = {**default_params, **params}
+
+        response = self.http_client.request(
+            method="GET",
+            endpoint="", # Base URL already includes api.php
+            params=full_params
+        )
+
+        if response is not None:
+            try:
+                data = response.json()
+                self._track_api_call(start_time, success=True)
+                return data
+            except ValueError as e:
+                logger.error(f"Invalid JSON response from Wikipedia: {e}")
+                self._track_api_call(start_time, success=False)
+                return None
+
+        self._track_api_call(start_time, success=False)
+        return None
+
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
+        """Get track information (genres, year, album) from Wikipedia by scraping.
+
+        Args:
+            artist: Artist name
+            track: Track title
+
+        Returns:
+            Dict with track information
+        """
+        result = {
+            "genres": [],
+            "year": None,
+            "album": None,
+            "source_api": "Wikipedia"
+        }
+
+        if not artist or not track or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return result
+
+        cache_key = f"wiki_info:{artist}:{track}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for Wikipedia info: {artist} - {track}")
+            return cached
+
+        # Try searching for "Artist (band)" or "Artist (musician)"
+        search_queries = [
+            f"{artist} ({track} song)",
+            f"{track} ({artist} song)",
+            f"{artist} band",
+            f"{artist} musician",
+            f"{artist}",
+            f"{track}"
+        ]
+
+        page_content = None
+        for query in search_queries:
+            params = {"titles": query}
+            data = self._request_wikipedia(params=params)
+            
+            if data and data.get("query") and data["query"].get("pages"):
+                page_id = next(iter(data["query"]["pages"]))
+                page = data["query"]["pages"][page_id]
+                if page_id != "-1" and page.get("revisions"):
+                    page_content = page["revisions"][0]["*"]
+                    break
+            time.sleep(0.1) # Be polite
+
+        if not page_content:
+            logger.info(f"No relevant Wikipedia page found for {artist} - {track}")
+            self.cache.set(cache_key, result) # Cache empty result
+            return result
+
+        # Parse content to extract genres and year from infobox
+        soup = BeautifulSoup(page_content, 'html.parser')
+        infobox = soup.find('table', class_='infobox')
+
+        if infobox:
+            # Extract genres
+            genre_row = infobox.find('th', string=re.compile(r'Genre', re.IGNORECASE))
+            if genre_row:
+                genres_td = genre_row.find_next_sibling('td')
+                if genres_td:
+                    # Extract text from links and list items
+                    genres_found = []
+                    for item in genres_td.find_all(['a', 'li']):
+                        genre_text = item.get_text(strip=True)
+                        if genre_text and genre_text.lower() not in [g.lower() for g in genres_found]:
+                            genres_found.append(genre_text.title())
+                    result["genres"].extend(genres_found[:5]) # Limit to 5
+
+            # Extract year (e.g., from "Released" or "Origin" fields)
+            # This is highly heuristic and might need refinement
+            year_match = re.search(r'(\d{4})', page_content)
+            if year_match:
+                extracted_year = int(year_match.group(1))
+                if 1900 <= extracted_year <= 2030:
+                    result["year"] = str(extracted_year)
+                else:
+                    logger.warning(f"Invalid year {extracted_year} extracted from Wikipedia for {artist} - {track}")
+
+        # Remove duplicates and limit genres
+        unique_genres = []
+        seen = set()
+        for genre in result["genres"]:
+            if genre.lower() not in seen:
+                unique_genres.append(genre)
+                seen.add(genre.lower())
+        result["genres"] = unique_genres[:5]
+
+        self.cache.set(cache_key, result)
+        return result
+
+class AcousticBrainzAPI(MusicAPI):
+    """AcousticBrainz API integration."""
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = "https://acousticbrainz.org/api/v1/"
+        self.http_client = HTTPClient(
+            base_url=self.base_url,
+            pool_connections=5,
+            pool_maxsize=10,
+            max_retries=3,
+            timeout=15,
+            circuit_breaker_config=CircuitBreakerConfig(
+                failure_threshold=5,
+                reset_timeout=60.0,
+                half_open_timeout=30.0
+            )
+        )
+
+    def _setup_rate_limits(self):
+        """Configure AcousticBrainz-specific rate limits."""
+        _rate_limiter.create_limit(
+            f"{self.api_name}_default",
+            capacity=5,
+            fill_rate=1.0
+        )
+
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
+        """Get track information (genres, year, album) from AcousticBrainz.
+        Requires MusicBrainz ID (MBID) for lookup. This API is primarily for audio features.
+
+        Args:
+            artist: Artist name
+            track: Track title
+
+        Returns:
+            Dict with track information
+        """
+        result = {
+            "genres": [],
+            "year": None,
+            "album": None,
+            "source_api": "AcousticBrainz"
+        }
+
+        if not artist or not track or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return result
+
+        cache_key = f"acousticbrainz_info:{artist}:{track}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for AcousticBrainz info: {artist} - {track}")
+            return cached
+
+        # AcousticBrainz requires MBID. We need to get it from MusicBrainz first.
+        # This implies a dependency on MusicBrainzAPI or a pre-fetched MBID.
+        # For simplicity, we'll assume MusicBrainzAPI is available and query it here.
+        # In a real scenario, this might be handled by a higher-level orchestrator.
+        mb_api = MusicBrainzAPI() # Re-initialize or pass existing instance
+        mb_info = mb_api.get_track_info(artist, track)
+        mbid = mb_info.get("mbid") # Assuming MusicBrainzAPI returns MBID
+
+        if not mbid:
+            logger.info(f"No MusicBrainz ID found for {artist} - {track}. Skipping AcousticBrainz.")
+            self.cache.set(cache_key, result)
+            return result
+
+        start_time = time.time()
+        endpoint = f"low-level/{mbid}" # Or high-level, depending on desired features
+        
+        response_data = self.http_client.request(
+            method="GET",
+            endpoint=endpoint,
+            headers={"User-Agent": "GenreDetectorApp/0.2 (+http://example.com)"}
+        )
+
+        if response_data and response_data.status_code == 200:
+            try:
+                data = response_data.json()
+                # Extract genres from 'tonal' or 'rhythm' features, or tags if available
+                # This is highly dependent on AcousticBrainz data structure
+                if data.get("metadata", {}).get("tags"):
+                    result["genres"].extend(data["metadata"]["tags"])
+                elif data.get("tonal", {}).get("key_of_scale"):
+                    # Example: derive genre from key/scale, very heuristic
+                    pass # Not directly providing genres, but audio features
+
+                # AcousticBrainz doesn't directly provide year or album in this endpoint
+                # You'd typically get this from MusicBrainz or other sources.
+
+                self._track_api_call(start_time, success=True)
+                self.cache.set(cache_key, result)
+                return result
+            except ValueError as e:
+                logger.error(f"Invalid JSON response from AcousticBrainz: {e}")
+                self._track_api_call(start_time, success=False)
+                return result
+        
+        logger.warning(f"Failed to get data from AcousticBrainz for MBID {mbid}. Status: {response_data.status_code if response_data else 'N/A'}")
+        self._track_api_call(start_time, success=False)
+        self.cache.set(cache_key, result)
+        return result
+
+class iTunesAPI(MusicAPI):
+    """iTunes Search API integration."""
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = "https://itunes.apple.com/search"
+        self.http_client = HTTPClient(
+            base_url=self.base_url,
+            pool_connections=5,
+            pool_maxsize=10,
+            max_retries=3,
+            timeout=15,
+            circuit_breaker_config=CircuitBreakerConfig(
+                failure_threshold=5,
+                reset_timeout=60.0,
+                half_open_timeout=30.0
+            )
+        )
+
+    def _setup_rate_limits(self):
+        """Configure iTunes-specific rate limits."""
+        # iTunes has a limit of 20 requests per minute
+        _rate_limiter.create_limit(
+            f"{self.api_name}_default",
+            capacity=5,
+            fill_rate=0.33 # ~20 requests per minute
+        )
+
+    def get_track_info(self, artist: str, track: str) -> Mapping[str, Any]:
+        """Get track information (genres, year, album) from iTunes.
+
+        Args:
+            artist: Artist name
+            track: Track title
+
+        Returns:
+            Dict with track information
+        """
+        result = {
+            "genres": [],
+            "year": None,
+            "album": None,
+            "source_api": "iTunes"
+        }
+
+        if not artist or not track or artist == "None" or track == "None" or not artist.strip() or not track.strip():
+            return result
+
+        cache_key = f"itunes_info:{artist}:{track}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for iTunes info: {artist} - {track}")
+            return cached
+
+        start_time = time.time()
+        params = {
+            "term": f"{artist} {track}",
+            "entity": "song",
+            "limit": 5
+        }
+
+        response_data = self.http_client.request(
+            method="GET",
+            endpoint="", # Base URL already includes search
+            params=params
+        )
+
+        if response_data and response_data.status_code == 200:
+            try:
+                data = response_data.json()
+                if data.get("results"):
+                    # Find the best match (simple heuristic: first result)
+                    song_data = data["results"][0]
+
+                    # Extract genre
+                    if song_data.get("primaryGenreName"):
+                        result["genres"].append(song_data["primaryGenreName"].title())
+                    
+                    # Extract year from releaseDate
+                    if song_data.get("releaseDate"):
+                        match_y = re.search(r'(\d{4})', song_data["releaseDate"])
+                        if match_y:
+                            extracted_year = int(match_y.group(1))
+                            if 1900 <= extracted_year <= 2030:
+                                result["year"] = str(extracted_year)
+                            else:
+                                logger.warning(f"Invalid year {extracted_year} from iTunes for {artist} - {track}")
+
+                    # Extract album
+                    if song_data.get("collectionName"):
+                        result["album"] = song_data["collectionName"].strip()
+
+                self._track_api_call(start_time, success=True)
+                self.cache.set(cache_key, result)
+                return result
+            except ValueError as e:
+                logger.error(f"Invalid JSON response from iTunes: {e}")
+                self._track_api_call(start_time, success=False)
+                return result
+        
+        logger.warning(f"Failed to get data from iTunes for {artist} - {track}. Status: {response_data.status_code if response_data else 'N/A'}")
+        self._track_api_call(start_time, success=False)
+        self.cache.set(cache_key, result)
+        return result

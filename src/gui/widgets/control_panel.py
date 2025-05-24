@@ -53,6 +53,12 @@ class ControlPanel(QWidget):
         self.rename_files.setChecked(True)
         analysis_layout.addWidget(self.rename_files)
         
+        self.organize_files = QCheckBox(tr("organize_files_checkbox"))
+        self.organize_files.setAccessibleName(tr("accessibility_organize_files"))
+        self.organize_files.setToolTip(tr("tooltip_organize_files"))
+        self.organize_files.setChecked(False)  # Por defecto desactivado
+        analysis_layout.addWidget(self.organize_files)
+        
         layout.addWidget(analysis_group)
         
         # Grupo de parámetros de detección
@@ -152,6 +158,7 @@ class ControlPanel(QWidget):
         
         # Conectar cambios
         self.rename_files.stateChanged.connect(self.emit_settings)
+        self.organize_files.stateChanged.connect(self.emit_settings)
         self.confidence_slider.valueChanged.connect(self.emit_settings)
         self.max_genres_spinner.valueChanged.connect(self.emit_settings)
         
@@ -168,6 +175,7 @@ class ControlPanel(QWidget):
         """Get the current settings."""
         return {
             'rename_files': self.rename_files.isChecked(),
+            'organize_files': self.organize_files.isChecked(),
             'confidence': self.confidence_slider.value() / 100.0,
             'max_genres': self.max_genres_spinner.value()
         }
@@ -176,6 +184,8 @@ class ControlPanel(QWidget):
         """Set the panel settings."""
         if 'rename_files' in settings:
             self.rename_files.setChecked(settings['rename_files'])
+        if 'organize_files' in settings:
+            self.organize_files.setChecked(settings['organize_files'])
         if 'confidence' in settings:
             self.confidence_slider.setValue(int(settings['confidence'] * 100))
         if 'max_genres' in settings:

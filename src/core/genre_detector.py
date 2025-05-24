@@ -3,9 +3,14 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import json
 import os
+import hashlib # Para calcular checksum
+from datetime import datetime # Para date_added y last_played
+
 from .music_apis import MusicAPI
 from .file_handler import Mp3FileHandler
 from .genre_normalizer import GenreNormalizer
+from .database.db_manager import DBManager # Importar DBManager
+from .database.models import Track # Importar el modelo Track
 
 # Import all available API classes for convenience
 try:
@@ -16,15 +21,17 @@ except ImportError:
 class GenreDetector:
     """Detect and normalize music genres from various sources."""
     
-    def __init__(self, apis: Optional[List[MusicAPI]] = None, file_handler: Optional[Mp3FileHandler] = None):
+    def __init__(self, apis: Optional[List[MusicAPI]] = None, file_handler: Optional[Mp3FileHandler] = None, db_manager: Optional[DBManager] = None):
         """Initialize genre detector.
         
         Args:
             apis: List of music APIs to use for genre detection
             file_handler: Mp3FileHandler instance to use (will create new one if None)
+            db_manager: DBManager instance to use for database operations (will create new one if None)
         """
         self.apis = apis or []
         self.file_handler = file_handler if file_handler else Mp3FileHandler()
+        self.db_manager = db_manager if db_manager else DBManager() # Inicializar DBManager
         self.confidence_threshold = 0.5
         self.max_genres = 5
         self._genre_cache = {}
@@ -66,8 +73,20 @@ class GenreDetector:
             
         return {}
         
+    def _calculate_checksum(self, filepath: str, block_size: int = 65536) -> str:
+        """Calcula el checksum SHA256 de un archivo."""
+        sha256 = hashlib.sha256()
+        try:
+            with open(filepath, 'rb') as f:
+                for block in iter(lambda: f.read(block_size), b''):
+                    sha256.update(block)
+            return sha256.hexdigest()
+        except Exception as e:
+            print(f"Error calculating checksum for {filepath}: {e}")
+            return ""
+
     def analyze_file(self, file_path: str, chunk_size: int = 8192) -> Dict:
-        """Analyze an MP3 file to detect genres.
+        """Analyze an MP3 file to detect genres and update/insert into DB.
         
         Args:
             file_path: Ruta al archivo MP3
@@ -117,6 +136,12 @@ class GenreDetector:
                 result["detected_genres"] = cached_data.get("detected_genres", {})
                 result["year"] = cached_data.get("year")
                 result["source"] = "cache"
+                
+                # Intentar cargar desde la DB si no está en caché de memoria
+                existing_track_db = self.db_manager.fetch_query("SELECT * FROM tracks WHERE filepath = ?", (file_path,))
+                if existing_track_db:
+                    track_obj = Track.from_row(existing_track_db[0])
+                    result["db_info"] = track_obj.to_dict()
                 return result
             
         # Query APIs
@@ -150,6 +175,12 @@ class GenreDetector:
             # En lugar de error, continuamos con géneros vacíos
             result["detected_genres"] = {}
             result["warning"] = "API Error" if api_errors else "No genres detected from APIs"
+            
+            # Intentar cargar desde la DB si no hay resultados de API
+            existing_track_db = self.db_manager.fetch_query("SELECT * FROM tracks WHERE filepath = ?", (file_path,))
+            if existing_track_db:
+                track_obj = Track.from_row(existing_track_db[0])
+                result["db_info"] = track_obj.to_dict()
             return result
             
         # Merge and normalize results
@@ -158,6 +189,12 @@ class GenreDetector:
             # En lugar de error, continuamos con géneros vacíos
             result["detected_genres"] = {}
             result["warning"] = "No genres met confidence threshold"
+            
+            # Intentar cargar desde la DB si no hay géneros fusionados
+            existing_track_db = self.db_manager.fetch_query("SELECT * FROM tracks WHERE filepath = ?", (file_path,))
+            if existing_track_db:
+                track_obj = Track.from_row(existing_track_db[0])
+                result["db_info"] = track_obj.to_dict()
             return result
             
         # Store original scores and year in the result
@@ -173,6 +210,77 @@ class GenreDetector:
         if metadata['artist'] and metadata['title'] and metadata['artist'] != "None" and metadata['title'] != "None":
             cache_key = f"{metadata['artist']}_{metadata['title']}"
             self._genre_cache[cache_key] = cache_entry
+        
+        # --- Guardar/Actualizar en la base de datos ---
+        checksum = self._calculate_checksum(file_path)
+        current_time = datetime.now().isoformat()
+
+        # Buscar si el track ya existe por filepath o checksum
+        existing_track_db = self.db_manager.fetch_query(
+            "SELECT * FROM tracks WHERE filepath = ? OR checksum = ?",
+            (file_path, checksum)
+        )
+        
+        # Preparar datos para la DB
+        genres_str = ";".join(merged_genres.keys()) if merged_genres else None
+        
+        track_data = {
+            "filepath": file_path,
+            "title": metadata.get('title'),
+            "artist": metadata.get('artist'),
+            "album": metadata.get('album'),
+            "genre": genres_str,
+            "year": int(result['year']) if result['year'] else None,
+            "bpm": file_info.get('bpm'), # Asumiendo que file_info ya tiene BPM
+            "key": file_info.get('key'), # Asumiendo que file_info ya tiene Key
+            "energy_level": file_info.get('energy_level'), # Asumiendo que file_info ya tiene Energy Level
+            "rating": file_info.get('rating'),
+            "play_count": file_info.get('play_count'),
+            "last_played": file_info.get('last_played'),
+            "date_added": file_info.get('date_added') or current_time,
+            "checksum": checksum
+        }
+
+        if existing_track_db:
+            # Actualizar track existente
+            track_id = existing_track_db[0]['id']
+            update_query = """
+            UPDATE tracks SET
+                title = ?, artist = ?, album = ?, genre = ?, year = ?,
+                bpm = ?, key = ?, energy_level = ?, rating = ?, play_count = ?,
+                last_played = ?, date_added = ?, checksum = ?
+            WHERE id = ?
+            """
+            self.db_manager.execute_query(
+                update_query,
+                (track_data['title'], track_data['artist'], track_data['album'],
+                 track_data['genre'], track_data['year'], track_data['bpm'],
+                 track_data['key'], track_data['energy_level'], track_data['rating'],
+                 track_data['play_count'], track_data['last_played'], track_data['date_added'],
+                 track_data['checksum'], track_id)
+            )
+            print(f"Track '{track_data['title']}' actualizado en la DB.")
+            result["db_action"] = "updated"
+            result["db_info"] = track_data
+        else:
+            # Insertar nuevo track
+            insert_query = """
+            INSERT INTO tracks (
+                filepath, title, artist, album, genre, year, bpm, key,
+                energy_level, rating, play_count, last_played, date_added, checksum
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            self.db_manager.execute_query(
+                insert_query,
+                (track_data['filepath'], track_data['title'], track_data['artist'],
+                 track_data['album'], track_data['genre'], track_data['year'],
+                 track_data['bpm'], track_data['key'], track_data['energy_level'],
+                 track_data['rating'], track_data['play_count'], track_data['last_played'],
+                 track_data['date_added'], track_data['checksum'])
+            )
+            print(f"Track '{track_data['title']}' insertado en la DB.")
+            result["db_action"] = "inserted"
+            result["db_info"] = track_data
             
         return result
         
