@@ -1,0 +1,64 @@
+# Nueva Biblioteca Configuration
+
+# Base configuration for the Nueva Biblioteca music management system
+app:
+  name: "Nueva Biblioteca"
+  version: "1.0.0"
+  
+# Database configuration
+database:
+  path: "data/biblioteca.db"
+  pool_size: 10
+  echo: false  # Set to true for SQL debugging
+  
+# UI Configuration
+ui:
+  theme: "default"
+  language: "es"
+  window:
+    width: 1200
+    height: 800
+    remember_geometry: true
+    
+# Music Library Settings
+library:
+  scan_paths: []
+  supported_formats: ["mp3", "flac", "ogg", "m4a", "wav"]
+  auto_scan: true
+  scan_interval: 3600  # seconds
+  
+# Smart Playlists
+playlists:
+  auto_update: true
+  update_interval: 300  # seconds
+  max_size: 1000  # maximum songs per playlist
+  
+# Export Settings
+export:
+  default_format: "m3u"
+  path_format: "relative"  # relative or absolute
+  encoding: "utf-8"
+  
+# API Configuration
+apis:
+  rate_limit:
+    requests_per_minute: 60
+    burst_limit: 10
+  cache:
+    enabled: true
+    ttl: 86400  # 24 hours in seconds
+    max_size: 1000
+    
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/nueva_biblioteca.log"
+  max_size: 10  # MB
+  backup_count: 5
+  format: "{time} | {level} | {name} | {message}"
+  
+# Performance
+performance:
+  worker_threads: 4
+  chunk_size: 100
+  memory_limit: 512  # MB
