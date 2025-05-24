@@ -1,4 +1,4 @@
-from src.gui.main_window import MainWindow
+from nueva_biblioteca.ui.main_window import MainWindow
 from PySide6.QtWidgets import QApplication
 import sys
 
