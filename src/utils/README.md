@@ -1,0 +1,1 @@
+Módulo para utilidades comunes, helpers y funciones transversales de la Nueva Biblioteca. 

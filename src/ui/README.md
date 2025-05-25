@@ -1,0 +1,1 @@
+Módulo para todos los componentes de la interfaz de usuario (PyQt6) de la Nueva Biblioteca. 

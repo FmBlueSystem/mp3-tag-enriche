@@ -1,0 +1,1 @@
+# Contenido de spotify_client.py 

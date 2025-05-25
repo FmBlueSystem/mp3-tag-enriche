@@ -8,8 +8,11 @@ pylast>=5.1.0
 beautifulsoup4>=4.12.2
 spotipy>=2.23.0
 
+# Audio playback (v3.0)
+pygame>=2.5.0
+
 # Database
-sqlite3  # Built-in Python module
+# sqlite3  # Built-in Python module # Comentada
 sqlalchemy>=2.0.0
 
 # Configuration

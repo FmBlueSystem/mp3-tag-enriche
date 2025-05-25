@@ -123,7 +123,11 @@ class DBManager:
             play_count INTEGER,
             last_played TEXT,
             date_added TEXT,
-            checksum TEXT UNIQUE
+            checksum TEXT UNIQUE,
+            enriched_genres TEXT,          -- JSON string para Dict[str, float]
+            enrichment_confidence REAL,    -- float
+            enrichment_sources TEXT,       -- JSON string para List[str]
+            enrichment_timestamp REAL      -- float (timestamp Unix)
         );
         """
 

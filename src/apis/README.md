@@ -1,0 +1,1 @@
+Módulo para la integración con APIs externas (Last.fm, MusicBrainz, etc.) de la Nueva Biblioteca. 

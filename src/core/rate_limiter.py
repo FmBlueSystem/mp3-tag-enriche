@@ -1,114 +1,215 @@
-"""Token bucket rate limiter implementation with fixed-point arithmetic."""
+#!/usr/bin/env python3
+"""
+⏱️ RATE LIMITER - NUEVA BIBLIOTECA v2.0
+======================================
+Control de límites de API usando algoritmo Token Bucket
+"""
+
 import time
+import threading
+from typing import Dict, Optional
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
-from threading import Lock
-import logging
-
-logger = logging.getLogger(__name__)
-
-# Use integer arithmetic with fixed-point scaling
-SCALE_FACTOR = 1000000  # 6 decimal places of precision
-
-def _to_fixed(value: float) -> int:
-    """Convert float to fixed-point integer."""
-    return int(value * SCALE_FACTOR)
-
-def _from_fixed(value: int) -> float:
-    """Convert fixed-point integer to float."""
-    return value / SCALE_FACTOR
 
 @dataclass
 class TokenBucket:
-    """Token bucket for rate limiting using fixed-point arithmetic."""
-    capacity: int      # Maximum number of tokens (fixed-point)
-    fill_rate: int     # Tokens per second (fixed-point)
-    tokens: int = 0    # Current token count (fixed-point)
-    last_update: int = 0  # Last update timestamp in nanoseconds
+    """Implementación de Token Bucket para rate limiting."""
+    capacity: int           # Capacidad máxima de tokens
+    fill_rate: float       # Tokens por segundo
+    tokens: float          # Tokens actuales
+    last_update: float     # Última actualización
+    lock: threading.Lock   # Lock para thread safety
+    
+    def __post_init__(self):
+        """Inicialización post-creación."""
+        if not hasattr(self, 'lock'):
+            self.lock = threading.Lock()
+        if not hasattr(self, 'last_update'):
+            self.last_update = time.time()
+        if not hasattr(self, 'tokens'):
+            self.tokens = float(self.capacity)
 
 class RateLimiter:
-    """Token bucket rate limiter implementation using fixed-point arithmetic."""
+    """
+    Gestor de rate limiting para múltiples APIs.
+    Usa algoritmo Token Bucket para control de velocidad.
+    """
+    
     def __init__(self):
-        self._buckets: Dict[str, TokenBucket] = {}
-        self._lock = Lock()
+        """Inicializar el rate limiter."""
+        self.buckets: Dict[str, TokenBucket] = {}
+        self.global_lock = threading.Lock()
         
-    def create_limit(self, key: str, capacity: float, fill_rate: float) -> None:
-        """Create a new rate limit bucket.
-        
-        Args:
-            key: Unique identifier for this rate limit
-            capacity: Maximum number of tokens (burst capacity)
-            fill_rate: Rate of token replenishment per second
+    def create_limit(self, key: str, capacity: int, fill_rate: float) -> None:
         """
-        with self._lock:
-            self._buckets[key] = TokenBucket(
-                capacity=_to_fixed(capacity),
-                fill_rate=_to_fixed(fill_rate),
-                tokens=_to_fixed(capacity),  # Start full
-                last_update=int(time.time_ns())
-            )
-
-    def _update_tokens(self, bucket: TokenBucket) -> None:
-        """Update token count based on elapsed time using fixed-point arithmetic."""
-        now_ns = time.time_ns()
-        if bucket.last_update:
-            # Calculate elapsed time in seconds with nanosecond precision
-            elapsed_ns = now_ns - bucket.last_update
-            elapsed_seconds = elapsed_ns / 1e9
-            
-            # Calculate new tokens using fixed-point multiplication
-            new_tokens = int(elapsed_seconds * bucket.fill_rate)
-            bucket.tokens = min(bucket.capacity, bucket.tokens + new_tokens)
-            
-        bucket.last_update = now_ns
-
-    def acquire(self, key: str, tokens: float = 1.0, wait: bool = True) -> bool:
-        """Attempt to acquire tokens from the bucket.
+        Crear un nuevo límite de velocidad.
         
         Args:
-            key: Bucket identifier
-            tokens: Number of tokens to acquire
-            wait: If True, wait for tokens to become available
+            key: Identificador único del límite
+            capacity: Capacidad máxima de tokens (burst)
+            fill_rate: Tokens por segundo (velocidad sostenida)
+        """
+        with self.global_lock:
+            self.buckets[key] = TokenBucket(
+                capacity=capacity,
+                fill_rate=fill_rate,
+                tokens=float(capacity),
+                last_update=time.time(),
+                lock=threading.Lock()
+            )
+            
+    def acquire(self, key: str, tokens: int = 1, wait: bool = False) -> bool:
+        """
+        Intentar adquirir tokens del bucket.
+        
+        Args:
+            key: Identificador del límite
+            tokens: Número de tokens a adquirir
+            wait: Si esperar cuando no hay tokens suficientes
             
         Returns:
-            True if tokens were acquired, False if not available and wait=False
+            True si se adquirieron los tokens, False si no
         """
-        tokens_fixed = _to_fixed(tokens)
-        
-        with self._lock:
-            bucket = self._buckets.get(key)
-            if not bucket:
-                logger.warning(f"No rate limit bucket found for key: {key}")
-                return True  # Allow if no bucket exists
+        if key not in self.buckets:
+            # Si no existe el bucket, crear uno por defecto
+            self.create_limit(key, capacity=10, fill_rate=1.0)
             
-            while True:
-                self._update_tokens(bucket)
+        bucket = self.buckets[key]
+        
+        with bucket.lock:
+            # Actualizar tokens basado en tiempo transcurrido
+            now = time.time()
+            time_passed = now - bucket.last_update
+            
+            # Añadir tokens basado en fill_rate
+            new_tokens = time_passed * bucket.fill_rate
+            bucket.tokens = min(bucket.capacity, bucket.tokens + new_tokens)
+            bucket.last_update = now
+            
+            # Verificar si hay suficientes tokens
+            if bucket.tokens >= tokens:
+                bucket.tokens -= tokens
+                return True
+            elif wait:
+                # Calcular tiempo de espera necesario
+                tokens_needed = tokens - bucket.tokens
+                wait_time = tokens_needed / bucket.fill_rate
                 
-                if bucket.tokens >= tokens_fixed:
-                    bucket.tokens -= tokens_fixed
-                    return True
-                    
-                if not wait:
-                    return False
-                
-                # Calculate sleep time needed for enough tokens
-                needed = tokens_fixed - bucket.tokens
-                # Convert to float for division to maintain precision
-                sleep_time = _from_fixed(needed) / _from_fixed(bucket.fill_rate)
-                
-                # Release lock while sleeping
-                self._lock.release()
+                # Esperar fuera del lock para no bloquear otros hilos
+                bucket.lock.release()
                 try:
-                    # Add small buffer to avoid waking up just slightly too early
-                    time.sleep(sleep_time + 0.0001)
+                    time.sleep(wait_time)
+                    return self.acquire(key, tokens, wait=False)
                 finally:
-                    self._lock.acquire()
-
-    def get_token_count(self, key: str) -> Optional[float]:
-        """Get current token count for a bucket."""
-        with self._lock:
-            bucket = self._buckets.get(key)
-            if bucket:
-                self._update_tokens(bucket)
-                return _from_fixed(bucket.tokens)
+                    bucket.lock.acquire()
+            
+            return False
+            
+    def get_status(self, key: str) -> Optional[Dict[str, float]]:
+        """
+        Obtener estado actual de un bucket.
+        
+        Args:
+            key: Identificador del límite
+            
+        Returns:
+            Diccionario con estado del bucket o None si no existe
+        """
+        if key not in self.buckets:
             return None
+            
+        bucket = self.buckets[key]
+        
+        with bucket.lock:
+            # Actualizar tokens antes de reportar estado
+            now = time.time()
+            time_passed = now - bucket.last_update
+            new_tokens = time_passed * bucket.fill_rate
+            current_tokens = min(bucket.capacity, bucket.tokens + new_tokens)
+            
+            return {
+                'capacity': bucket.capacity,
+                'fill_rate': bucket.fill_rate,
+                'current_tokens': current_tokens,
+                'utilization': (bucket.capacity - current_tokens) / bucket.capacity
+            }
+            
+    def reset_bucket(self, key: str) -> bool:
+        """
+        Resetear un bucket a su capacidad máxima.
+        
+        Args:
+            key: Identificador del límite
+            
+        Returns:
+            True si se reseteo exitosamente, False si no existe
+        """
+        if key not in self.buckets:
+            return False
+            
+        bucket = self.buckets[key]
+        
+        with bucket.lock:
+            bucket.tokens = float(bucket.capacity)
+            bucket.last_update = time.time()
+            
+        return True
+        
+    def remove_limit(self, key: str) -> bool:
+        """
+        Remover un límite de velocidad.
+        
+        Args:
+            key: Identificador del límite
+            
+        Returns:
+            True si se removió exitosamente, False si no existía
+        """
+        with self.global_lock:
+            if key in self.buckets:
+                del self.buckets[key]
+                return True
+            return False
+            
+    def get_all_status(self) -> Dict[str, Dict[str, float]]:
+        """
+        Obtener estado de todos los buckets.
+        
+        Returns:
+            Diccionario con estado de todos los buckets
+        """
+        status = {}
+        
+        with self.global_lock:
+            for key in list(self.buckets.keys()):
+                bucket_status = self.get_status(key)
+                if bucket_status:
+                    status[key] = bucket_status
+                    
+        return status
+        
+    def cleanup_unused(self, max_age: float = 3600.0) -> int:
+        """
+        Limpiar buckets no utilizados recientemente.
+        
+        Args:
+            max_age: Edad máxima en segundos
+            
+        Returns:
+            Número de buckets removidos
+        """
+        now = time.time()
+        removed = 0
+        
+        with self.global_lock:
+            keys_to_remove = []
+            
+            for key, bucket in self.buckets.items():
+                with bucket.lock:
+                    if (now - bucket.last_update) > max_age:
+                        keys_to_remove.append(key)
+                        
+            for key in keys_to_remove:
+                del self.buckets[key]
+                removed += 1
+                
+        return removed

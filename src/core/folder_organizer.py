@@ -4,7 +4,8 @@ import shutil
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from .database.music_database import MusicDatabase, Track
+from .database.music_database import MusicDatabase
+from .database.models import Track
 
 logger = logging.getLogger(__name__)
 

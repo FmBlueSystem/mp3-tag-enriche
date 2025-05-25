@@ -1,443 +1,326 @@
-"""Persistent disk-based cache implementation with advanced features."""
-import json
+#!/usr/bin/env python3
+"""
+💾 PERSISTENT CACHE - NUEVA BIBLIOTECA v2.0
+==========================================
+Cache persistente para respuestas de APIs musicales
+"""
+
 import os
+import json
 import time
-import zlib
-from threading import Lock
-from typing import Any, Dict, Optional, Union
-import logging
+import hashlib
+import threading
 from pathlib import Path
-from collections import OrderedDict
-import sys
-import re
+from typing import Any, Optional, Dict
+import logging
 
 logger = logging.getLogger(__name__)
 
-def sanitize_cache_filename(filename: str) -> str:
-    """
-    Sanitiza nombres de archivo para cache, eliminando caracteres problemáticos.
-    
-    Args:
-        filename: Nombre de archivo original
-        
-    Returns:
-        Nombre de archivo sanitizado para sistema de archivos
-    """
-    # Reemplazar caracteres problemáticos
-    sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
-    
-    # Eliminar espacios dobles y caracteres de control
-    sanitized = re.sub(r'\s+', ' ', sanitized).strip()
-    
-    # Limitar longitud para evitar problemas de sistema de archivos
-    if len(sanitized) > 200:
-        sanitized = sanitized[:200] + '_truncated'
-    
-    return sanitized
-
-class CacheEntry:
-    """Representa una entrada en el caché con metadatos."""
-    
-    def __init__(self, value: Any, expires: float, size: int, data_type: str):
-        self.value = value
-        self.expires = expires
-        self.size = size
-        self.data_type = data_type
-        self.last_accessed = time.time()
-
-    def to_dict(self) -> dict:
-        """Convierte la entrada a diccionario para serialización."""
-        return {
-            "value": self.value,
-            "expires": self.expires,
-            "size": self.size,
-            "data_type": self.data_type,
-            "last_accessed": self.last_accessed
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict) -> 'CacheEntry':
-        """Crea una entrada desde un diccionario deserializado."""
-        entry = cls(
-            data["value"],
-            data["expires"],
-            data["size"],
-            data["data_type"]
-        )
-        entry.last_accessed = data.get("last_accessed", time.time())
-        return entry
-
 class PersistentCache:
-    """Caché persistente en disco con TTL, límites de tamaño y optimizaciones."""
+    """
+    Cache persistente con TTL (Time To Live) para respuestas de APIs.
+    Almacena datos en archivos JSON en disco.
+    """
     
-    def __init__(self, cache_dir: str,
-                 default_ttl: int = 3600,
-                 max_size_bytes: int = 100 * 1024 * 1024,  # 100MB default
-                 compression_threshold: int = 1024,  # 1KB
-                 ttl_policy: Dict[str, int] = None,
-                 cleanup_interval: int = 300):  # 5 min default
-        """Inicializa el caché persistente.
+    def __init__(self, cache_dir: Path, default_ttl: int = 3600):
+        """
+        Inicializar el cache persistente.
         
         Args:
-            cache_dir: Directorio para almacenar archivos de caché
-            default_ttl: TTL predeterminado en segundos (default: 1 hora)
-            max_size_bytes: Tamaño máximo del caché en bytes
-            compression_threshold: Tamaño mínimo para comprimir en bytes
-            ttl_policy: Diccionario de TTLs por tipo de dato {"type": seconds}
-            cleanup_interval: Intervalo en segundos para limpiar entradas expiradas
+            cache_dir: Directorio donde almacenar archivos de cache
+            default_ttl: Tiempo de vida por defecto en segundos (1 hora)
         """
-        # Validar parámetros
-        if default_ttl <= 0:
-            raise ValueError("default_ttl debe ser positivo")
-        if max_size_bytes <= 0:
-            raise ValueError("max_size_bytes debe ser positivo")
-        if compression_threshold <= 0:
-            raise ValueError("compression_threshold debe ser positivo")
-        if cleanup_interval <= 0:
-            raise ValueError("cleanup_interval debe ser positivo")
-        """Inicializa el caché persistente.
+        self.cache_dir = Path(cache_dir)
+        self.default_ttl = default_ttl
+        self.lock = threading.Lock()
         
-        Args:
-            cache_dir: Directorio para almacenar archivos de caché
-            default_ttl: TTL predeterminado en segundos (default: 1 hora)
-            max_size_bytes: Tamaño máximo del caché en bytes
-            compression_threshold: Tamaño mínimo para comprimir en bytes
-            ttl_policy: Diccionario de TTLs por tipo de dato {"type": seconds}
-        """
-        self._cache_dir = Path(cache_dir)
-        self._default_ttl = default_ttl
-        self._max_size_bytes = max_size_bytes
-        self._compression_threshold = compression_threshold
-        self._ttl_policy = ttl_policy or {}
-        self._lock = Lock()
-        self._current_size = 0
-        self._lru_cache = OrderedDict()  # key -> tamaño
-        self._cleanup_interval = cleanup_interval
-        self._last_cleanup = time.time()
+        # Crear directorio de cache si no existe
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         
-        # Estadísticas mejoradas
-        self._stats = {
-            "hits": 0,
-            "misses": 0,
-            "evictions": 0,
-            "compression_savings": 0,
-            "current_size": 0,
-            "entries": 0
-        }
+        # Archivo de metadatos para tracking de TTL
+        self.metadata_file = self.cache_dir / "_cache_metadata.json"
+        self.metadata = self._load_metadata()
         
-        # Crear directorio de caché si no existe
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Inicializar caché
-        self._init_cache()
-        
-    def _init_cache(self) -> None:
-        """Inicializa el caché cargando entradas existentes y limpiando expiradas."""
-        self._current_size = 0
-        self._lru_cache.clear()
-        
-        # Cargar entradas existentes
-        for cache_file in self._cache_dir.glob("*.json"):
-            try:
-                with open(cache_file, 'r') as f:
-                    entry = json.load(f)
-                    entry_obj = CacheEntry.from_dict(entry)
-                    
-                # Verificar expiración
-                if entry_obj.expires <= time.time():
-                    cache_file.unlink()
-                    self._stats["evictions"] += 1
-                    continue
-                    
-                key = cache_file.stem
-                self._lru_cache[key] = entry_obj.size
-                self._current_size += entry_obj.size
-                
-            except (json.JSONDecodeError, KeyError, OSError) as e:
-                logger.warning(f"Error cargando archivo de caché {cache_file}: {e}")
-                try:
-                    cache_file.unlink()
-                except OSError:
-                    pass
-        
-        self._stats["current_size"] = self._current_size
-        self._stats["entries"] = len(self._lru_cache)
-        
-    def _get_ttl(self, data_type: str) -> int:
-        """Obtiene el TTL para un tipo de dato específico."""
-        return self._ttl_policy.get(data_type, self._default_ttl)
-    
-    def _compress_value(self, value: Union[str, bytes]) -> tuple[str, int, bool]:
-        """Comprime un valor si supera el umbral."""
-        is_compressed = False
-        
-        # Si es bytes, convertir a base64 para JSON
-        if isinstance(value, bytes):
-            import base64
-            value = base64.b64encode(value).decode('utf-8')
-        elif not isinstance(value, str):
-            value = json.dumps(value)
-            
-        value_bytes = value.encode('utf-8')
-        original_size = len(value_bytes)
-        
-        if original_size >= self._compression_threshold:
-            compressed = zlib.compress(value_bytes)
-            saved = original_size - len(compressed)
-            self._stats["compression_savings"] += saved
-            is_compressed = True
-            # Convertir bytes comprimidos a base64 para JSON
-            value = base64.b64encode(compressed).decode('utf-8')
-            
-        return value, original_size, is_compressed
-    
-    def _deserialize_value(self, value: Any, is_compressed: bool) -> Any:
-        """Deserializa y descomprime un valor si es necesario."""
-        if not isinstance(value, str):
-            return value
-            
+    def _load_metadata(self) -> Dict[str, Dict[str, Any]]:
+        """Cargar metadatos de cache desde disco."""
         try:
-            import base64
-            
-            # Decodificar de base64 si está comprimido
-            if is_compressed:
-                compressed = base64.b64decode(value)
-                value = zlib.decompress(compressed)
-                try:
-                    # Intentar decodificar como JSON
-                    return json.loads(value.decode('utf-8'))
-                except (UnicodeDecodeError, json.JSONDecodeError):
-                    # Si no es JSON, devolver los bytes decodificados de base64
-                    return base64.b64decode(value)
-            
-            # Si no está comprimido, intentar cargar como JSON
-            try:
-                return json.loads(value)
-            except json.JSONDecodeError:
-                # Si no es JSON, podría ser un string base64
-                try:
-                    return base64.b64decode(value)
-                except:
-                    return value
-                
-        except zlib.error:
-            return value
-    
-    def _enforce_size_limit(self) -> None:
-        """Aplica el límite de tamaño eliminando entradas según LRU."""
-        while self._current_size > self._max_size_bytes and self._lru_cache:
-            key, size = self._lru_cache.popitem(last=False)  # FIFO
-            self._current_size -= size
-            cache_path = self._get_cache_path(key)
-            
-            try:
-                cache_path.unlink()
-                self._stats["evictions"] += 1
-            except OSError:
-                pass
-            
-        self._stats["current_size"] = self._current_size
+            if self.metadata_file.exists():
+                with open(self.metadata_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            logger.warning(f"Error loading cache metadata: {e}")
         
-    def _get_cache_path(self, key: str) -> Path:
-        """Obtiene la ruta del sistema de archivos para una clave de caché."""
-        return self._cache_dir / f"{sanitize_cache_filename(key)}.json"
-
-    def cleanup(self) -> None:
-        """Elimina todas las entradas expiradas del caché."""
-        with self._lock:
-            current_time = time.time()
-            expired_keys = []
+        return {}
+        
+    def _save_metadata(self) -> None:
+        """Guardar metadatos de cache a disco."""
+        try:
+            with open(self.metadata_file, 'w', encoding='utf-8') as f:
+                json.dump(self.metadata, f, indent=2)
+        except IOError as e:
+            logger.error(f"Error saving cache metadata: {e}")
             
-            # Buscar archivos expirados
-            for cache_file in self._cache_dir.glob("*.json"):
+    def _get_cache_key_hash(self, key: str) -> str:
+        """
+        Generar hash seguro para usar como nombre de archivo.
+        
+        Args:
+            key: Clave original del cache
+            
+        Returns:
+            Hash MD5 de la clave
+        """
+        return hashlib.md5(key.encode('utf-8')).hexdigest()
+        
+    def _get_cache_file_path(self, key: str) -> Path:
+        """
+        Obtener ruta del archivo de cache para una clave.
+        
+        Args:
+            key: Clave del cache
+            
+        Returns:
+            Path del archivo de cache
+        """
+        key_hash = self._get_cache_key_hash(key)
+        return self.cache_dir / f"{key_hash}.json"
+        
+    def _is_expired(self, key: str) -> bool:
+        """
+        Verificar si una entrada de cache ha expirado.
+        
+        Args:
+            key: Clave del cache
+            
+        Returns:
+            True si ha expirado, False si no
+        """
+        if key not in self.metadata:
+            return True
+            
+        metadata = self.metadata[key]
+        created_at = metadata.get('created_at', 0)
+        ttl = metadata.get('ttl', self.default_ttl)
+        
+        return (time.time() - created_at) > ttl
+        
+    def get(self, key: str) -> Optional[Any]:
+        """
+        Obtener valor del cache.
+        
+        Args:
+            key: Clave del cache
+            
+        Returns:
+            Valor almacenado o None si no existe o ha expirado
+        """
+        with self.lock:
+            # Verificar si la entrada ha expirado
+            if self._is_expired(key):
+                self.delete(key)
+                return None
+                
+            # Intentar cargar el archivo
+            cache_file = self._get_cache_file_path(key)
+            
+            try:
+                if cache_file.exists():
+                    with open(cache_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        logger.debug(f"Cache hit for key: {key}")
+                        return data
+            except (json.JSONDecodeError, IOError) as e:
+                logger.warning(f"Error reading cache file for key {key}: {e}")
+                self.delete(key)
+                
+            return None
+            
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+        """
+        Almacenar valor en el cache.
+        
+        Args:
+            key: Clave del cache
+            value: Valor a almacenar (debe ser serializable a JSON)
+            ttl: Tiempo de vida en segundos (None = usar default)
+            
+        Returns:
+            True si se almacenó exitosamente, False si no
+        """
+        if ttl is None:
+            ttl = self.default_ttl
+            
+        with self.lock:
+            try:
+                # Guardar datos en archivo
+                cache_file = self._get_cache_file_path(key)
+                
+                with open(cache_file, 'w', encoding='utf-8') as f:
+                    json.dump(value, f, indent=2, ensure_ascii=False)
+                
+                # Actualizar metadatos
+                self.metadata[key] = {
+                    'created_at': time.time(),
+                    'ttl': ttl,
+                    'file_path': str(cache_file),
+                    'size_bytes': cache_file.stat().st_size
+                }
+                
+                self._save_metadata()
+                logger.debug(f"Cache set for key: {key}")
+                return True
+                
+            except (json.JSONEncodeError, IOError) as e:
+                logger.error(f"Error writing cache file for key {key}: {e}")
+                return False
+                
+    def delete(self, key: str) -> bool:
+        """
+        Eliminar entrada del cache.
+        
+        Args:
+            key: Clave del cache
+            
+        Returns:
+            True si se eliminó exitosamente, False si no existía
+        """
+        with self.lock:
+            cache_file = self._get_cache_file_path(key)
+            
+            # Eliminar archivo si existe
+            if cache_file.exists():
                 try:
-                    with open(cache_file, 'r') as f:
-                        entry_dict = json.load(f)
-                        if entry_dict["expires"] <= current_time:
-                            expired_keys.append(cache_file.stem)
-                            cache_file.unlink()
-                except (json.JSONDecodeError, KeyError, OSError):
-                    # Si hay error, eliminar el archivo
+                    cache_file.unlink()
+                except OSError as e:
+                    logger.error(f"Error deleting cache file for key {key}: {e}")
+                    return False
+                    
+            # Eliminar de metadatos
+            if key in self.metadata:
+                del self.metadata[key]
+                self._save_metadata()
+                
+            logger.debug(f"Cache deleted for key: {key}")
+            return True
+            
+    def clear(self) -> int:
+        """
+        Limpiar todo el cache.
+        
+        Returns:
+            Número de entradas eliminadas
+        """
+        with self.lock:
+            count = 0
+            
+            # Eliminar todos los archivos de cache
+            for cache_file in self.cache_dir.glob("*.json"):
+                if cache_file.name != "_cache_metadata.json":
                     try:
                         cache_file.unlink()
-                    except OSError:
-                        pass
+                        count += 1
+                    except OSError as e:
+                        logger.error(f"Error deleting cache file {cache_file}: {e}")
+                        
+            # Limpiar metadatos
+            self.metadata.clear()
+            self._save_metadata()
             
-            # Actualizar estructuras internas
+            logger.info(f"Cache cleared: {count} entries deleted")
+            return count
+            
+    def cleanup_expired(self) -> int:
+        """
+        Limpiar entradas expiradas del cache.
+        
+        Returns:
+            Número de entradas eliminadas
+        """
+        with self.lock:
+            expired_keys = []
+            
+            # Identificar claves expiradas
+            for key in list(self.metadata.keys()):
+                if self._is_expired(key):
+                    expired_keys.append(key)
+                    
+            # Eliminar entradas expiradas
             for key in expired_keys:
-                if key in self._lru_cache:
-                    self._current_size -= self._lru_cache[key]
-                    del self._lru_cache[key]
-                    self._stats["evictions"] += 1
+                self.delete(key)
+                
+            logger.info(f"Cache cleanup: {len(expired_keys)} expired entries deleted")
+            return len(expired_keys)
             
-            self._stats["current_size"] = self._current_size
-            self._stats["entries"] = len(self._lru_cache)
-            self._last_cleanup = current_time
-
-    def get(self, key: str) -> Optional[Any]:
-        """Obtiene un valor del caché.
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Obtener estadísticas del cache.
         
-        Args:
-            key: Clave a recuperar
-            
         Returns:
-            Valor en caché si se encuentra y no ha expirado, None en caso contrario
+            Diccionario con estadísticas
         """
-        cache_path = self._get_cache_path(key)
-        
-        with self._lock:
-            # Verificar si es necesario hacer limpieza
-            current_time = time.time()
-            if current_time - self._last_cleanup >= self._cleanup_interval:
-                self.cleanup()
-            try:
-                if not cache_path.exists():
-                    self._stats["misses"] += 1
-                    return None
-                
-                with open(cache_path, 'r') as f:
-                    entry_dict = json.load(f)
-                    is_compressed = entry_dict.pop("is_compressed", False)
-                    entry = CacheEntry.from_dict(entry_dict)
-                
-                # Verificar expiración
-                if entry.expires <= time.time():
-                    cache_path.unlink()
-                    self._lru_cache.pop(key, None)
-                    self._current_size -= entry.size
-                    self._stats["evictions"] += 1
-                    self._stats["misses"] += 1
-                    return None
-                
-                # Actualizar LRU
-                if key in self._lru_cache:
-                    self._lru_cache.move_to_end(key)
-                
-                entry.last_accessed = time.time()
-                with open(cache_path, 'w') as f:
-                    json.dump(entry.to_dict(), f)
-                
-                self._stats["hits"] += 1
-                return self._deserialize_value(entry.value, is_compressed)
-                
-            except (json.JSONDecodeError, KeyError, OSError) as e:
-                logger.warning(f"Error leyendo caché para clave {key}: {e}")
-                try:
-                    cache_path.unlink()
-                    self._lru_cache.pop(key, None)
-                except OSError:
-                    pass
-                self._stats["misses"] += 1
-                return None
-
-    def set(self, key: str, value: Any, data_type: str = "default", ttl: Optional[int] = None) -> None:
-        """Establece un valor en el caché.
-        
-        Args:
-            key: Clave de caché
-            value: Valor a almacenar
-            data_type: Tipo de dato para política de TTL
-        """
-        cache_path = self._get_cache_path(key)
-        
-        with self._lock:
-            try:
-                # Comprimir y serializar
-                compressed_value, original_size, is_compressed = self._compress_value(value)
-                
-                # Validar TTL
-                if ttl is not None:
-                    if ttl < 0:
-                        ttl = self._get_ttl(data_type)
-                else:
-                    ttl = self._get_ttl(data_type)
-                
-                # Crear entrada
-                entry = CacheEntry(
-                    value=compressed_value,
-                    expires=time.time() + ttl,
-                    size=original_size,
-                    data_type=data_type
-                )
-                
-                # Añadir metadato de compresión
-                entry_dict = entry.to_dict()
-                entry_dict["is_compressed"] = is_compressed
-                
-                # Actualizar tamaño
-                old_size = 0
-                if key in self._lru_cache:
-                    old_size = self._lru_cache[key]
-                    self._current_size -= old_size
-                
-                self._current_size += original_size
-                self._lru_cache[key] = original_size
-                self._lru_cache.move_to_end(key)
-                
-                # Aplicar límite de tamaño
-                self._enforce_size_limit()
-                
-                # Guardar entrada
-                with open(cache_path, 'w') as f:
-                    # Escribir en archivo temporal primero
-                    temp_path = cache_path.with_suffix('.tmp')
-                    with open(temp_path, 'w') as temp_f:
-                        json.dump(entry_dict, temp_f)
-                    
-                    # Mover archivo temporal al destino final
-                    temp_path.replace(cache_path)
-                
-                self._stats["current_size"] = self._current_size
-                self._stats["entries"] = len(self._lru_cache)
-                    
-            except (OSError, TypeError) as e:
-                logger.error(f"Error escribiendo caché para clave {key}: {e}")
-
-    def delete(self, key: str) -> None:
-        """Elimina una entrada del caché.
-        
-        Args:
-            key: Clave de caché a eliminar
-        """
-        cache_path = self._get_cache_path(key)
-        
-        with self._lock:
-            try:
-                if key in self._lru_cache:
-                    self._current_size -= self._lru_cache[key]
-                    del self._lru_cache[key]
-                cache_path.unlink()
-                self._stats["current_size"] = self._current_size
-                self._stats["entries"] = len(self._lru_cache)
-            except OSError:
-                pass
-
-    def clear(self) -> None:
-        """Limpia todas las entradas del caché."""
-        with self._lock:
-            for cache_file in self._cache_dir.glob("*.json"):
-                try:
-                    cache_file.unlink()
-                except OSError:
-                    pass
-            self._lru_cache.clear()
-            self._current_size = 0
-            self._stats = {
-                "hits": 0,
-                "misses": 0,
-                "evictions": 0,
-                "compression_savings": 0,
-                "current_size": 0,
-                "entries": 0
+        with self.lock:
+            total_entries = len(self.metadata)
+            total_size = sum(
+                meta.get('size_bytes', 0) 
+                for meta in self.metadata.values()
+            )
+            
+            # Contar entradas expiradas
+            expired_count = sum(
+                1 for key in self.metadata.keys() 
+                if self._is_expired(key)
+            )
+            
+            return {
+                'total_entries': total_entries,
+                'expired_entries': expired_count,
+                'active_entries': total_entries - expired_count,
+                'total_size_bytes': total_size,
+                'total_size_mb': round(total_size / (1024 * 1024), 2),
+                'cache_directory': str(self.cache_dir),
+                'default_ttl': self.default_ttl
             }
-
-    def get_stats(self) -> Dict[str, int]:
-        """Obtiene estadísticas del caché.
+            
+    def exists(self, key: str) -> bool:
+        """
+        Verificar si una clave existe y no ha expirado.
+        
+        Args:
+            key: Clave del cache
+            
+        Returns:
+            True si existe y es válida, False si no
+        """
+        with self.lock:
+            return not self._is_expired(key)
+            
+    def get_keys(self) -> list:
+        """
+        Obtener lista de todas las claves activas (no expiradas).
         
         Returns:
-            Dict con conteos de hits/misses/evictions y métricas de tamaño
+            Lista de claves activas
         """
-        with self._lock:
-            stats = self._stats.copy()
-            stats["memory_usage"] = sys.getsizeof(self._lru_cache)
-            return stats
+        with self.lock:
+            return [
+                key for key in self.metadata.keys() 
+                if not self._is_expired(key)
+            ]
+            
+    def set_ttl(self, key: str, ttl: int) -> bool:
+        """
+        Actualizar TTL de una entrada existente.
+        
+        Args:
+            key: Clave del cache
+            ttl: Nuevo tiempo de vida en segundos
+            
+        Returns:
+            True si se actualizó exitosamente, False si no existe
+        """
+        with self.lock:
+            if key in self.metadata and not self._is_expired(key):
+                self.metadata[key]['ttl'] = ttl
+                self._save_metadata()
+                return True
+            return False

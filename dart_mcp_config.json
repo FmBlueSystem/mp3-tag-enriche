@@ -1,11 +1,32 @@
 {
-  "mcpServers": {
-    "dart": {
-      "command": "npx",
-      "args": ["-y", "dart-mcp-server"],
-      "env": {
-        "DART_TOKEN": "dsa_df88b54b32408afbe42489b08d25bfbf91759ab7d2d1cdac26f4d72b51c71583"
-      }
+    "project": {
+        "id": "music_library_manager",
+        "version": "1.5.0",
+        "update_timestamp": "2025-05-24T17:35:13-06:00"
+    },
+    "dart_ai": {
+        "endpoint": "/api/v1/project/update",
+        "auth": {
+            "type": "bearer",
+            "token_env": "DART_API_TOKEN"
+        }
+    },
+    "sync": {
+        "files": [
+            "project_progress.md",
+            "dart_mcp_update.json"
+        ],
+        "ignore": [
+            "*.pyc",
+            "__pycache__",
+            "*.log"
+        ]
+    },
+    "notifications": {
+        "enabled": true,
+        "channels": [
+            "email",
+            "dashboard"
+        ]
     }
-  }
-} 
+}

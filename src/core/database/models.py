@@ -27,7 +27,11 @@ class Track:
                  last_played: Optional[str] = None,
                  date_added: Optional[str] = None,
                  checksum: Optional[str] = None,
-                 id: Optional[int] = None):
+                 id: Optional[int] = None,
+                 enriched_genres: Optional[Dict[str, float]] = None,
+                 enrichment_confidence: Optional[float] = None,
+                 enrichment_sources: Optional[List[str]] = None,
+                 enrichment_timestamp: Optional[float] = None):
         self.id = id
         self.filepath = filepath
         self.title = title
@@ -43,10 +47,14 @@ class Track:
         self.last_played = last_played
         self.date_added = date_added
         self.checksum = checksum
+        self.enriched_genres = enriched_genres
+        self.enrichment_confidence = enrichment_confidence
+        self.enrichment_sources = enrichment_sources
+        self.enrichment_timestamp = enrichment_timestamp
 
     def to_dict(self) -> Dict[str, Any]:
         """Convierte el objeto Track a un diccionario."""
-        return {
+        result = {
             "id": self.id,
             "filepath": self.filepath,
             "title": self.title,
@@ -63,6 +71,13 @@ class Track:
             "date_added": self.date_added,
             "checksum": self.checksum
         }
+        result.update({
+            "enriched_genres": self.enriched_genres,
+            "enrichment_confidence": self.enrichment_confidence,
+            "enrichment_sources": self.enrichment_sources,
+            "enrichment_timestamp": self.enrichment_timestamp
+        })
+        return result
 
     @staticmethod
     def from_row(row: sqlite3.Row) -> 'Track':
@@ -82,7 +97,11 @@ class Track:
             play_count=row['play_count'],
             last_played=row['last_played'],
             date_added=row['date_added'],
-            checksum=row['checksum']
+            checksum=row['checksum'],
+            enriched_genres=json.loads(row['enriched_genres']) if row['enriched_genres'] else None,
+            enrichment_confidence=row['enrichment_confidence'],
+            enrichment_sources=json.loads(row['enrichment_sources']) if row['enrichment_sources'] else None,
+            enrichment_timestamp=row['enrichment_timestamp']
         )
 
 class SmartPlaylist:

@@ -19,9 +19,9 @@ import mutagen
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TCON, TCOM, TCOP, TENC, TLEN, TMOO, TPE2, TPUB, TLAN, TRCK, TPOS, TSRC, TXXX
 
 # Importar la clase original Mp3FileHandler
-from src.core.file_handler import Mp3FileHandler
+from .file_handler import Mp3FileHandler
 # Importar las funciones mejoradas
-from src.core.improved_file_handler import (
+from .improved_file_handler import (
     extract_artist_title_improved,
     post_process_artist,
     post_process_title,

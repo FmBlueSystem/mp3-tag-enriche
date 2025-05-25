@@ -5,7 +5,9 @@ import logging
 import json
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-from ..database.music_database import MusicDatabase, Track
+from ..database.music_database import MusicDatabase, TrackMetadata
+from ..database.models import Track # Importar solo Track desde models
+# from ..models import TrackAnalysis # Eliminada importación no utilizada
 import re
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,6 @@ class PlaylistGenerator:
                 return None
                 
             # Crear la playlist
-            from ..database.models import Playlist
             playlist = Playlist(
                 name=f"Género: {genre}",
                 description=f"Tracks del género {genre}",
@@ -107,7 +108,6 @@ class PlaylistGenerator:
                 return None
                 
             # Crear la playlist
-            from ..database.models import Playlist
             playlist_name = f"BPM: {min_bpm}-{max_bpm}"
             playlist = Playlist(
                 name=playlist_name,
@@ -160,10 +160,8 @@ class PlaylistGenerator:
             energy_step = (end_energy - start_energy) / (steps - 1) if steps > 1 else 0
             
             # Crear la playlist
-            from ..database.models import Playlist
-            direction = "ascendente" if end_energy > start_energy else "descendente"
             playlist = Playlist(
-                name=f"Progresión energética {direction}",
+                name=f"Progresión energética",
                 description=f"Progresión de energía {start_energy:.1f} a {end_energy:.1f}",
                 is_dynamic=True
             )
@@ -242,7 +240,6 @@ class PlaylistGenerator:
                 return None
             
             # Crear la playlist
-            from ..database.models import Playlist
             playlist = Playlist(
                 name=f"Mix Camelot desde {start_key}",
                 description=f"Mix armónico Camelot starting en {start_key}",

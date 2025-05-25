@@ -12,6 +12,7 @@ from threading import Lock
 from ...core.genre_detector import GenreDetector
 from ...core.file_handler import Mp3FileHandler
 from ...core.music_apis import MusicBrainzAPI
+from ...core.database.db_manager import DBManager
 
 # Try to import all available APIs
 try:
@@ -142,8 +143,9 @@ def clean_and_split_genre_payload(raw_genre_name: str) -> List[str]:
 
 class GenreModel:
     """Modelo para el procesamiento de géneros musicales."""
-    def __init__(self, backup_dir: Optional[str] = None):
+    def __init__(self, backup_dir: Optional[str] = None, db_manager: Optional[DBManager] = None):
         self.file_handler = Mp3FileHandler(backup_dir=backup_dir)
+        self.db_manager = db_manager
         
         # Configure all available APIs
         apis = [MusicBrainzAPI()]
@@ -176,7 +178,8 @@ class GenreModel:
         
         self.detector = GenreDetector(
             apis=apis,
-            file_handler=self.file_handler
+            file_handler=self.file_handler,
+            db_manager=self.db_manager
         )
         
         logger.info(f"GenreModel inicializado con {len(apis)} APIs: {[api.__class__.__name__ for api in apis]}")

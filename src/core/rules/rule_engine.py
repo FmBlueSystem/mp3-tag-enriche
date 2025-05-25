@@ -9,7 +9,7 @@ from datetime import datetime
 
 from .base_rule import BaseRule
 from .rule_factory import RuleFactory
-from ...core.database.music_database import MusicDatabase, Track, Rule
+from ...core.database.music_database import MusicDatabase, TrackMetadata
 
 logger = logging.getLogger(__name__)
 

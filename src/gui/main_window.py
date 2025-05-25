@@ -11,6 +11,8 @@ from PySide6.QtGui import QFont, QIcon, QColor
 from typing import Optional
 from pathlib import Path
 
+from qt_material import apply_stylesheet # Importar qt-material
+
 from .i18n import tr, set_language
 
 from ..core.genre_detector import GenreDetector
@@ -25,7 +27,8 @@ from .widgets.file_results_table_widget import FileResultsTableWidget
 from .widgets.memory_indicator import MemoryIndicator
 from .widgets.cpu_indicator import CPUIndicator
 from .threads.processing_thread import ProcessingThread
-from .style import apply_dark_theme, apply_light_theme
+# from .style import apply_dark_theme, apply_light_theme # Comentada
+# from .style import ThemeManager # Comentada si existe
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +46,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(tr("ui.window.title"))
         self.setGeometry(100, 100, 1200, 800)  # Increased width to accommodate side panel
+        
+        # Aplicar tema de qt-material
+        apply_stylesheet(self, theme='dark_blue.xml')
+
         self.backup_dir: Optional[str] = None
         default_backup_path = '/Volumes/My Passport/Dj compilation 2025/Respados mp3'
         
@@ -65,12 +72,12 @@ class MainWindow(QMainWindow):
         # Inicializar DBManager aquí y pasarlo a los componentes que lo necesiten
         self.db_manager = DBManager()
         self.model = GenreModel(backup_dir=self.backup_dir, db_manager=self.db_manager) # Pasar db_manager al modelo
-        self.rule_engine = RuleEngine(db_manager=self.db_manager) # Inicializar RuleEngine
+        self.rule_engine = RuleEngine(self.db_manager) # Pasar db_manager posicionalmente
         self.folder_organizer = FolderOrganizer(db_manager=self.db_manager) # Inicializar FolderOrganizer
 
-        self.is_dark_theme = True
+        # self.is_dark_theme = True # Comentado - qt-material maneja el tema
         self.setup_ui()
-        self.apply_current_theme()
+        # self.apply_current_theme() # Comentado - qt-material maneja el tema
 
     def _ensure_model_backup_dir_updated(self):
         """Asegura que el modelo esté inicializado y su directorio de respaldo actualizado."""
@@ -155,12 +162,13 @@ class MainWindow(QMainWindow):
         self.theme_btn = QPushButton()
         self.theme_btn.setAccessibleName(tr("accessibility.buttons.theme.name"))
         self.theme_btn.setAccessibleDescription(tr("accessibility.buttons.theme.desc"))
-        self.theme_btn.clicked.connect(self.toggle_theme)
+        # self.theme_btn.clicked.connect(self.toggle_theme) # Comentado
         self.theme_btn.setToolTip(tr("tooltips.theme"))
         self.theme_btn.setShortcut("Ctrl+T")
         self.theme_btn.setMinimumWidth(100)
         self.theme_btn.setMaximumWidth(120)
-        self.update_theme_button()
+        # self.update_theme_button() # Comentado
+        self.theme_btn.setVisible(False) # Ocultar el botón de tema por ahora
         top_bar.addWidget(self.theme_btn)
 
         left_layout.addLayout(top_bar)
@@ -503,27 +511,18 @@ class MainWindow(QMainWindow):
             logger.info("No se seleccionaron archivos.")
 
     def browse_folder(self):
-        logger.info("Abriendo diálogo para seleccionar carpeta.")
-        folder = QFileDialog.getExistingDirectory(
-            self,
-            tr("dialogs.select_folder"),
-            os.path.expanduser("~")
-        )
-        if folder:
-            logger.info(f"Carpeta seleccionada: {folder}")
-            self.file_results_table.add_folder(folder)
-        else:
-            logger.info("No se seleccionó carpeta.")
+        """Browse for a folder to add to the file list."""
+        # Asegurar que el modelo esté actualizado antes de cualquier operación
+        self._ensure_model_backup_dir_updated() 
 
-    def toggle_theme(self):
-        """Alterna entre tema claro y oscuro."""
-        self.is_dark_theme = not self.is_dark_theme
-        self.apply_current_theme()
-        self.update_theme_button()
-        theme_key = "ui.theme.dark.name" if self.is_dark_theme else "ui.theme.light.name"
-        theme_name = tr(theme_key)
-        logger.info(f"Theme changed to {theme_name} mode")
-        self.statusBar().showMessage(tr("ui.theme.changed", {"mode": theme_name}), 2000)
+        folder_path = QFileDialog.getExistingDirectory(
+            self, 
+            tr("ui.dialogs.select_folder"), 
+            str(Path.home() / "Music") # Directorio inicial más genérico
+        )
+        if folder_path:
+            self.file_results_table.add_folder(folder_path)
+            logger.info(f"Carpeta añadida: {folder_path}")
 
     def change_language(self, index: int):
         """Change the application language."""
@@ -534,7 +533,6 @@ class MainWindow(QMainWindow):
         self.add_files_btn.setText(tr("ui.buttons.add_files"))
         self.add_folder_btn.setText(tr("ui.buttons.add_folder"))
         self.process_btn.setText(tr("ui.buttons.process"))
-        self.update_theme_button()
         # Update accessibility text
         central_widget = self.centralWidget()
         central_widget.setAccessibleName(tr("accessibility.main_window"))
@@ -553,69 +551,83 @@ class MainWindow(QMainWindow):
         self.process_btn.setToolTip(tr("tooltips.process"))
         # Update status bar
         self.statusBar().showMessage(tr("general.status.ready"))
-
-    def apply_current_theme(self):
-        """Aplica el tema actual (claro u oscuro)."""
-        if self.is_dark_theme:
-            apply_dark_theme(self)
-        else:
-            apply_light_theme(self)
-
-    def update_theme_button(self):
-        """Actualiza el texto e ícono del botón de tema."""
-        if self.is_dark_theme:
-            self.theme_btn.setText(tr("ui.theme.light.label"))
-        else:
-            self.theme_btn.setText(tr("ui.theme.dark.label"))
+        self.theme_btn.setIcon(QIcon.fromTheme("weather-clear-night") if self.is_dark_theme else QIcon.fromTheme("weather-sunny"))
+        self.theme_btn.setText(tr("ui.buttons.theme.light") if self.is_dark_theme else tr("ui.buttons.theme.dark"))
 
     def closeEvent(self, event):
-        logger.info("Cerrando la ventana principal. Deteniendo hilos si es necesario.")
-        if hasattr(self, "processing_thread") and self.processing_thread is not None:
-            if self.processing_thread.isRunning():
-                logger.info("Deteniendo hilo de procesamiento antes de cerrar.")
-                self.processing_thread.stop()
-                self.processing_thread.quit()
-                self.processing_thread.wait()
+        """Handle the close event of the window."""
+        logger.info("Cerrando MainWindow.")
+        if hasattr(self, 'processing_thread') and self.processing_thread and self.processing_thread.isRunning():
+            reply = QMessageBox.question(self,
+                                         tr("ui.dialogs.confirm_exit.title"),
+                                         tr("ui.dialogs.confirm_exit.message"),
+                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                         QMessageBox.StandardButton.No)
+            if reply == QMessageBox.StandardButton.Yes:
+                self.cancel_processing() # Intenta cancelar de forma segura
+                # Espera un poco para que el hilo termine si es posible, pero no indefinidamente
+                if self.processing_thread.wait(3000): # Espera 3 segundos
+                    logger.info("Hilo de procesamiento terminado correctamente antes de cerrar.")
+                else:
+                    logger.warning("Hilo de procesamiento no terminó a tiempo, forzando cierre.")
+                event.accept()
+            else:
+                event.ignore()
+                return
+        
+        # Guardar estado de la base de datos antes de cerrar, si es necesario
+        if hasattr(self, 'db_manager') and self.db_manager:
+            logger.info("Cerrando conexión con la base de datos.")
+            self.db_manager.close() # Asegúrate de que este método exista y haga lo necesario
+
+        # Guardar la configuración de idioma
+        if hasattr(self, 'lang_selector'):
+            current_lang_code = self.lang_selector.currentData()
+            # Aquí podrías guardar current_lang_code en un archivo de configuración
+            logger.info(f"Idioma actual al cerrar: {current_lang_code}")
+
         super().closeEvent(event)
 
     def showEvent(self, event):
+        """Cargar el idioma al mostrar la ventana."""
+        # Aquí podrías cargar el idioma desde un archivo de configuración
+        # y establecerlo en self.lang_selector
+        # Por ahora, establecemos un idioma por defecto si es necesario
+        # (asumiendo que ya se maneja en setup_ui o __init__)
         super().showEvent(event)
-        # Eliminar la carga automática de la carpeta y el procesamiento
-        # (No hacer nada especial al iniciar)
+        # Ejemplo: si quieres forzar un idioma al inicio desde una config:
+        # saved_lang = self.config.get("language", "en") # Suponiendo que tienes un self.config
+        # index = self.lang_selector.findData(saved_lang)
+        # if index >= 0:
+        #     self.lang_selector.setCurrentIndex(index)
+        # else:
+        #     self.lang_selector.setCurrentIndex(self.lang_selector.findData("en")) # Fallback a inglés
 
     def on_memory_critical(self):
-        """Maneja estado crítico de memoria (solo logging, sin interrumpir)."""
-        logger.critical("Estado crítico de memoria detectado")
-        # Opcional: mostrar mensaje discreto en status bar
-        self.statusBar().showMessage("⚠️ Memoria crítica", 3000)
-        
-    def on_memory_high(self):
-        """Maneja estado alto de memoria (solo logging, sin interrumpir)."""
-        logger.warning("Estado alto de memoria detectado")
-        self.statusBar().showMessage("⚠️ Memoria alta", 2000)
-        
-    def on_memory_normal(self):
-        """Maneja estado normal de memoria."""
-        logger.info("Memoria ha vuelto a niveles normales")
-        self.statusBar().showMessage("✅ Memoria normal", 1000)
+        self.statusBar().showMessage(tr("status.memory.critical"), 5000)
+        self.statusBar().setStyleSheet("background-color: red; color: white;")
 
+    def on_memory_high(self):
+        self.statusBar().showMessage(tr("status.memory.high"), 3000)
+        self.statusBar().setStyleSheet("background-color: orange; color: black;")
+
+    def on_memory_normal(self):
+        # Limpiar el mensaje y el estilo si es necesario, o dejar que se borre solo
+        # self.statusBar().clearMessage()
+        self.statusBar().setStyleSheet("") # Restablecer estilo de la barra de estado
+    
     def on_memory_warning(self, message: str):
-        """Método obsoleto - mantenido para compatibilidad pero ya no se usa."""
-        logger.warning(f"Método obsoleto on_memory_warning llamado: {message}")
-        # Ya no mostramos diálogos que interrumpen - el indicador visual maneja esto
+        QMessageBox.warning(self, tr("ui.dialogs.memory_warning.title"), message)
 
     def on_cpu_critical(self):
-        """Maneja estado crítico de CPU (solo logging, sin interrumpir)."""
-        logger.critical("Estado crítico de CPU detectado")
-        # Opcional: mostrar mensaje discreto en status bar
-        self.statusBar().showMessage("⚠️ CPU crítica", 3000)
-        
+        self.statusBar().showMessage(tr("status.cpu.critical"), 5000)
+        # Actualizar estilo si es diferente del de memoria crítica para distinguirlos
+        self.statusBar().setStyleSheet("background-color: darkred; color: white;") 
+
     def on_cpu_high(self):
-        """Maneja estado alto de CPU (solo logging, sin interrumpir)."""
-        logger.warning("Estado alto de CPU detectado")
-        self.statusBar().showMessage("⚠️ CPU alta", 2000)
-        
+        self.statusBar().showMessage(tr("status.cpu.high"), 3000)
+        self.statusBar().setStyleSheet("background-color: darkorange; color: black;")
+
     def on_cpu_normal(self):
-        """Maneja estado normal de CPU."""
-        logger.info("CPU ha vuelto a niveles normales")
-        self.statusBar().showMessage("✅ CPU normal", 1000)
+        # self.statusBar().clearMessage()
+        self.statusBar().setStyleSheet("") # Restablecer estilo

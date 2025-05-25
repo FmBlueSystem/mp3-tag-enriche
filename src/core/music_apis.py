@@ -16,7 +16,7 @@ from .rate_limiter import RateLimiter
 from .persistent_cache import PersistentCache
 from .api_metrics import MetricsTracker
 from .genre_normalizer import GenreNormalizer
-from .http_client import HTTPClient, CircuitBreakerConfig
+from .http_client import HTTPClient
 
 # Claves API (idealmente se pasarían en el constructor o se leerían de config)
 # Por ahora, para Discogs, si es necesario, se puede definir aquí temporalmente o asumir que se pasa.
@@ -528,18 +528,11 @@ class DiscogsAPI(MusicAPI):
         self.api_token = api_token
         self.base_url = DISCOGS_BASE_URL_MUSIC_APIS
         
-        # Initialize HTTP client with connection pooling and circuit breaker
+        # Initialize HTTP client
         self.http_client = HTTPClient(
-            base_url=self.base_url,
-            pool_connections=5,
-            pool_maxsize=10,
-            max_retries=3,
             timeout=15,
-            circuit_breaker_config=CircuitBreakerConfig(
-                failure_threshold=5,
-                reset_timeout=60.0,
-                half_open_timeout=30.0
-            )
+            max_retries=3,
+            user_agent="GenreDetectorApp/0.2 (+http://example.com)"
         )
     
     def _setup_rate_limits(self):
@@ -586,19 +579,19 @@ class DiscogsAPI(MusicAPI):
             "User-Agent": "GenreDetectorApp/0.2 (+http://example.com)"
         }
         
-        response = self.http_client.request(
-            method="GET",
-            endpoint=endpoint,
+        url = f"{self.base_url}{endpoint}"
+        response = self.http_client.get(
+            url=url,
             headers=headers,
             params=params
         )
         
         if response is not None:
             try:
-                data = response.json()
+                data = response.get('data', {})
                 self._track_api_call(start_time, success=True)
                 return data
-            except ValueError as e:
+            except (ValueError, KeyError) as e:
                 logger.error(f"Invalid JSON response from Discogs: {e}")
                 self._track_api_call(start_time, success=False)
                 return None
