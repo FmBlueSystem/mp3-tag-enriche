@@ -123,104 +123,107 @@ class MusicService:
 
     def get_statistics(self) -> Dict[str, Any]:
         """
-        Obtiene estadísticas de la biblioteca.
+        Obtiene estadísticas generales de la biblioteca.
 
         Returns:
-            Diccionario con estadísticas
+            Diccionario con estadísticas (total_tracks, total_artists, etc.)
         """
         try:
             tracks = self.db.get_tracks()
             
-            # Extraer datos únicos
-            genres = set()
+            # Recopilar datos
             artists = set()
             albums = set()
-            years = set()
+            genres = set()
+            years = []
             
             for track in tracks:
-                if track.genre:
-                    genres.add(track.genre)
                 if track.artist:
                     artists.add(track.artist)
                 if track.album:
                     albums.add(track.album)
-                if track.year:
-                    years.add(track.year)
+                if track.genre:
+                    genres.add(track.genre)
+                if hasattr(track, 'year') and track.year:
+                    years.append(track.year)
             
-            return {
+            # Crear estadísticas
+            stats = {
                 'total_tracks': len(tracks),
-                'total_genres': len(genres),
                 'total_artists': len(artists),
                 'total_albums': len(albums),
-                'year_range': [min(years), max(years)] if years else None,
-                'genres': sorted(list(genres))
+                'total_genres': len(genres),
+                'years_range': f"{min(years) if years else 'N/A'}-{max(years) if years else 'N/A'}",
+                'most_common_genre': max(genres, key=lambda x: sum(1 for t in tracks if t.genre == x)) if genres else 'N/A'
             }
+            
+            return stats
             
         except Exception as e:
             self._logger.error(f"Error obteniendo estadísticas: {str(e)}")
             return {
                 'total_tracks': 0,
-                'total_genres': 0,
                 'total_artists': 0,
                 'total_albums': 0,
-                'year_range': None,
-                'genres': []
+                'total_genres': 0,
+                'years_range': 'N/A',
+                'most_common_genre': 'N/A'
             }
-
-    def import_tracks(self, directory: str, recursive: bool = True) -> Dict[str, Any]:
+            
+    def import_files_with_manager(self, directory_path: str, recursive: bool = True) -> Dict[str, Any]:
         """
-        Importa tracks desde un directorio.
-
+        Importa archivos utilizando el ImportManager directamente desde MusicService.
+        Este método simplifica la integración entre ImportManager y MusicService.
+        
         Args:
-            directory: Ruta al directorio con archivos de música
-            recursive: Si debe buscar en subdirectorios
-
+            directory_path: Ruta del directorio a importar
+            recursive: Si buscar recursivamente en subdirectorios
+            
         Returns:
             Diccionario con resultados de la importación
         """
+        from ..importers.import_manager import ImportManager
+        
         try:
-            extractor = MetadataExtractor()
-            scan_results = extractor.scan_directory(directory, recursive)
+            # Crear instancia de ImportManager
+            import_manager = ImportManager()
             
-            results = {
-                'total': scan_results['total'],
-                'success': 0,
-                'failed': 0,
-                'errors': scan_results['errors'],
-                'imported_tracks': []
+            # Ejecutar importación
+            result = import_manager.import_directory(
+                directory_path,
+                recursive=recursive,
+                check_duplicates=True,
+                extract_metadata=True
+            )
+            
+            # Procesar tracks importados si es necesario
+            for track_id in result.new_tracks:
+                # Podemos realizar procesamiento adicional aquí si es necesario
+                pass
+                
+            # Notificar cambios en la biblioteca
+            self._logger.info(f"Biblioteca actualizada: {result.successful_imports} nuevos tracks")
+            
+            return {
+                'total': result.total_processed,
+                'success': result.successful_imports,
+                'failed': result.failed_imports,
+                'duplicates': result.duplicate_files,
+                'errors': result.errors,
+                'imported_tracks': result.new_tracks,
+                'duration': result.duration_seconds
             }
-
-            # Procesar tracks encontrados
-            for track_metadata in scan_results['tracks']:
-                try:
-                    # Generar ID único si no existe
-                    if 'id' not in track_metadata or not track_metadata['id']:
-                        track_metadata['id'] = str(uuid.uuid4())
-
-                    # Añadir track a la base de datos
-                    track_id = self.add_track(track_metadata)
-                    if track_id:
-                        results['success'] += 1
-                        results['imported_tracks'].append(track_id)
-                    else:
-                        results['failed'] += 1
-                        results['errors'].append(
-                            f"No se pudo importar: {track_metadata.get('path', 'Unknown')}"
-                        )
-                except Exception as e:
-                    results['failed'] += 1
-                    results['errors'].append(str(e))
             
-            return results
-
         except Exception as e:
-            self._logger.error(f"Error importando tracks: {str(e)}")
+            self._logger.error(f"Error en importación integrada: {str(e)}")
             return {
                 'total': 0,
                 'success': 0,
                 'failed': 0,
+                'duplicates': 0,
                 'errors': [str(e)],
-                'imported_tracks': []
+                'imported_tracks': [],
+                'duration': 0
             }
 
     def export_playlist(self, tracks: List[str], format: str = 'm3u') -> Optional[str]:
@@ -253,3 +256,71 @@ class MusicService:
         except Exception as e:
             self._logger.error(f"Error exportando playlist: {str(e)}")
             return None
+
+    def get_all_tracks(self) -> List[Dict[str, Any]]:
+        """
+        Obtiene todos los tracks de la biblioteca.
+
+        Returns:
+            Lista con todos los tracks en formato diccionario
+        """
+        try:
+            tracks = self.db.get_tracks()
+            return [vars(track) for track in tracks]
+        except Exception as e:
+            self._logger.error(f"Error obteniendo todos los tracks: {str(e)}")
+            return []
+
+    def get_artists(self) -> List[str]:
+        """
+        Obtiene todos los artistas únicos de la biblioteca.
+
+        Returns:
+            Lista de artistas únicos
+        """
+        try:
+            tracks = self.db.get_tracks()
+            artists = set()
+            for track in tracks:
+                if track.artist:
+                    artists.add(track.artist)
+            return sorted(list(artists))
+        except Exception as e:
+            self._logger.error(f"Error obteniendo artistas: {str(e)}")
+            return []
+
+    def get_keys(self) -> List[str]:
+        """
+        Obtiene todas las claves musicales únicas de la biblioteca.
+
+        Returns:
+            Lista de claves musicales únicas
+        """
+        try:
+            tracks = self.db.get_tracks()
+            keys = set()
+            for track in tracks:
+                if track.key:
+                    keys.add(track.key)
+            return sorted(list(keys))
+        except Exception as e:
+            self._logger.error(f"Error obteniendo claves: {str(e)}")
+            return []
+
+    def get_genres(self) -> List[str]:
+        """
+        Obtiene todos los géneros únicos de la biblioteca.
+
+        Returns:
+            Lista de géneros únicos
+        """
+        try:
+            tracks = self.db.get_tracks()
+            genres = set()
+            for track in tracks:
+                if track.genre:
+                    genres.add(track.genre)
+            return sorted(list(genres))
+        except Exception as e:
+            self._logger.error(f"Error obteniendo géneros: {str(e)}")
+            return []

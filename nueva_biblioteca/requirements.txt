@@ -7,9 +7,27 @@ PySide6>=6.6.0
 # Tema Material Design
 qt-material>=2.14
 
-# Procesamiento de audio (opcional para futuras funcionalidades)
-# mutagen>=1.47.0  # Para metadatos de audio
-# pygame>=2.5.0    # Para reproducción de audio
+# Procesamiento de audio y metadatos
+mutagen>=1.47.0  # Para metadatos de audio
+pygame>=2.5.0    # Para reproducción de audio
+
+# Base de datos
+sqlalchemy>=2.0.0  # ORM para base de datos
+alembic>=1.13.0    # Migraciones de base de datos
+
+# APIs externas
+requests>=2.31.0   # Cliente HTTP
+spotipy>=2.22.1    # API de Spotify
+pylast>=5.2.0      # API de Last.fm
+
+# Análisis de audio
+librosa>=0.10.1    # Análisis de audio avanzado
+numpy>=1.24.0      # Operaciones numéricas
+scipy>=1.11.0      # Procesamiento científico
+
+# Utilidades adicionales
+tqdm>=4.66.0       # Barras de progreso
+python-dotenv>=1.0.0  # Variables de entorno
 
 # Utilidades del sistema
 pathlib2>=2.3.7; python_version < "3.4"

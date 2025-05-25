@@ -6,35 +6,69 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QFileDialog, QProgressBar, QTableWidget, QTableWidgetItem,
-    QFrame, QScrollArea, QWidget
+    QFrame, QScrollArea, QWidget, QMessageBox
 )
 from PySide6.QtCore import Qt, QThread, Signal
 
 from ...services.music_service import MusicService
+from ...importers.import_manager import ImportManager, ImportProgress, ImportResult
 
 class ImportWorker(QThread):
-    """Worker thread para importar música."""
+    """Worker thread para importar música usando MusicService integrado con ImportManager."""
     progress = Signal(dict)
     finished = Signal(dict)
     
-    def __init__(self, music_service: MusicService, directory: str):
+    def __init__(self, directory: str, music_service: MusicService):
         super().__init__()
-        self.music_service = music_service
         self.directory = directory
+        self.music_service = music_service
+        self.import_manager = ImportManager()
         
     def run(self):
-        """Ejecuta la importación en segundo plano."""
+        """Ejecuta la importación en segundo plano usando MusicService."""
         try:
-            results = self.music_service.import_tracks(self.directory)
-            self.finished.emit(results)
+            # Configurar callbacks del ImportManager para recibir actualizaciones
+            self.import_manager.add_progress_callback(self._on_progress)
+            
+            # Utilizar método integrado de MusicService para importación
+            result = self.music_service.import_files_with_manager(
+                self.directory,
+                recursive=True
+            )
+            
+            # Emitir resultado ya procesado por MusicService
+            self.finished.emit(result)
+            
         except Exception as e:
             self.finished.emit({
                 'total': 0,
                 'success': 0,
-                'failed': 0,
+                'failed': 1,
+                'duplicates': 0,
                 'errors': [str(e)],
-                'imported_tracks': []
+                'imported_tracks': [],
+                'duration': 0
             })
+    
+    def _on_progress(self, progress: ImportProgress):
+        """Callback para progreso de importación."""
+        progress_data = {
+            'total_files': progress.total_files,
+            'processed_files': progress.processed_files,
+            'successful_imports': progress.successful_imports,
+            'failed_imports': progress.failed_imports,
+            'duplicate_files': progress.duplicate_files,
+            'current_file': progress.current_file,
+            'completion_percentage': progress.completion_percentage,
+            'processing_rate': progress.processing_rate,
+            'estimated_time_remaining': progress.estimated_time_remaining
+        }
+        self.progress.emit(progress_data)
+    
+    def cancel_import(self):
+        """Cancela la importación en progreso."""
+        if self.import_manager:
+            self.import_manager.cancel_import()
 
 class ResultsWidget(QFrame):
     """Widget para mostrar resultados de importación."""
@@ -76,10 +110,12 @@ class ResultsWidget(QFrame):
         self.total_label = QLabel("Total: 0")
         self.success_label = QLabel("Exitosos: 0")
         self.failed_label = QLabel("Fallidos: 0")
+        self.duplicates_label = QLabel("Duplicados: 0")
         
         stats_layout.addWidget(self.total_label)
         stats_layout.addWidget(self.success_label)
         stats_layout.addWidget(self.failed_label)
+        stats_layout.addWidget(self.duplicates_label)
         
         layout.addLayout(stats_layout)
         
@@ -114,6 +150,7 @@ class ResultsWidget(QFrame):
         self.total_label.setText(f"Total: {results['total']}")
         self.success_label.setText(f"Exitosos: {results['success']}")
         self.failed_label.setText(f"Fallidos: {results['failed']}")
+        self.duplicates_label.setText(f"Duplicados: {results.get('duplicates', 0)}")
         
         # Actualizar tabla de errores
         self.errors_table.setRowCount(len(results['errors']))
@@ -125,15 +162,20 @@ class ImportDialog(QDialog):
     
     def __init__(self, music_service: MusicService, parent=None):
         super().__init__(parent)
-        self.music_service = music_service
+        self.music_service = music_service  # Mantenemos para compatibilidad
         self.worker: Optional[ImportWorker] = None
         self.setup_ui()
         
     def setup_ui(self):
         """Configura la interfaz del diálogo."""
         self.setWindowTitle("Importar Música")
-        self.setMinimumWidth(600)
-        self.setMinimumHeight(400)
+        self.setMinimumWidth(650)
+        self.setMinimumHeight(450)
+        
+        # Crear barra de estado
+        self.status_bar = QLabel("Seleccione un directorio para comenzar")
+        self.status_bar.setStyleSheet("color: #666666; padding: 5px;")
+        
         self.setStyleSheet("""
             QDialog {
                 background: #F5F5F5;
@@ -218,6 +260,19 @@ class ImportDialog(QDialog):
         self.import_btn.setEnabled(False)
         self.import_btn.clicked.connect(self.start_import)
         
+        self.cancel_btn = QPushButton("Cancelar")
+        self.cancel_btn.setVisible(False)
+        self.cancel_btn.clicked.connect(self.cancel_import)
+        self.cancel_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #DC3545;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #C82333;
+            }
+        """)
+        
         self.close_btn = QPushButton("Cerrar")
         self.close_btn.clicked.connect(self.accept)
         self.close_btn.setStyleSheet("""
@@ -234,9 +289,13 @@ class ImportDialog(QDialog):
         """)
         
         buttons_layout.addWidget(self.import_btn)
+        buttons_layout.addWidget(self.cancel_btn)
         buttons_layout.addWidget(self.close_btn)
         
         layout.addLayout(buttons_layout)
+        
+        # Añadir barra de estado al fondo
+        layout.addWidget(self.status_bar)
         
         self.setLayout(layout)
         
@@ -263,14 +322,35 @@ class ImportDialog(QDialog):
         self.select_btn.setEnabled(False)
         self.import_btn.setEnabled(False)
         
+        # Mostrar botón cancelar y ocultar cerrar
+        self.cancel_btn.setVisible(True)
+        self.close_btn.setVisible(False)
+        
         # Mostrar progreso
         self.progress_bar.setVisible(True)
         self.progress_bar.setRange(0, 0)  # Modo indeterminado
         
-        # Crear y configurar worker
-        self.worker = ImportWorker(self.music_service, directory)
+        # Crear y configurar worker con MusicService
+        self.worker = ImportWorker(directory, self.music_service)
         self.worker.finished.connect(self.import_finished)
+        self.worker.progress.connect(self.update_progress)
         self.worker.start()
+    
+    def update_progress(self, progress_data: dict):
+        """Actualiza la barra de progreso con datos en tiempo real."""
+        if progress_data.get('total_files', 0) > 0:
+            # Cambiar a modo determinado
+            self.progress_bar.setRange(0, progress_data['total_files'])
+            self.progress_bar.setValue(progress_data['processed_files'])
+            
+            # Actualizar texto de estado
+            current_file = progress_data.get('current_file', '')
+            if current_file:
+                percentage = progress_data.get('completion_percentage', 0)
+                self.progress_bar.setFormat(f"{percentage:.1f}% - {current_file}")
+        else:
+            # Mantener modo indeterminado
+            self.progress_bar.setRange(0, 0)
         
     def import_finished(self, results: dict):
         """
@@ -286,6 +366,56 @@ class ImportDialog(QDialog):
         self.results_widget.setVisible(True)
         self.results_widget.update_results(results)
         
-        # Rehabilitar controles
+        # Rehabilitar controles y cambiar visibilidad
         self.select_btn.setEnabled(True)
         self.import_btn.setEnabled(True)
+        self.cancel_btn.setVisible(False)
+        self.close_btn.setVisible(True)
+        
+        # Mostrar información resumen
+        duration = results.get('duration', 0)
+        minutes = int(duration // 60)
+        seconds = int(duration % 60)
+        
+        # Añadimos mensaje detallado
+        success = results.get('success', 0)
+        failed = results.get('failed', 0)
+        duplicates = results.get('duplicates', 0)
+        
+        info_text = f"Importación completada en {minutes}min {seconds}s.\n\n"
+        
+        if success > 0:
+            info_text += f"• {success} archivos importados correctamente.\n"
+        if duplicates > 0:
+            info_text += f"• {duplicates} archivos duplicados omitidos.\n"
+        if failed > 0:
+            info_text += f"• {failed} archivos fallidos (ver detalles).\n"
+            
+        QMessageBox.information(
+            self,
+            "Importación Completada",
+            info_text
+        )
+        
+        # Si hay nuevas pistas, marcar para actualizar la biblioteca
+        if success > 0:
+            self.setResult(QDialog.Accepted)
+    
+    def set_import_path(self, folder_path: str):
+        """Establece la ruta de importación preseleccionada."""
+        if folder_path and Path(folder_path).exists():
+            self.dir_label.setText(folder_path)
+            self.import_btn.setEnabled(True)
+            
+    def cancel_import(self):
+        """Cancela la importación en progreso."""
+        if self.worker and self.worker.isRunning():
+            # Cancelar importación en el ImportManager
+            self.worker.cancel_import()
+            
+            # Actualizar UI
+            self.status_bar.showMessage("Importación cancelada")
+            self.progress_bar.setFormat("Cancelando...")
+            
+            # No terminamos el thread forzosamente, dejamos que termine limpiamente
+            # El callback import_finished se llamará cuando termine
